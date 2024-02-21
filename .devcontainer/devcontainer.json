@@ -1,0 +1,33 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/python
+{
+	"name": "PLD Compilateur",
+
+	"build": {
+		"dockerfile": "Dockerfile",
+		"context": ".",
+		"options": ["--platform=linux/amd64"]	// For Mac M1 and M2 users
+	},
+
+	"features": {
+		"ghcr.io/devcontainers/features/java:1": {
+			"jdkDistro": 11
+		},
+		"ghcr.io/devcontainers/features/python": {
+			"version": "3.9"
+		}
+	},
+
+	"postCreateCommand": "pip install -r ${containerWorkspaceFolder}/requirements.txt",
+
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"mike-lischke.vscode-antlr4",
+				"ms-vscode.cpptools-extension-pack",
+				"ms-vscode.cpptools",
+				"ms-python.python"
+			]
+		}
+	}
+}
