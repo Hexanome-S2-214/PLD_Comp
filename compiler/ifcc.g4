@@ -9,7 +9,7 @@ statement : affectation | declaration | return_stmt | declAff ;
 
 declaration: 'int' VAR ';' ;
 affectation: VAR '=' expr ';' ; 
-return_stmt: RETURN CONST ';' | RETURN VAR ';' ;
+return_stmt: RETURN expr ';' ;
 declAff : 'int' VAR '=' expr ';';
 expr : '(' expr ')' #exprPar
      | '-' expr #exprNeg

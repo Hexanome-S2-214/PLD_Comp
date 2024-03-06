@@ -24,18 +24,6 @@ antlrcpp::Any CodeGenVisitor::visitAffectation(ifccParser::AffectationContext *c
     this->visit(ctx->expr());
     std::cout << "    movl %eax, -"<<varIndex<<"(%rbp)\n";
 
-    /* if (ctx->VAR().size() > 1) {
-        // VAR '=' VAR ';'
-        std::string secondVarName = ctx->VAR(1)->getText();
-        int secondVarIndex = symbolTable[secondVarName].index;
-        std::cout << "    movl -"<<secondVarIndex<<"(%rbp), %eax\n";
-        std::cout << "    movl %eax, -"<<varIndex<<"(%rbp)\n";
-    } else {
-        // VAR '=' CONST ';'
-        int value = stoi(ctx->CONST()->getText());
-        std::cout << "    movl $"<<value<<", -"<<varIndex<<"(%rbp)\n";
-    } */
-
     return 0;
 }
 
@@ -63,17 +51,6 @@ antlrcpp::Any CodeGenVisitor::visitExprVar(ifccParser::ExprVarContext *ctx){
     std::cout << "    movl -"<<varIndex<<"(%rbp), %eax\n";
     return 0;
 }
-/* 
-antlrcpp::Any CodeGenVisitor::visitExprSomme(ifccParser::ExprSommeContext *ctx){
-    this->visit(ctx->expr(0));
-    std::string varName = symbolTableVisitor->createTempVar();
-    int varIndex = symbolTableVisitor->symbolTable[varName].index;
-    std::cout << "    movl %eax, -"<<varIndex<<"(%rbp)\n";
-    this->visit(ctx->expr(1));
-    std::cout << "    addl -"<<varIndex<<"(%rbp), %eax\n";
-
-    return 0;
-} */
 
 antlrcpp::Any CodeGenVisitor::visitExprSousSomme(ifccParser::ExprSousSommeContext *ctx){
     this->visit(ctx->expr(0));
@@ -113,22 +90,6 @@ antlrcpp::Any CodeGenVisitor::visitExprMultDiv(ifccParser::ExprMultDivContext *c
         std::cout << "    movl -"<<varIndex<<"(%rbp), %eax\n";
         std::cout << "    cltd\n";
         std::cout << "    idivl %ecx\n";
-    }
-
-    return 0;
-}
-
-antlrcpp::Any CodeGenVisitor::visitReturn_stmt(ifccParser::Return_stmtContext *ctx)
-{
-    if (ctx->VAR() != nullptr) {
-        // return VAR;
-        std::string varName = ctx->VAR()->getText();
-        int varIndex = symbolTableVisitor->symbolTable[varName].index;
-        std::cout << "    movl -"<<varIndex<<"(%rbp), %eax\n";
-    } else {
-        // return CONST;
-        int retval = stoi(ctx->CONST()->getText());
-        std::cout << "    movl $"<<retval<<", %eax\n";
     }
 
     return 0;
