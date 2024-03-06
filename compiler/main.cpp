@@ -9,6 +9,7 @@
 #include "generated/ifccBaseVisitor.h"
 
 #include "CodeGenVisitor.h"
+#include "SymbolTableVisitor.h"
 
 using namespace antlr4;
 using namespace std;
@@ -43,8 +44,10 @@ int main(int argn, const char **argv)
       exit(1);
   }
 
-  
-  CodeGenVisitor v;
+  SymbolTableVisitor s;
+  s.visit(tree);
+  s.checkAllVariablesUsed();
+  CodeGenVisitor v(&s);
   v.visit(tree);
 
   return 0;
