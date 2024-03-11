@@ -8,6 +8,7 @@ antlrcpp::Any SymbolTableVisitor::visitDeclStd(ifccParser::DeclStdContext *ctx)
 
 antlrcpp::Any SymbolTableVisitor::visitDeclAff(ifccParser::DeclAffContext *ctx)
 {
+    this->visit(ctx->declAffRule()->expr()); //Checks if variable exists
     declaration(ctx->declAffRule()->VAR()->getText(), "visitDeclAff");
     return 0;
 }
