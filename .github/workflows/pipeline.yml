@@ -28,8 +28,10 @@ jobs:
       - name: Build project
         run: |
             cd ./compiler
-            chmod +x ./runmake_ubuntu.sh
-            ./runmake_ubuntu.sh
+            make \
+              ANTLRLIB=/usr/lib/x86_64-linux-gnu/libantlr4-runtime.a \
+              ANTLRJAR=/usr/share/java/stringtemplate4.jar:/usr/share/java/antlr4.jar:/usr/share/java/antlr4-runtime.jar:/usr/share/java/antlr3-runtime.jar/:/usr/share/java/treelayout.jar \
+              ANTLRINC=/usr/include/antlr4-runtime
     
       - name: Archive ifcc
         uses: actions/upload-artifact@v4
