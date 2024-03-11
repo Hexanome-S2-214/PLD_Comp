@@ -53,6 +53,8 @@ epilog      = ""
 argparser.add_argument('input',metavar='PATH',nargs='+',help='For each path given:'
                        +' if it\'s a file, use this file;'
                        +' if it\'s a directory, use all *.c files in this subtree')
+argparser.add_argument('-osd','--output-subdirectory', metavar='PATH',
+                        help="Name of the subdir to save the output. Only available if the input is a file.")
 
 argparser.add_argument('-d','--debug',action="count",default=0,
                        help='Increase quantity of debugging messages (only useful to debug the test script itself)')
@@ -69,6 +71,10 @@ if args.debug >=2:
 orig_cwd=os.getcwd()
 if "ifcc-test-output" in orig_cwd:
     print('error: cannot run from within the output directory')
+    exit(1)
+
+if (len(args.input) > 1 or os.path.isdir(args.input[0])) and args.output_subdirectory:
+    print('error: cannot use -osd option when the input is a directory')
     exit(1)
     
 if not os.path.exists('ifcc-test-output'):
@@ -139,7 +145,7 @@ for inputfilename in inputfilenames:
     
     ## each test-case gets copied and processed in its own subdirectory:
     ## ../somedir/subdir/file.c becomes ./ifcc-test-output/somedir-subdir-file/input.c
-    subdir='ifcc-test-output/'+str(cpt)+'-'+inputfilename.strip("./")[:-2].replace('/','-')
+    subdir = 'ifcc-test-output/' + args.output_subdirectory if args.output_subdirectory else (str(cpt)+'-'+inputfilename.strip("./")[:-2].replace('/','-'))
 
     if os.path.exists(subdir):
         shutil.rmtree(subdir)
