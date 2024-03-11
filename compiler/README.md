@@ -21,16 +21,14 @@ where `N` is a positive integer constant.
 ## Prerequisites
   Before building your  compiler, you should install  antlr using your
   distribution's  package manager,  or by  running the  provided shell
-  script:   `cd  .. ; ./install-antlr.sh`. 
+  script:   `install-antlr.sh`. 
     
 ## Compilation scripts
 - `Makefile` contains  the actual build  logic. Please read  this file
   and ask questions on parts you do not understand.
-  The  Makefile uses  3  variables (ANTLRJAR,  ANTLRINC and  ANTLRLIB)
-  indicating the location of various parts of the Antlr suite. 
+  The  Makefile includes a .mk file that defines several variables 
+  (ANTLR, ANTLRJAR,  ANTLRINC and  ANTLRLIB) indicating the location 
+  of various parts of the Antlr suite. 
   You can (should)  change  those values to suit your installation, either
-  by editing the  Makefile and/or on the command  line, as illustrated
-  by the `runmake_*` scripts.
-- `runmake_fedora.sh` is an example of such a script. it shows how
-  makefile variables can be overriden from the command-line.
+  by editing the  Makefile and/or adding another .mk file.
 

@@ -68,8 +68,13 @@ if args.debug >=2:
 
 orig_cwd=os.getcwd()
 if "ifcc-test-output" in orig_cwd:
-    sys.stderr.write('error: cannot run from within the output directory')
+    print('error: cannot run from within the output directory')
     exit(1)
+    
+if os.path.isdir('ifcc-test-output'):
+    # cleanup previous output directory
+    command('rm -rf ifcc-test-output')
+os.mkdir('ifcc-test-output')
     
 ## Then we process the inputs arguments i.e. filenames or subtrees
 inputfilenames=[]
@@ -79,13 +84,13 @@ for path in args.input:
         if path[-2:] == '.c':
             inputfilenames.append(path)
         else:
-            sys.stderr.write("error: incorrect filename suffix (should be '.c'): "+path)
+            print("error: incorrect filename suffix (should be '.c'): "+path)
             exit(1)
     elif os.path.isdir(path):
         for dirpath,dirnames,filenames in os.walk(path):
             inputfilenames+=[dirpath+'/'+name for name in filenames if name[-2:]=='.c']
     else:
-        sys.stderr.write("error: cannot read input path `"+path+"'")
+        print("error: cannot read input path `"+path+"'")
         sys.exit(1)
 
 ## debug: after treewalk
@@ -94,7 +99,7 @@ if args.debug:
 
 ## sanity check
 if len(inputfilenames) == 0:
-    sys.stderr.write("error: found no test-case in: "+" ".join(args.input))
+    print("error: found no test-case in: "+" ".join(args.input))
     sys.exit(1)
 
 ## Here we check that  we can actually read the files.  Our goal is to
@@ -104,7 +109,7 @@ for inputfilename in inputfilenames:
         f=open(inputfilename,"r")
         f.close()
     except Exception as e:
-        sys.stderr.write("error: "+e.args[1]+": "+inputfilename)
+        print("error: "+e.args[1]+": "+inputfilename)
         sys.exit(1)
 
 ## Last but not least: we now locate the "wrapper script" that we will
@@ -115,7 +120,7 @@ else:
     wrapper=os.path.dirname(os.path.realpath(__file__))+"/ifcc-wrapper.sh"
 
 if not os.path.isfile(wrapper):
-    sys.stderr.write("error: cannot find "+os.path.basename(wrapper)+" in directory: "+os.path.dirname(wrapper))
+    print("error: cannot find "+os.path.basename(wrapper)+" in directory: "+os.path.dirname(wrapper))
     exit(1)
 
 if args.debug:
@@ -131,17 +136,13 @@ for inputfilename in inputfilenames:
         print("debug: PREPARING "+inputfilename)
 
     if 'ifcc-test-output' in os.path.realpath(inputfilename):
-        sys.stderr.write('error: input filename is within output directory: '+inputfilename)
+        print('error: input filename is within output directory: '+inputfilename)
         exit(1)
     
     ## each test-case gets copied and processed in its own subdirectory:
     ## ../somedir/subdir/file.c becomes ./ifcc-test-output/somedir-subdir-file/input.c
     subdir='ifcc-test-output/'+inputfilename.strip("./")[:-2].replace('/','-')
-    
-    if os.path.exists(subdir):
-        shutil.rmtree(subdir)
-    os.makedirs(subdir)
-        
+    os.mkdir(subdir)
     shutil.copyfile(inputfilename, subdir+'/input.c')
     jobs.append(subdir)
 
@@ -187,35 +188,35 @@ for jobname in jobs:
         continue
     elif gccstatus != 0 and ifccstatus == 0:
         ## ifcc wrongly accepts invalid program -> error
-        sys.stderr.write("TEST FAIL (your compiler accepts an invalid program)")
-        exit(1)
+        print("TEST FAIL (your compiler accepts an invalid program)")
+        continue
     elif gccstatus == 0 and ifccstatus != 0:
         ## ifcc wrongly rejects valid program -> error
-        sys.stderr.write("TEST FAIL (your compiler rejects a valid program)")
+        print("TEST FAIL (your compiler rejects a valid program)")
         if args.verbose:
             dumpfile("ifcc-compile.txt")
-        exit(1)
+        continue
     else:
         ## ifcc accepts to compile valid program -> let's link it
         ldstatus=command("gcc -o exe-ifcc asm-ifcc.s", "ifcc-link.txt")
         if ldstatus:
-            sys.stderr.write("TEST FAIL (your compiler produces incorrect assembly)")
+            print("TEST FAIL (your compiler produces incorrect assembly)")
             if args.verbose:
                 dumpfile("ifcc-link.txt")
-            exit(1)
+            continue
 
     ## both compilers  did produce an  executable, so now we  run both
     ## these executables and compare the results.
         
     command("./exe-ifcc","ifcc-execute.txt")
     if open("gcc-execute.txt").read() != open("ifcc-execute.txt").read() :
-        sys.stderr.write("TEST FAIL (different results at execution)")
+        print("TEST FAIL (different results at execution)")
         if args.verbose:
             print("GCC:")
             dumpfile("gcc-execute.txt")
             print("you:")
             dumpfile("ifcc-execute.txt")
-        exit(1)
+        continue
 
     ## last but not least
     print("TEST OK")

@@ -1,7 +1,8 @@
-# You can override these from the command-line, as illustrated by the various `runmake_*.sh` scripts
-ANTLRJAR=../antlr/jar/antlr-4.9.2-complete.jar
-ANTLRINC=../antlr/include
-ANTLRLIB=../antlr/lib/libantlr4-runtime.a
+# config.mk contains the paths to antlr4 etc.
+# Each student should have a config.mk corresponding to her system.
+# Examples are  ubuntu.mk, DI.mk, fedora.mk
+# Then config.mk should be in the .gitignore of your project
+include config.mk
 
 CC=g++
 CCFLAGS=-g -c -std=c++17 -I$(ANTLRINC) -Wno-attributes # -Wno-defaulted-function-deleted -Wno-unknown-warning-option
@@ -17,7 +18,8 @@ OBJECTS=build/ifccBaseVisitor.o \
 	build/ifccVisitor.o \
 	build/ifccParser.o \
 	build/main.o \
-	build/CodeGenVisitor.o
+	build/CodeGenVisitor.o \
+	build/SymbolTableVisitor.o
 
 ifcc: $(OBJECTS)
 	@mkdir -p build
@@ -46,7 +48,7 @@ generated/ifccVisitor.cpp: generated/ifccParser.cpp
 generated/ifccBaseVisitor.cpp: generated/ifccParser.cpp
 generated/ifccParser.cpp: ifcc.g4
 	@mkdir -p generated
-	java -cp $(ANTLRJAR) org.antlr.v4.Tool  -visitor -no-listener -Dlanguage=Cpp -o generated ifcc.g4
+	$(ANTLR) -visitor -no-listener -Dlanguage=Cpp -o generated ifcc.g4
 
 # prevent automatic cleanup of "intermediate" files like ifccLexer.cpp etc
 .PRECIOUS: generated/ifcc%.cpp   
@@ -59,7 +61,7 @@ FILE ?= ../tests/testfiles/1_return42.c
 
 gui:
 	@mkdir -p generated build
-	java -cp $(ANTLRJAR) org.antlr.v4.Tool -Dlanguage=Java -o generated ifcc.g4
+	$(ANTLR) -Dlanguage=Java -o generated ifcc.g4
 	javac -cp $(ANTLRJAR) -d build generated/*.java
 	java -cp $(ANTLRJAR):build org.antlr.v4.gui.TestRig ifcc axiom -gui $(FILE)
 
