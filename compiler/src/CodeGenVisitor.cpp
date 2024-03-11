@@ -1,36 +1,19 @@
 #include "CodeGenVisitor.h"
 
-antlrcpp::Any CodeGenVisitor::visitProg(ifccParser::ProgContext *ctx) 
-{
-    std::cout<< ".globl main\n" ;
-    std::cout<< " main: \n" ;
-    std::cout<< "    # prologue\n" ;
-    std::cout<< "    pushq %rbp\n" ;
-    std::cout<< "    movq %rsp, %rbp\n" ;
-
-    this->visit( ctx->statements() );
-    
-    std::cout << "    # epilogue\n";
-    std::cout << "    popq %rbp\n";
-    std::cout << "    ret\n";
-
-    return 0;
-}
-
 antlrcpp::Any CodeGenVisitor::visitAffectation(ifccParser::AffectationContext *ctx){
-    std::string varName = ctx->VAR()->getText();
+    std::string varName = ctx->affectationRule()->VAR()->getText();
     int varIndex = symbolTableVisitor->symbolTable[varName].index;
 
-    this->visit(ctx->expr());
+    this->visit(ctx->affectationRule()->expr());
     std::cout << "    movl %eax, -"<<varIndex<<"(%rbp)\n";
 
     return 0;
 }
 
 antlrcpp::Any CodeGenVisitor::visitDeclAff(ifccParser::DeclAffContext *ctx){
-    std::string varName = ctx->VAR()->getText();
+    std::string varName = ctx->declAffRule()->VAR()->getText();
     int varIndex = symbolTableVisitor->symbolTable[varName].index;
-    this->visit(ctx->expr());
+    this->visit(ctx->declAffRule()->expr());
     std::cout << "    movl %eax, -"<<varIndex<<"(%rbp)\n";
     return 0;
 }

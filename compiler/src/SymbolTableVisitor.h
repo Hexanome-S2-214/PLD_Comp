@@ -15,9 +15,10 @@ class SymbolTableVisitor  : public ifccBaseVisitor {
     public:
         std::map<std::string, VariableInfo> symbolTable;
 
-        virtual antlrcpp::Any visitDeclaration(ifccParser::DeclarationContext *ctx) override;
-        virtual antlrcpp::Any visitDeclAff(ifccParser::DeclAffContext *ctx) override;
+        virtual antlrcpp::Any visitDeclStd(ifccParser::DeclStdContext *ctx) override ;
+        virtual antlrcpp::Any visitDeclAff(ifccParser::DeclAffContext *ctx) override ;
         virtual antlrcpp::Any visitExprVar(ifccParser::ExprVarContext *ctx) override;
         void checkAllVariablesUsed();
         std::string createTempVar();
+        void declaration(std::string symbol, std::string callSource);
 };

@@ -15,10 +15,9 @@ class  CodeGenVisitor : public ifccBaseVisitor {
         SymbolTableVisitor* symbolTableVisitor;
 
         CodeGenVisitor(SymbolTableVisitor* visitor) : symbolTableVisitor(visitor){};
-        virtual antlrcpp::Any visitProg(ifccParser::ProgContext *ctx) override ;
-/*         virtual antlrcpp::Any visitReturn_stmt(ifccParser::Return_stmtContext *ctx) override;
- */        virtual antlrcpp::Any visitAffectation(ifccParser::AffectationContext *ctx) override;
-        virtual antlrcpp::Any visitDeclAff(ifccParser::DeclAffContext *ctx) override;
+        //virtual antlrcpp::Any visitReturn_stmt(ifccParser::Return_stmtContext *ctx) override;
+        virtual antlrcpp::Any visitAffectation(ifccParser::AffectationContext *ctx) override;
+        virtual antlrcpp::Any visitDeclAff(ifccParser::DeclAffContext *ctx) override ;
 
         virtual antlrcpp::Any visitExprPar(ifccParser::ExprParContext *ctx) override;
         virtual antlrcpp::Any visitExprConst(ifccParser::ExprConstContext *ctx) override;
