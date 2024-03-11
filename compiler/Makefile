@@ -13,7 +13,6 @@ all: ifcc
 
 ##########################################
 # link together all pieces of our compiler 
-SRC_FILES=$(wildcard src/**/*.cpp src/*.cpp)
 OBJECTS=build/ifccBaseVisitor.o \
 	build/ifccLexer.o \
 	build/ifccVisitor.o \
@@ -21,11 +20,11 @@ OBJECTS=build/ifccBaseVisitor.o \
 	build/main.o \
 	build/CodeGenVisitor.o \
 	build/SymbolTableVisitor.o \
-	$(patsubst %.cpp, build/%.o, $(wildcard ir/*.cpp)) # IR subdir
+	$(patsubst %.cpp, build/%.o, $(wildcard ir/*.cpp ir/**/*.cpp)) # IR subdir
 
 ifcc: $(OBJECTS)
 	@mkdir -p build
-	$(CC) $(LDFLAGS) build/*.o $(ANTLRLIB) -o ifcc
+	$(CC) $(LDFLAGS) build/*.o build/**/*.o $(ANTLRLIB) -o ifcc
 
 ##########################################
 # compile our hand-writen C++ code: main(), CodeGenVisitor, etc.
