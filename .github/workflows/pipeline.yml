@@ -29,10 +29,10 @@ jobs:
         run: |
             cd ./compiler
 
-            echo "ANTLRLIB=/usr/lib/x86_64-linux-gnu/libantlr4-runtime.a" >> config.mk
-            echo "ANTLRJAR=/usr/share/java/stringtemplate4.jar:/usr/share/java/antlr4.jar:/usr/share/java/antlr4-runtime.jar:/usr/share/java/antlr3-runtime.jar/:/usr/share/java/treelayout.jar" >> config.mk
-            echo "ANTLRINC=/usr/include/antlr4-runtime" >> config.mk
-            
+            echo "ANTLRLIB=/usr/lib/x86_64-linux-gnu/libantlr4-runtime.a\n" >> config.mk
+            echo "ANTLRJAR=/usr/share/java/stringtemplate4.jar:/usr/share/java/antlr4.jar:/usr/share/java/antlr4-runtime.jar:/usr/share/java/antlr3-runtime.jar/:/usr/share/java/treelayout.jar\n" >> config.mk
+            echo "ANTLRINC=/usr/include/antlr4-runtime\n" >> config.mk
+
             make
     
       - name: Archive ifcc
