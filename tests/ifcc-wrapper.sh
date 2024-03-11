@@ -18,6 +18,10 @@
 DESTNAME=$1
 SOURCENAME=$2
 
+#QUAND ON AJOUTERA L'ECRITURE DANS UN FICHIER EN SORTIE
+# $(dirname $0)/../compiler/ifcc -o $DESTNAME $SOURCENAME 
+# retcode=$?
+
 $(dirname $0)/../compiler/ifcc $SOURCENAME >$DESTNAME
 retcode=$?
 

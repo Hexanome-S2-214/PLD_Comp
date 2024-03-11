@@ -130,7 +130,7 @@ if args.debug:
 ## PREPARE step: copy all test-cases under ifcc-test-output
 
 jobs=[]
-
+cpt = 1
 for inputfilename in inputfilenames:
     if args.debug>=2:
         print("debug: PREPARING "+inputfilename)
@@ -141,10 +141,11 @@ for inputfilename in inputfilenames:
     
     ## each test-case gets copied and processed in its own subdirectory:
     ## ../somedir/subdir/file.c becomes ./ifcc-test-output/somedir-subdir-file/input.c
-    subdir='ifcc-test-output/'+inputfilename.strip("./")[:-2].replace('/','-')
+    subdir='ifcc-test-output/'+str(cpt)+'-'+inputfilename.strip("./")[:-2].replace('/','-')
     os.mkdir(subdir)
     shutil.copyfile(inputfilename, subdir+'/input.c')
     jobs.append(subdir)
+    cpt+=1
 
 ## eliminate duplicate paths from the 'jobs' list
 unique_jobs=[]
@@ -163,10 +164,16 @@ if args.debug:
 ######################################################################################
 ## TEST step: actually compile all test-cases with both compilers
 
+cpt = 0
+cpt_test_ok = 0
+
 for jobname in jobs:
     os.chdir(orig_cwd)
+    
+    cpt += 1
 
-    print('TEST-CASE: '+jobname)
+    print('\n--------------------------')
+    print('TEST-CASE n°'+str(cpt)+ " : "+jobname)
     os.chdir(jobname)
     
     ## Reference compiler = GCC
@@ -185,6 +192,7 @@ for jobname in jobs:
     if gccstatus != 0 and ifccstatus != 0:
         ## ifcc correctly rejects invalid program -> test-case ok
         print("TEST OK")
+        cpt_test_ok += 1
         continue
     elif gccstatus != 0 and ifccstatus == 0:
         ## ifcc wrongly accepts invalid program -> error
@@ -220,3 +228,8 @@ for jobname in jobs:
 
     ## last but not least
     print("TEST OK")
+    cpt_test_ok += 1
+
+## Affichage du taux d'erreur
+taux_erreur = (1-cpt_test_ok/cpt)*100
+print('\nTaux d\'erreur : ' + str(round(taux_erreur, 2)) + "%\n")
