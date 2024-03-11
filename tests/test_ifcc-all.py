@@ -5,7 +5,7 @@ import glob
 PROGRAMS_DIR = 'tests/testfiles'
 
 def get_files_path(dir):
-    return [f for f in glob.glob(dir + '**/*.c', recursive=True)]
+    return [f for f in glob.glob(dir + '/**/*.c', recursive=True)]
 
 @pytest.fixture(params=get_files_path(PROGRAMS_DIR), ids=lambda f: f)
 def file_path(request):
