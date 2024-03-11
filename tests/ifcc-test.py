@@ -71,10 +71,8 @@ if "ifcc-test-output" in orig_cwd:
     print('error: cannot run from within the output directory')
     exit(1)
     
-if os.path.isdir('ifcc-test-output'):
-    # cleanup previous output directory
-    command('rm -rf ifcc-test-output')
-os.mkdir('ifcc-test-output')
+if not os.path.exists('ifcc-test-output'):
+    os.mkdir('ifcc-test-output')
     
 ## Then we process the inputs arguments i.e. filenames or subtrees
 inputfilenames=[]
@@ -142,6 +140,10 @@ for inputfilename in inputfilenames:
     ## each test-case gets copied and processed in its own subdirectory:
     ## ../somedir/subdir/file.c becomes ./ifcc-test-output/somedir-subdir-file/input.c
     subdir='ifcc-test-output/'+str(cpt)+'-'+inputfilename.strip("./")[:-2].replace('/','-')
+
+    if os.path.exists(subdir):
+        shutil.rmtree(subdir)
+
     os.mkdir(subdir)
     shutil.copyfile(inputfilename, subdir+'/input.c')
     jobs.append(subdir)
