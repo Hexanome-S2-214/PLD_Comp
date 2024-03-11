@@ -5,5 +5,6 @@ namespace IR
     enum Type
     {
         Int,
+        Bool,
     };
 };
