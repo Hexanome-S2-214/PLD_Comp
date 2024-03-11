@@ -20,7 +20,7 @@ import os
 import shutil
 import sys
 import subprocess
-
+from colorama import Fore, Style
 def command(string, logfile=None):
     """execute `string` as a shell command, optionnaly logging stdout+stderr to a file. return exit status.)"""
     if args.verbose:
@@ -191,16 +191,19 @@ for jobname in jobs:
     
     if gccstatus != 0 and ifccstatus != 0:
         ## ifcc correctly rejects invalid program -> test-case ok
-        print("TEST OK")
+        print(Fore.GREEN +"TEST OK")
+        print(Style.RESET_ALL)
         cpt_test_ok += 1
         continue
     elif gccstatus != 0 and ifccstatus == 0:
         ## ifcc wrongly accepts invalid program -> error
-        print("TEST FAIL (your compiler accepts an invalid program)")
+        print(Fore.RED + "TEST FAIL (your compiler accepts an invalid program)")
+        print(Style.RESET_ALL)
         continue
     elif gccstatus == 0 and ifccstatus != 0:
         ## ifcc wrongly rejects valid program -> error
-        print("TEST FAIL (your compiler rejects a valid program)")
+        print(Fore.RED +"TEST FAIL (your compiler rejects a valid program)")
+        print(Style.RESET_ALL)
         if args.verbose:
             dumpfile("ifcc-compile.txt")
         continue
@@ -208,7 +211,8 @@ for jobname in jobs:
         ## ifcc accepts to compile valid program -> let's link it
         ldstatus=command("gcc -o exe-ifcc asm-ifcc.s", "ifcc-link.txt")
         if ldstatus:
-            print("TEST FAIL (your compiler produces incorrect assembly)")
+            print(Fore.RED +"TEST FAIL (your compiler produces incorrect assembly)")
+            print(Style.RESET_ALL)
             if args.verbose:
                 dumpfile("ifcc-link.txt")
             continue
@@ -218,7 +222,8 @@ for jobname in jobs:
         
     command("./exe-ifcc","ifcc-execute.txt")
     if open("gcc-execute.txt").read() != open("ifcc-execute.txt").read() :
-        print("TEST FAIL (different results at execution)")
+        print(Fore.RED +"TEST FAIL (different results at execution)")
+        print(Style.RESET_ALL)
         if args.verbose:
             print("GCC:")
             dumpfile("gcc-execute.txt")
@@ -227,7 +232,8 @@ for jobname in jobs:
         continue
 
     ## last but not least
-    print("TEST OK")
+    print(Fore.GREEN+ "TEST OK")
+    print(Style.RESET_ALL)
     cpt_test_ok += 1
 
 ## Affichage du taux d'erreur
