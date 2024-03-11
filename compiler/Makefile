@@ -13,45 +13,45 @@ all: ifcc
 
 ##########################################
 # link together all pieces of our compiler 
-OBJECTS=build/ifccBaseVisitor.o \
-	build/ifccLexer.o \
-	build/ifccVisitor.o \
-	build/ifccParser.o \
-	build/main.o \
-	build/CodeGenVisitor.o \
-	build/SymbolTableVisitor.o
+OBJECTS=src/build/ifccBaseVisitor.o \
+	src/build/ifccLexer.o \
+	src/build/ifccVisitor.o \
+	src/build/ifccParser.o \
+	src/build/main.o \
+	src/build/CodeGenVisitor.o \
+	src/build/SymbolTableVisitor.o
 
 ifcc: $(OBJECTS)
-	@mkdir -p build
-	$(CC) $(LDFLAGS) build/*.o $(ANTLRLIB) -o ifcc
+	@mkdir -p src/build
+	$(CC) $(LDFLAGS) src/build/*.o $(ANTLRLIB) -o ifcc
 
 ##########################################
 # compile our hand-writen C++ code: main(), CodeGenVisitor, etc.
-build/%.o: %.cpp generated/ifccParser.cpp
-	@mkdir -p build
+src/build/%.o: src/%.cpp src/generated/ifccParser.cpp
+	@mkdir -p src/build
 	$(CC) $(CCFLAGS) -MMD -o $@ $< 
 
 ##########################################
 # compile all the antlr-generated C++
-build/%.o: generated/%.cpp
-	@mkdir -p build
+src/build/%.o: src/generated/%.cpp
+	@mkdir -p src/build
 	$(CC) $(CCFLAGS) -MMD -o $@ $< 
 
 # automagic dependency management: `gcc -MMD` generates all the .d files for us
--include build/*.d
-build/%.d:
+-include src/build/*.d
+src/build/%.d:
 
 ##########################################
 # generate the C++ implementation of our Lexer/Parser/Visitor
-generated/ifccLexer.cpp: generated/ifccParser.cpp
-generated/ifccVisitor.cpp: generated/ifccParser.cpp
-generated/ifccBaseVisitor.cpp: generated/ifccParser.cpp
-generated/ifccParser.cpp: ifcc.g4
-	@mkdir -p generated
-	$(ANTLR) -visitor -no-listener -Dlanguage=Cpp -o generated ifcc.g4
+src/generated/ifccLexer.cpp: src/generated/ifccParser.cpp
+src/generated/ifccVisitor.cpp: src/generated/ifccParser.cpp
+src/generated/ifccBaseVisitor.cpp: src/generated/ifccParser.cpp
+src/generated/ifccParser.cpp: src/ifcc.g4
+	@mkdir -p src/generated
+	cd src && $(ANTLR) -visitor -no-listener -Dlanguage=Cpp -o generated ifcc.g4
 
 # prevent automatic cleanup of "intermediate" files like ifccLexer.cpp etc
-.PRECIOUS: generated/ifcc%.cpp   
+.PRECIOUS: src/generated/ifcc%.cpp   
 
 ##########################################
 # view the parse tree in a graphical window
@@ -60,13 +60,13 @@ generated/ifccParser.cpp: ifcc.g4
 FILE ?= ../tests/testfiles/1_return42.c
 
 gui:
-	@mkdir -p generated build
-	$(ANTLR) -Dlanguage=Java -o generated ifcc.g4
-	javac -cp $(ANTLRJAR) -d build generated/*.java
-	java -cp $(ANTLRJAR):build org.antlr.v4.gui.TestRig ifcc axiom -gui $(FILE)
+	@mkdir -p src/generated src/build
+	cd src && $(ANTLR) -Dlanguage=Java -o generated ifcc.g4
+	javac -cp $(ANTLRJAR) -d src/build src/generated/*.java
+	java -cp $(ANTLRJAR):src/build org.antlr.v4.gui.TestRig ifcc axiom -gui $(FILE)
 
 ##########################################
 # delete all machine-generated files
 clean:
-	rm -rf build generated
+	rm -rf src/build src/generated
 	rm -f ifcc

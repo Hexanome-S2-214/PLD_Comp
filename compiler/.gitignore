@@ -1,0 +1,5 @@
+config.mk
+src/build
+src/generated
+src/.antlr
+*test*
