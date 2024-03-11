@@ -2,7 +2,7 @@
 
 
 #include "antlr4-runtime.h"
-#include "generated/ifccBaseVisitor.h"
+#include "../generated/ifccBaseVisitor.h"
 #include "VariableInfo.h"
 
 #include <map>
