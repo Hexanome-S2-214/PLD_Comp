@@ -10,6 +10,8 @@
 
 #include "CodeGenVisitor.h"
 #include "SymbolTableVisitor.h"
+#include "ir/ir-cfg.h"
+#include "ir-visitor.h"
 
 using namespace antlr4;
 using namespace std;
@@ -44,11 +46,18 @@ int main(int argn, const char **argv)
       exit(1);
   }
 
-  SymbolTableVisitor s;
-  s.visit(tree);
-  s.checkAllVariablesUsed();
-  CodeGenVisitor v(&s);
-  v.visit(tree);
+  IR::CFG cfg;
+  IRVisitor visitor(&cfg);
+
+  visitor.visit(tree);
+
+  cfg.gen_asm(cout);
+
+  // SymbolTableVisitor s;
+  // s.visit(tree);
+  // s.checkAllVariablesUsed();
+  // CodeGenVisitor v(&s);
+  // v.visit(tree);
 
   return 0;
 }

@@ -24,8 +24,10 @@ namespace IR
         void gen_asm_epilogue(ostream& o);
 
         SymbolTable * get_symbol_table();
+
+        BasicBlock * get_current_bb();
     private:
         vector<BasicBlock *> blocks;
-        SymbolTable symbol_table;
+        SymbolTable * symbol_table;
     };
 };

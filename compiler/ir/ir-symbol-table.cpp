@@ -1,10 +1,11 @@
 #include "ir-symbol-table.h"
+#include "ir-reg.h"
 
 IR::Symbol::Symbol(string id, int offset, Type type, antlr4::ParserRuleContext * ctx) : id(id), offset(offset), type(type), ctx(ctx) {}
 
 void IR::Symbol::gen_asm(ostream& o)
 {
-    o << offset << "(%rbp)" << endl;
+    o << offset << reg_stack->get_asm_str() << endl;
 }
 
 IR::Symbol * IR::SymbolTable::declare_symbol(string id, Type type, antlr4::ParserRuleContext * ctx)
