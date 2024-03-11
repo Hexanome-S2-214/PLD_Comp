@@ -23,3 +23,8 @@ void IR::CFG::gen_asm_epilogue(ostream& o)
 {
     
 }
+
+IR::SymbolTable * IR::CFG::get_symbol_table()
+{
+    return &symbol_table;
+}

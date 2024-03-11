@@ -22,6 +22,8 @@ namespace IR
         void gen_asm(ostream& o) override;
         void gen_asm_prologue(ostream& o);
         void gen_asm_epilogue(ostream& o);
+
+        SymbolTable * get_symbol_table();
     private:
         vector<BasicBlock *> blocks;
         SymbolTable symbol_table;
