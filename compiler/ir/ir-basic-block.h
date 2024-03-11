@@ -23,6 +23,9 @@ namespace IR
         void add_instr(IRInstr * instr);
 
         void gen_asm(ostream& o) override;
+
+        void set_exit_true(BasicBlock * exit_true);
+        void set_exit_false(BasicBlock * exit_false);
     private:
         BasicBlock * exit_true;
         BasicBlock * exit_false;

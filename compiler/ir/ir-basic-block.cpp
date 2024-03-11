@@ -16,3 +16,13 @@ void IR::BasicBlock::gen_asm(ostream& o)
         instr->gen_asm(o);
     }
 }
+
+void IR::BasicBlock::set_exit_true(IR::BasicBlock * exit_true)
+{
+    this->exit_true = exit_true;
+}
+
+void IR::BasicBlock::set_exit_false(IR::BasicBlock * exit_false)
+{
+    this->exit_false = exit_false;
+}
