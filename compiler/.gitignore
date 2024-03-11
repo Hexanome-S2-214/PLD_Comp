@@ -1,4 +1,5 @@
 config.mk
-build
-generated
+src/build
+src/generated
+src/.antlr
 *test*
