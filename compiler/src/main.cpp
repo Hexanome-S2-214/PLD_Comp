@@ -47,8 +47,19 @@ int main(int argn, const char **argv)
   SymbolTableVisitor s;
   s.visit(tree);
   s.checkAllVariablesUsed();
+
+  std::cout<< ".globl main\n" ;
+  std::cout<< " main: \n" ;
+  std::cout<< "    # prologue\n" ;
+  std::cout<< "    pushq %rbp\n" ;
+  std::cout<< "    movq %rsp, %rbp\n" ;
+
   CodeGenVisitor v(&s);
   v.visit(tree);
+  
+  std::cout << "    # epilogue\n";
+  std::cout << "    popq %rbp\n";
+  std::cout << "    ret\n";
 
   return 0;
 }

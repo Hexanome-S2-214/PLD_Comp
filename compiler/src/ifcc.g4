@@ -2,15 +2,22 @@ grammar ifcc;
 
 axiom : prog EOF ;
 
-prog : 'int' 'main' '(' ')' '{' statements '}' ;
+prog: 'int' 'main' '(' ')' '{' statement* '}';
 
-statements : statement | statement statements ;
-statement : affectation | declaration | return_stmt | declAff ;
+statement: declarationRule # declaration | instructionRule # instruction;
 
-declaration: 'int' VAR ';' ;
-affectation: VAR '=' expr ';' ; 
-return_stmt: RETURN expr ';' ;
-declAff : 'int' VAR '=' expr ';';
+declarationRule: declStdRule # declStd | declAffRule # declAff;
+
+instructionRule: returnStmtRule # returnStmt | affectationRule # affectation;
+
+
+declStdRule: 'int' VAR ';';
+declAffRule: 'int' VAR '=' expr ';';
+
+affectationRule: VAR '=' expr ';';
+
+returnStmtRule: RETURN expr ';';
+
 expr : '(' expr ')' #exprPar
      | '-' expr #exprNeg
      | expr (MULT | DIV) expr #exprMultDiv

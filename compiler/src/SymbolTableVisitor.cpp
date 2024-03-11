@@ -1,26 +1,15 @@
 #include "SymbolTableVisitor.h"
 
-
-
-antlrcpp::Any SymbolTableVisitor::visitDeclaration(ifccParser::DeclarationContext *ctx) {
-    std::string varName = ctx->VAR()->getText();
-    if (symbolTable.count(varName) > 0) {
-        std::cerr << "Error: Variable " << varName << " is already declared.\n";
-        exit(1);
-    }
-    symbolTable[varName] = {currentIndex, false};
-    currentIndex += 4;
+antlrcpp::Any SymbolTableVisitor::visitDeclStd(ifccParser::DeclStdContext *ctx)
+{
+    declaration(ctx->declStdRule()->VAR()->getText(), "visitDeclStd");
     return 0;
 }
 
-antlrcpp::Any SymbolTableVisitor::visitDeclAff(ifccParser::DeclAffContext *ctx){
-    std::string varName = ctx->VAR()->getText();
-    if (symbolTable.count(varName) > 0) {
-        std::cerr << "Error: Variable " << varName << " is already declared.\n";
-        exit(1);
-    }
-    symbolTable[varName] = {currentIndex, true};
-    currentIndex += 4;
+antlrcpp::Any SymbolTableVisitor::visitDeclAff(ifccParser::DeclAffContext *ctx)
+{
+    this->visit(ctx->declAffRule()->expr()); //Checks if variable exists
+    declaration(ctx->declAffRule()->VAR()->getText(), "visitDeclAff");
     return 0;
 }
 
@@ -47,4 +36,14 @@ std::string SymbolTableVisitor::createTempVar(){
     symbolTable[tempVar] = {currentIndex, true};
     currentIndex += 4;
     return tempVar;
+}
+
+void SymbolTableVisitor::declaration(std::string symbol, std::string callSource)
+{
+    if(symbolTable.find(symbol) != symbolTable.end()){
+        std::cerr << callSource << ": Symbol already declared !" << std::endl;
+        exit(1);
+    }
+    symbolTable[symbol] = {currentIndex, false};
+    currentIndex += 4;
 }
