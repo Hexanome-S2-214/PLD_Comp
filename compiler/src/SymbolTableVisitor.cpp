@@ -42,7 +42,7 @@ void SymbolTableVisitor::declaration(std::string symbol, std::string callSource)
 {
     if(symbolTable.find(symbol) != symbolTable.end()){
         std::cerr << callSource << ": Symbol already declared !" << std::endl;
-        exit;
+        exit(1);
     }
     symbolTable[symbol] = {currentIndex, false};
     currentIndex += 4;
