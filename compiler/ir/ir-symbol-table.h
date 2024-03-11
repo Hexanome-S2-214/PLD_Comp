@@ -11,11 +11,17 @@ using namespace std;
 
 namespace IR
 {
-    
-    struct Symbol
+    class Symbol : public IRBase
     {
+    public:
+        Symbol(string id, int offset, Type type, antlr4::ParserRuleContext * ctx = nullptr);
+        ~Symbol();
+
+        void gen_asm(ostream& o) override;
+
+        string id;
         int offset;
-        bool used;
+        bool used = false;
         Type type;
         antlr4::ParserRuleContext * ctx;
     };
@@ -26,8 +32,10 @@ namespace IR
         SymbolTable();
         ~SymbolTable();
 
-        Symbol * declare_symbol(string id, Type type, antlr4::ParserRuleContext * ctx);
-        Symbol * get_symbol(string id, antlr4::ParserRuleContext * ctx);
+        Symbol * declare_symbol(string id, Type type, antlr4::ParserRuleContext * ctx = nullptr);
+        Symbol * get_symbol(string id, antlr4::ParserRuleContext * ctx = nullptr);
+
+        Symbol * declare_tmp(Type type, antlr4::ParserRuleContext * ctx = nullptr);
 
         string get_next_tmp();
     private:
