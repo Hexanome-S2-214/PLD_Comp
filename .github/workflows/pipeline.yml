@@ -32,7 +32,7 @@ jobs:
             echo "ANTLRLIB=/usr/lib/x86_64-linux-gnu/libantlr4-runtime.a\n" >> config.mk
             echo "ANTLRJAR=/usr/share/java/stringtemplate4.jar:/usr/share/java/antlr4.jar:/usr/share/java/antlr4-runtime.jar:/usr/share/java/antlr3-runtime.jar/:/usr/share/java/treelayout.jar\n" >> config.mk
             echo "ANTLRINC=/usr/include/antlr4-runtime\n" >> config.mk
-            echo "ANTLR=java -cp $$(ANTLRJAR) org.antlr.v4.Tool" >> config.mk
+            echo 'ANTLR=java -cp $(ANTLRJAR) org.antlr.v4.Tool' >> config.mk
 
             make
     
