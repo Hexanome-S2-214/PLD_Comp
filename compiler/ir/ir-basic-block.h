@@ -16,7 +16,8 @@ namespace IR
     class BasicBlock : public IRBase
     {
     public:
-        BasicBlock(CFG * cfg);
+        BasicBlock(CFG * cfg) : cfg(cfg) {};
+        BasicBlock(CFG * cfg, BasicBlock * exit_true, BasicBlock * exit_false) : cfg(cfg), exit_true(exit_true), exit_false(exit_false) {};
         ~BasicBlock();
 
         void add_instr(IRInstr * instr);
