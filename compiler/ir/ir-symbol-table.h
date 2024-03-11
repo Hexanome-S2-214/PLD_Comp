@@ -4,6 +4,7 @@
 #include <map>
 #include "antlr4-runtime.h"
 #include "ir-type.h"
+#include "ir-base.h"
 
 #define SYMBOL_SIZE 4
 
@@ -11,7 +12,7 @@ using namespace std;
 
 namespace IR
 {
-    class Symbol : public IRBase
+    class Symbol : public IR::IRBase
     {
     public:
         Symbol(string id, int offset, Type type, antlr4::ParserRuleContext * ctx = nullptr);

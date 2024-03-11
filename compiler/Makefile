@@ -13,13 +13,15 @@ all: ifcc
 
 ##########################################
 # link together all pieces of our compiler 
+SRC_FILES=$(wildcard src/**/*.cpp src/*.cpp)
 OBJECTS=build/ifccBaseVisitor.o \
 	build/ifccLexer.o \
 	build/ifccVisitor.o \
 	build/ifccParser.o \
 	build/main.o \
 	build/CodeGenVisitor.o \
-	build/SymbolTableVisitor.o
+	build/SymbolTableVisitor.o \
+	$(patsubst %.cpp, build/%.o, $(wildcard ir/*.cpp)) # IR subdir
 
 ifcc: $(OBJECTS)
 	@mkdir -p build
@@ -28,13 +30,13 @@ ifcc: $(OBJECTS)
 ##########################################
 # compile our hand-writen C++ code: main(), CodeGenVisitor, etc.
 build/%.o: %.cpp generated/ifccParser.cpp
-	@mkdir -p build
+	@mkdir -p $(@D)
 	$(CC) $(CCFLAGS) -MMD -o $@ $< 
 
 ##########################################
 # compile all the antlr-generated C++
 build/%.o: generated/%.cpp
-	@mkdir -p build
+	@mkdir -p $(@D)
 	$(CC) $(CCFLAGS) -MMD -o $@ $< 
 
 # automagic dependency management: `gcc -MMD` generates all the .d files for us

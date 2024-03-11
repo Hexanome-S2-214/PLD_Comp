@@ -1,5 +1,6 @@
 #include "ir-symbol-table.h"
 #include "ir-reg.h"
+#include "ir-base.h"
 
 IR::Symbol::Symbol(string id, int offset, Type type, antlr4::ParserRuleContext * ctx) : id(id), offset(offset), type(type), ctx(ctx) {}
 

@@ -1,5 +1,3 @@
-#pragma once
-
 #include "ir-basic-block.h"
 #include "ir-cfg.h"
 #include "ir-instr.h"
