@@ -28,10 +28,12 @@ jobs:
       - name: Build project
         run: |
             cd ./compiler
-            make \
-              ANTLRLIB=/usr/lib/x86_64-linux-gnu/libantlr4-runtime.a \
-              ANTLRJAR=/usr/share/java/stringtemplate4.jar:/usr/share/java/antlr4.jar:/usr/share/java/antlr4-runtime.jar:/usr/share/java/antlr3-runtime.jar/:/usr/share/java/treelayout.jar \
-              ANTLRINC=/usr/include/antlr4-runtime
+
+            echo "ANTLRLIB=/usr/lib/x86_64-linux-gnu/libantlr4-runtime.a" >> config.mk
+            echo "ANTLRJAR=/usr/share/java/stringtemplate4.jar:/usr/share/java/antlr4.jar:/usr/share/java/antlr4-runtime.jar:/usr/share/java/antlr3-runtime.jar/:/usr/share/java/treelayout.jar" >> config.mk
+            echo "ANTLRINC=/usr/include/antlr4-runtime" >> config.mk
+            
+            make
     
       - name: Archive ifcc
         uses: actions/upload-artifact@v4
