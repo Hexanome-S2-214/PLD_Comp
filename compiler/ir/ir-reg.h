@@ -7,7 +7,11 @@ using namespace std;
 
 namespace IR
 {
-    class IRReg : public IRBase {};
+    class IRReg : public IRBase {
+    public:
+        IRReg() {};
+        ~IRReg() = default;
+    };
 
     class IRRegA : public IRReg
     {
@@ -44,9 +48,4 @@ namespace IR
             o << "(%esp)";
         }
     };
-
-    IRRegA * reg_a = new IRRegA();
-    IRRegB * reg_b = new IRRegB();
-    IRRegC * reg_c = new IRRegC();
-    IRRegStack * reg_stack = new IRRegStack();
 };

@@ -15,7 +15,7 @@ namespace IR
     {
     public:
         IRInstr(BasicBlock * bb) : bb(bb) {}
-        ~IRInstr();
+        ~IRInstr() = default;
 
         BasicBlock * get_bb() { return bb; };
     private:

@@ -17,7 +17,7 @@ namespace IR
     {
     public:
         CFG();
-        ~CFG();
+        ~CFG() = default;
 
         void gen_asm(ostream& o) override;
         void gen_asm_prologue(ostream& o);

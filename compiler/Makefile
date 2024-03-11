@@ -20,11 +20,12 @@ OBJECTS=build/ifccBaseVisitor.o \
 	build/main.o \
 	build/CodeGenVisitor.o \
 	build/SymbolTableVisitor.o \
+	build/ir-visitor.o \
 	$(patsubst %.cpp, build/%.o, $(wildcard ir/*.cpp ir/**/*.cpp)) # IR subdir
 
 ifcc: $(OBJECTS)
 	@mkdir -p build
-	$(CC) $(LDFLAGS) build/*.o build/**/*.o $(ANTLRLIB) -o ifcc
+	$(CC) $(LDFLAGS) $(OBJECTS) $(ANTLRLIB) -o ifcc
 
 ##########################################
 # compile our hand-writen C++ code: main(), CodeGenVisitor, etc.

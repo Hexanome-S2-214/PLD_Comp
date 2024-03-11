@@ -27,7 +27,7 @@ void IR::BasicBlock::gen_asm(ostream& o)
     {
         if (exit_true != nullptr)
         {
-            o << "\tcmpq $1, " << reg_a->get_asm_str() << endl;
+            o << "\tcmpq $1, " << IR::IRRegA().get_asm_str() << endl;
             o << "\tje " << exit_true->get_label() << endl;
             o << "\tjmp " << exit_false->get_label() << endl;
         }

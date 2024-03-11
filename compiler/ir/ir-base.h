@@ -10,7 +10,9 @@ namespace IR
     class IRBase
     {
     public:
-        virtual void gen_asm(ostream& o);
+        ~IRBase() = default;
+
+        virtual void gen_asm(ostream& o) = 0;
         string get_asm_str();
     };
 };

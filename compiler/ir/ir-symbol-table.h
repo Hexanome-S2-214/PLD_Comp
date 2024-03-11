@@ -16,7 +16,8 @@ namespace IR
     {
     public:
         Symbol(string id, int offset, Type type, antlr4::ParserRuleContext * ctx = nullptr);
-        ~Symbol();
+        Symbol() {};
+        ~Symbol() = default;
 
         void gen_asm(ostream& o) override;
 
@@ -30,8 +31,8 @@ namespace IR
     class SymbolTable
     {
     public:
-        SymbolTable();
-        ~SymbolTable();
+        SymbolTable() {};
+        ~SymbolTable() = default;
 
         Symbol * declare_symbol(string id, Type type, antlr4::ParserRuleContext * ctx = nullptr);
         Symbol * get_symbol(string id, antlr4::ParserRuleContext * ctx = nullptr);
