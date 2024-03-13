@@ -163,6 +163,8 @@ if args.debug:
 ######################################################################################
 ## TEST step: actually compile all test-cases with both compilers
 
+error_count = 0
+
 for jobname in jobs:
     os.chdir(orig_cwd)
 
@@ -189,13 +191,15 @@ for jobname in jobs:
     elif gccstatus != 0 and ifccstatus == 0:
         ## ifcc wrongly accepts invalid program -> error
         print("TEST FAIL (your compiler accepts an invalid program)")
-        exit(1)
+        error_count += 1
+        continue
     elif gccstatus == 0 and ifccstatus != 0:
         ## ifcc wrongly rejects valid program -> error
         print("TEST FAIL (your compiler rejects a valid program)")
         if args.verbose:
             dumpfile("ifcc-compile.txt")
-        exit(1)
+        error_count += 1
+        continue
     else:
         ## ifcc accepts to compile valid program -> let's link it
         ldstatus=command("gcc -o exe-ifcc asm-ifcc.s", "ifcc-link.txt")
@@ -203,7 +207,8 @@ for jobname in jobs:
             print("TEST FAIL (your compiler produces incorrect assembly)")
             if args.verbose:
                 dumpfile("ifcc-link.txt")
-            exit(1)
+            error_count += 1
+            continue
 
     ## both compilers  did produce an  executable, so now we  run both
     ## these executables and compare the results.
@@ -216,7 +221,12 @@ for jobname in jobs:
             dumpfile("gcc-execute.txt")
             print("you:")
             dumpfile("ifcc-execute.txt")
-        exit(1)
+        error_count += 1
+        continue
 
     ## last but not least
     print("TEST OK")
+
+if error_count > 0:
+    print("error: "+str(error_count)+" test-cases failed")
+    exit(1)
