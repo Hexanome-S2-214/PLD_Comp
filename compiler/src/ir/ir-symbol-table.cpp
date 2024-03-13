@@ -6,7 +6,7 @@ IR::Symbol::Symbol(string id, int offset, Type type, antlr4::ParserRuleContext *
 
 void IR::Symbol::gen_asm(ostream& o)
 {
-    o << offset << IR::IRRegStack().get_asm_str() << endl;
+    o << offset << IR::IRRegStack().get_asm_str();
 }
 
 IR::Symbol * IR::SymbolTable::declare_symbol(string id, Type type, antlr4::ParserRuleContext * ctx)

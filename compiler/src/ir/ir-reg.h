@@ -45,7 +45,7 @@ namespace IR
     public:
         void gen_asm(ostream& o) override
         {
-            o << "(%esp)";
+            o << "(%rbp)";
         }
     };
 };

@@ -5,5 +5,5 @@
 
 void IR::IRInstrExprCst::gen_asm(ostream& o)
 {
-    o << "\tmovl $ " <<  this->value << ", " << IR::IRRegA().get_asm_str() << endl;
+    o << "\tmovl $" <<  this->value << ", " << IR::IRRegA().get_asm_str() << endl;
 }
