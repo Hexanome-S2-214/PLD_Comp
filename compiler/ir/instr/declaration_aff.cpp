@@ -9,6 +9,3 @@ void IR::IRInstrDeclaAff::gen_asm(ostream& o)
 
     o << "\tmovl " << IR::IRRegA().get_asm_str() << ", " << symbol->get_asm_str() << endl;
 }
-
-
-//IR::IRRegA().get_asm_str() pour le registre a si jamais
