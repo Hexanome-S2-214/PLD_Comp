@@ -12,7 +12,7 @@ namespace IR
     class IRInstrExprVar : public IRInstr
     {
     public:
-        IRInstrExprVar(BasicBlock * bb, int value) : IRInstr(bb), id(id) {};
+        IRInstrExprVar(BasicBlock * bb, string id) : IRInstr(bb), id(id) {};
 
         void gen_asm(ostream& o) override;
     private:
