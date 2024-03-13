@@ -69,9 +69,9 @@ antlrcpp::Any IRVisitor::visitExprMultDiv(ifccParser::ExprMultDivContext *ctx){
     this->visit(ctx->expr(1));
 
     if(ctx->getTokens(ifccParser::MULT).size() > 0)
-        cfg->get_current_bb()->add_instr(new IR::IRInstrExprMult(cfg->get_current_bb(), varTemp->id));
+        cfg->get_current_bb()->add_instr(new IR::IRInstrExprMult(cfg->get_current_bb(), varTemp->get_asm_str(), IR::IRRegA().get_asm_str()));
     else
-        cfg->get_current_bb()->add_instr(new IR::IRInstrExprDiv(cfg->get_current_bb(), varTemp->id));
+        cfg->get_current_bb()->add_instr(new IR::IRInstrExprDiv(cfg->get_current_bb(), varTemp->get_asm_str()));
         
     return 0;
 }

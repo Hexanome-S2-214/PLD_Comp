@@ -5,7 +5,5 @@
 
 void IR::IRInstrExprMult::gen_asm(ostream& o)
 {
-    Symbol * symbol = this->get_bb()->get_cfg()->get_symbol_table()->get_symbol(this->tmpVar);
-
-    o << "    imull "<< symbol->get_asm_str() << ", " << IR::IRRegA().get_asm_str() << endl;
+    o << "\timull " << src << ", " << dest << endl;
 }
