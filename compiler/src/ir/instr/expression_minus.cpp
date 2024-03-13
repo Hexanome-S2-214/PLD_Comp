@@ -6,5 +6,4 @@
 void IR::IRInstrExprMinus::gen_asm(ostream& o)
 {
     o << "\tsubl " << src << ", " << dest << endl;
-
 }
