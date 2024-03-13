@@ -22,8 +22,8 @@ antlrcpp::Any CodeGenVisitor::visitExprPar(ifccParser::ExprParContext *ctx){
     return this->visit(ctx->expr());
 }
 
-antlrcpp::Any CodeGenVisitor::visitExprConst(ifccParser::ExprConstContext *ctx){
-    int value = stoi(ctx->CONST()->getText());
+antlrcpp::Any CodeGenVisitor::visitExprNum(ifccParser::ExprNumContext *ctx){
+    int value = stoi(ctx->NUM()->getText());
     std::cout << "    movl $"<<value<<", %eax\n";
     return 0;
 }
