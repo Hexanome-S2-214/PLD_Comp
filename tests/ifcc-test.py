@@ -145,10 +145,12 @@ for inputfilename in inputfilenames:
     
     ## each test-case gets copied and processed in its own subdirectory:
     ## ../somedir/subdir/file.c becomes ./ifcc-test-output/somedir-subdir-file/input.c
-    subdir = 'ifcc-test-output/' + args.output_subdirectory if args.output_subdirectory else (str(cpt)+'-'+inputfilename.strip("./")[:-2].replace('/','-'))
+    subdir = 'ifcc-test-output/' + (args.output_subdirectory if args.output_subdirectory else (str(cpt)+'-'+inputfilename.strip("./")[:-2].replace('/','-')))
 
     if os.path.exists(subdir):
         shutil.rmtree(subdir)
+
+    print(subdir)
 
     os.mkdir(subdir)
     shutil.copyfile(inputfilename, subdir+'/input.c')
