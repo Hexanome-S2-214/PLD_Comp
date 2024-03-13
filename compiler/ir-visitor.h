@@ -17,8 +17,8 @@ public:
     virtual antlrcpp::Any visitExprConst(ifccParser::ExprConstContext *ctx) override;
     virtual antlrcpp::Any visitExprVar(ifccParser::ExprVarContext *ctx) override;
     // virtual antlrcpp::Any visitExprSousSomme(ifccParser::ExprSousSommeContext *ctx) override;
-    // virtual antlrcpp::Any visitExprNeg(ifccParser::ExprNegContext *ctx) override;
     virtual antlrcpp::Any visitExprMultDiv(ifccParser::ExprMultDivContext *ctx) override;
+    virtual antlrcpp::Any visitExprNeg(ifccParser::ExprNegContext *ctx) override;
 private:
     IR::CFG * cfg;
 };

@@ -3,6 +3,7 @@
 #include "ir/ir-type.h"
 #include "ir/ir-basic-block.h"
 #include "ir/instr/assign.h"
+#include "ir/instr/expression_neg.h"
 #include "ir/instr/expression_cst.h"
 #include "ir/instr/expression_var.h"
 #include "ir/instr/expression_mult.h"
@@ -41,5 +42,12 @@ antlrcpp::Any IRVisitor::visitExprMultDiv(ifccParser::ExprMultDivContext *ctx){
         cfg->get_current_bb()->add_instr(new IR::IRInstrExprMult(cfg->get_current_bb(), varTemp->id));
     else
         cfg->get_current_bb()->add_instr(new IR::IRInstrExprDiv(cfg->get_current_bb(), varTemp->id));
+    return 0;
+}
+
+antlrcpp::Any IRVisitor::visitExprNeg(ifccParser::ExprNegContext *ctx)
+{
+    this->visit(ctx->expr());
+    cfg->get_current_bb()->add_instr(new IR::IRInstrExprNeg(cfg->get_current_bb()));
     return 0;
 }
