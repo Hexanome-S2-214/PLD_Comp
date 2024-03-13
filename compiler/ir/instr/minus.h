@@ -9,13 +9,13 @@ namespace IR
 
 namespace IR
 {
-    class IRInstrExprVar : public IRInstr
+    class IRInstrMinus : public IRInstr
     {
     public:
-        IRInstrExprVar(BasicBlock * bb, string id) : IRInstr(bb), id(id) {};
+        IRInstrExprMinus(BasicBlock * bb, int value) : IRInstr(bb), id(id) {};
 
         void gen_asm(ostream& o) override;
     private:
-        string id;
+        string id; 
     };
 }

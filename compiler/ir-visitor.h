@@ -14,8 +14,8 @@ public:
     virtual antlrcpp::Any visitAffectation(ifccParser::AffectationContext *ctx) override;
     // virtual antlrcpp::Any visitDeclAff(ifccParser::DeclAffContext *ctx) override;
     // virtual antlrcpp::Any visitExprPar(ifccParser::ExprParContext *ctx) override;
-    // virtual antlrcpp::Any visitExprConst(ifccParser::ExprConstContext *ctx) override;
-    // virtual antlrcpp::Any visitExprVar(ifccParser::ExprVarContext *ctx) override;
+    virtual antlrcpp::Any visitExprConst(ifccParser::ExprConstContext *ctx) override;
+    virtual antlrcpp::Any visitExprVar(ifccParser::ExprVarContext *ctx) override;
     // virtual antlrcpp::Any visitExprSousSomme(ifccParser::ExprSousSommeContext *ctx) override;
     virtual antlrcpp::Any visitExprNeg(ifccParser::ExprNegContext *ctx) override;
     // virtual antlrcpp::Any visitExprMultDiv(ifccParser::ExprMultDivContext *ctx) override;
