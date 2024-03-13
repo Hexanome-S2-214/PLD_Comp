@@ -20,7 +20,7 @@ import os
 import shutil
 import sys
 import subprocess
-
+from colorama import Fore, Style
 def command(string, logfile=None):
     """execute `string` as a shell command, optionnaly logging stdout+stderr to a file. return exit status.)"""
     if args.verbose:
@@ -53,6 +53,8 @@ epilog      = ""
 argparser.add_argument('input',metavar='PATH',nargs='+',help='For each path given:'
                        +' if it\'s a file, use this file;'
                        +' if it\'s a directory, use all *.c files in this subtree')
+argparser.add_argument('-osd','--output-subdirectory', metavar='PATH',
+                        help="Name of the subdir to save the output. Only available if the input is a file.")
 
 argparser.add_argument('-d','--debug',action="count",default=0,
                        help='Increase quantity of debugging messages (only useful to debug the test script itself)')
@@ -70,11 +72,13 @@ orig_cwd=os.getcwd()
 if "ifcc-test-output" in orig_cwd:
     print('error: cannot run from within the output directory')
     exit(1)
+
+if (len(args.input) > 1 or os.path.isdir(args.input[0])) and args.output_subdirectory:
+    print('error: cannot use -osd option when the input is a directory')
+    exit(1)
     
-if os.path.isdir('ifcc-test-output'):
-    # cleanup previous output directory
-    command('rm -rf ifcc-test-output')
-os.mkdir('ifcc-test-output')
+if not os.path.exists('ifcc-test-output'):
+    os.mkdir('ifcc-test-output')
     
 ## Then we process the inputs arguments i.e. filenames or subtrees
 inputfilenames=[]
@@ -130,7 +134,7 @@ if args.debug:
 ## PREPARE step: copy all test-cases under ifcc-test-output
 
 jobs=[]
-
+cpt = 1
 for inputfilename in inputfilenames:
     if args.debug>=2:
         print("debug: PREPARING "+inputfilename)
@@ -141,10 +145,17 @@ for inputfilename in inputfilenames:
     
     ## each test-case gets copied and processed in its own subdirectory:
     ## ../somedir/subdir/file.c becomes ./ifcc-test-output/somedir-subdir-file/input.c
-    subdir='ifcc-test-output/'+inputfilename.strip("./")[:-2].replace('/','-')
+    subdir = 'ifcc-test-output/' + (args.output_subdirectory if args.output_subdirectory else (str(cpt)+'-'+inputfilename.strip("./")[:-2].replace('/','-')))
+
+    if os.path.exists(subdir):
+        shutil.rmtree(subdir)
+
+    print(subdir)
+
     os.mkdir(subdir)
     shutil.copyfile(inputfilename, subdir+'/input.c')
     jobs.append(subdir)
+    cpt+=1
 
 ## eliminate duplicate paths from the 'jobs' list
 unique_jobs=[]
@@ -163,12 +174,16 @@ if args.debug:
 ######################################################################################
 ## TEST step: actually compile all test-cases with both compilers
 
-error_count = 0
+cpt = 0
+cpt_test_ok = 0
 
 for jobname in jobs:
     os.chdir(orig_cwd)
+    
+    cpt += 1
 
-    print('TEST-CASE: '+jobname)
+    print('\n--------------------------')
+    print('TEST-CASE n°'+str(cpt)+ " : "+jobname)
     os.chdir(jobname)
     
     ## Reference compiler = GCC
@@ -186,28 +201,30 @@ for jobname in jobs:
     
     if gccstatus != 0 and ifccstatus != 0:
         ## ifcc correctly rejects invalid program -> test-case ok
-        print("TEST OK")
+        print(Fore.GREEN +"TEST OK")
+        print(Style.RESET_ALL)
+        cpt_test_ok += 1
         continue
     elif gccstatus != 0 and ifccstatus == 0:
         ## ifcc wrongly accepts invalid program -> error
-        print("TEST FAIL (your compiler accepts an invalid program)")
-        error_count += 1
+        print(Fore.RED + "TEST FAIL (your compiler accepts an invalid program)")
+        print(Style.RESET_ALL)
         continue
     elif gccstatus == 0 and ifccstatus != 0:
         ## ifcc wrongly rejects valid program -> error
-        print("TEST FAIL (your compiler rejects a valid program)")
+        print(Fore.RED +"TEST FAIL (your compiler rejects a valid program)")
+        print(Style.RESET_ALL)
         if args.verbose:
             dumpfile("ifcc-compile.txt")
-        error_count += 1
         continue
     else:
         ## ifcc accepts to compile valid program -> let's link it
         ldstatus=command("gcc -o exe-ifcc asm-ifcc.s", "ifcc-link.txt")
         if ldstatus:
-            print("TEST FAIL (your compiler produces incorrect assembly)")
+            print(Fore.RED +"TEST FAIL (your compiler produces incorrect assembly)")
+            print(Style.RESET_ALL)
             if args.verbose:
                 dumpfile("ifcc-link.txt")
-            error_count += 1
             continue
 
     ## both compilers  did produce an  executable, so now we  run both
@@ -215,18 +232,23 @@ for jobname in jobs:
         
     command("./exe-ifcc","ifcc-execute.txt")
     if open("gcc-execute.txt").read() != open("ifcc-execute.txt").read() :
-        print("TEST FAIL (different results at execution)")
+        print(Fore.RED +"TEST FAIL (different results at execution)")
+        print(Style.RESET_ALL)
         if args.verbose:
             print("GCC:")
             dumpfile("gcc-execute.txt")
             print("you:")
             dumpfile("ifcc-execute.txt")
-        error_count += 1
         continue
 
     ## last but not least
-    print("TEST OK")
+    print(Fore.GREEN+ "TEST OK")
+    print(Style.RESET_ALL)
+    cpt_test_ok += 1
 
-if error_count > 0:
-    print("error: "+str(error_count)+" test-cases failed")
+## Affichage du taux d'erreur
+taux_erreur = (1-cpt_test_ok/cpt)*100
+print('\nTaux d\'erreur : ' + str(round(taux_erreur, 2)) + "%\n")
+
+if taux_erreur > 0:
     exit(1)

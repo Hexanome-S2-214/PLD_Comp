@@ -13,15 +13,11 @@ all: ifcc
 
 ##########################################
 # link together all pieces of our compiler 
-OBJECTS=build/ifccBaseVisitor.o \
-	build/ifccLexer.o \
+SRC=$(wildcard src/*.cpp src/**/*.cpp src/**/**/*.cpp)
+OBJECTS=build/ifccLexer.o \
 	build/ifccVisitor.o \
 	build/ifccParser.o \
-	build/main.o \
-	build/CodeGenVisitor.o \
-	build/SymbolTableVisitor.o \
-	build/ir-visitor.o \
-	$(patsubst %.cpp, build/%.o, $(wildcard ir/*.cpp ir/**/*.cpp)) # IR subdir
+	$(patsubst src/%.cpp, build/%.o, $(SRC))
 
 ifcc: $(OBJECTS)
 	@mkdir -p build
@@ -29,7 +25,7 @@ ifcc: $(OBJECTS)
 
 ##########################################
 # compile our hand-writen C++ code: main(), CodeGenVisitor, etc.
-build/%.o: %.cpp generated/ifccParser.cpp
+build/%.o: src/%.cpp generated/ifccParser.cpp
 	@mkdir -p $(@D)
 	$(CC) $(CCFLAGS) -MMD -o $@ $< 
 
@@ -62,10 +58,10 @@ generated/ifccParser.cpp: ifcc.g4
 FILE ?= ../tests/testfiles/1_return42.c
 
 gui:
-	@mkdir -p generated build
+	@mkdir -p src/generated src/build
 	$(ANTLR) -Dlanguage=Java -o generated ifcc.g4
-	javac -cp $(ANTLRJAR) -d build generated/*.java
-	java -cp $(ANTLRJAR):build org.antlr.v4.gui.TestRig ifcc axiom -gui $(FILE)
+	javac -cp $(ANTLRJAR) -d src/build generated/*.java
+	java -cp $(ANTLRJAR):src/build org.antlr.v4.gui.TestRig ifcc axiom -gui $(FILE)
 
 ##########################################
 # delete all machine-generated files
