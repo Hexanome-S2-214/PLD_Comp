@@ -10,8 +10,8 @@
 #include "ir/instr/expression_var.h"
 #include "ir/instr/expression_mult.h"
 #include "ir/instr/expression_div.h"
-#include "ir/instr/plus.h"
-#include "ir/instr/minus.h"
+#include "ir/instr/expression_plus.h"
+#include "ir/instr/expression_minus.h"
 #include "ir/instr/mov.h"
 
 antlrcpp::Any IRVisitor::visitDeclStdRule(ifccParser::DeclStdRuleContext *ctx)
