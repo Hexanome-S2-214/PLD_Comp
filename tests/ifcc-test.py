@@ -189,13 +189,13 @@ for jobname in jobs:
     elif gccstatus != 0 and ifccstatus == 0:
         ## ifcc wrongly accepts invalid program -> error
         print("TEST FAIL (your compiler accepts an invalid program)")
-        continue
+        exit(1)
     elif gccstatus == 0 and ifccstatus != 0:
         ## ifcc wrongly rejects valid program -> error
         print("TEST FAIL (your compiler rejects a valid program)")
         if args.verbose:
             dumpfile("ifcc-compile.txt")
-        continue
+        exit(1)
     else:
         ## ifcc accepts to compile valid program -> let's link it
         ldstatus=command("gcc -o exe-ifcc asm-ifcc.s", "ifcc-link.txt")
@@ -203,7 +203,7 @@ for jobname in jobs:
             print("TEST FAIL (your compiler produces incorrect assembly)")
             if args.verbose:
                 dumpfile("ifcc-link.txt")
-            continue
+            exit(1)
 
     ## both compilers  did produce an  executable, so now we  run both
     ## these executables and compare the results.
@@ -216,7 +216,7 @@ for jobname in jobs:
             dumpfile("gcc-execute.txt")
             print("you:")
             dumpfile("ifcc-execute.txt")
-        continue
+        exit(1)
 
     ## last but not least
     print("TEST OK")

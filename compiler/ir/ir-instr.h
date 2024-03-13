@@ -3,6 +3,7 @@
 namespace IR
 {
     class BasicBlock;
+    class SymbolTable;
 }
 
 #include "ir-base.h"
@@ -18,6 +19,7 @@ namespace IR
         ~IRInstr() = default;
 
         BasicBlock * get_bb() { return bb; };
+        SymbolTable * get_symbol_table();
     private:
         BasicBlock * bb;
     };
