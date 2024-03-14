@@ -4,6 +4,7 @@
 #include <string>
 
 #include "ir-arch.h"
+#include "../error-reporter/error-reporter.h"
 
 using namespace std;
 
@@ -14,7 +15,7 @@ namespace IR
     {
     public:
         IRBase(IRBase * parent);
-        IRBase(IRArch arch);
+        IRBase(IRArch arch, ErrorReporter::ErrorReporter * error_reporter);
         ~IRBase() = default;
 
         virtual void gen_asm(ostream& o) = 0;
@@ -22,5 +23,6 @@ namespace IR
     private:
         IRBase * parent;
         IRArch arch;
+        ErrorReporter::ErrorReporter * error_reporter;
     };
 };

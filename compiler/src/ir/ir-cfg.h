@@ -8,6 +8,7 @@ namespace IR
 #include <vector>
 #include "ir-base.h"
 #include "ir-symbol-table.h"
+#include "../error-reporter/error-reporter.h"
 
 using namespace std;
 
@@ -16,7 +17,7 @@ namespace IR
     class CFG : public IRBase
     {
     public:
-        CFG(IRArch arch);
+        CFG(IRArch arch, ErrorReporter::ErrorReporter * error_reporter);
         ~CFG() = default;
 
         void gen_asm(ostream& o) override;

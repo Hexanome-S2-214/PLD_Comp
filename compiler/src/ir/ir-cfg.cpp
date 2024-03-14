@@ -2,7 +2,7 @@
 #include "ir-basic-block.h"
 #include "ir-symbol-table.h"
 
-IR::CFG::CFG(IRArch arch) : IRBase(arch)
+IR::CFG::CFG(IRArch arch, ErrorReporter::ErrorReporter * error_reporter) : IRBase(arch, error_reporter)
 {
     symbol_table = new SymbolTable();
 

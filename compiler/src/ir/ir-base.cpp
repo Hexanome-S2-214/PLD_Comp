@@ -5,7 +5,7 @@ using namespace std;
 
 IR::IRBase::IRBase(IRBase * parent) : parent(parent), arch(parent->arch) {}
 
-IR::IRBase::IRBase(IRArch arch) : parent(nullptr), arch(arch) {}
+IR::IRBase::IRBase(IRArch arch, ErrorReporter::ErrorReporter * error_reporter) : parent(nullptr), arch(arch), error_reporter(error_reporter) {}
 
 string IR::IRBase::get_asm_str()
 {
