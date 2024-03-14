@@ -16,7 +16,7 @@ namespace IR
     class CFG : public IRBase
     {
     public:
-        CFG();
+        CFG(IRArch arch);
         ~CFG() = default;
 
         void gen_asm(ostream& o) override;

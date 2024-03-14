@@ -5,7 +5,7 @@
 
 IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label) : BasicBlock(cfg, label, nullptr, nullptr) {}
 
-IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label, IR::BasicBlock * exit_true, IR::BasicBlock * exit_false) : cfg(cfg), label(label), exit_true(exit_true), exit_false(exit_false)
+IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label, IR::BasicBlock * exit_true, IR::BasicBlock * exit_false) : IRBase(cfg), cfg(cfg), label(label), exit_true(exit_true), exit_false(exit_false)
 {
     // this->test_var = this->cfg->get_symbol_table()->get_next_tmp();
     // this->cfg->get_symbol_table()->declare_symbol(this->test_var, Bool);
@@ -27,7 +27,7 @@ void IR::BasicBlock::gen_asm(ostream& o)
     {
         if (exit_true != nullptr)
         {
-            o << "\tcmpq $1, " << IR::IRRegA().get_asm_str() << endl;
+            o << "\tcmpq $1, " << IR::IRRegA(this).get_asm_str() << endl;
             o << "\tje " << exit_true->get_label() << endl;
             o << "\tjmp " << exit_false->get_label() << endl;
         }

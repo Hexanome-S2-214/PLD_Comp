@@ -9,13 +9,15 @@ namespace IR
 {
     class IRReg : public IRBase {
     public:
-        IRReg() {};
+        IRReg(IRBase * parent) : IRBase(parent) {};
         ~IRReg() = default;
     };
 
     class IRRegA : public IRReg
     {
     public:
+        IRRegA(IRBase * parent) : IRReg(parent) {};
+
         void gen_asm(ostream& o) override
         {
             o << "%eax";
@@ -25,6 +27,8 @@ namespace IR
     class IRRegB : public IRReg
     {
     public:
+        IRRegB(IRBase * parent) : IRReg(parent) {};
+
         void gen_asm(ostream& o) override
         {
             o << "%ebx";
@@ -34,6 +38,8 @@ namespace IR
     class IRRegC : public IRReg
     {
     public:
+        IRRegC(IRBase * parent) : IRReg(parent) {};
+
         void gen_asm(ostream& o) override
         {
             o << "%ecx";
@@ -43,6 +49,8 @@ namespace IR
     class IRRegStack : public IRReg
     {
     public:
+        IRRegStack(IRBase * parent) : IRReg(parent) {};
+        
         void gen_asm(ostream& o) override
         {
             o << "(%rbp)";

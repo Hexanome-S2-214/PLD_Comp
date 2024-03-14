@@ -15,8 +15,8 @@ namespace IR
     class Symbol : public IR::IRBase
     {
     public:
-        Symbol(string id, int offset, Type type, antlr4::ParserRuleContext * ctx = nullptr);
-        Symbol() {};
+        Symbol(IRBase * parent, string id, int offset, Type type, antlr4::ParserRuleContext * ctx = nullptr);
+        Symbol() : IRBase(nullptr) {};
         ~Symbol() = default;
 
         void gen_asm(ostream& o) override;
@@ -34,10 +34,10 @@ namespace IR
         SymbolTable() {};
         ~SymbolTable() = default;
 
-        Symbol * declare_symbol(string id, Type type, antlr4::ParserRuleContext * ctx = nullptr);
+        Symbol * declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx = nullptr);
         Symbol * get_symbol(string id, antlr4::ParserRuleContext * ctx = nullptr);
 
-        Symbol * declare_tmp(Type type, antlr4::ParserRuleContext * ctx = nullptr);
+        Symbol * declare_tmp(IRBase * parent, Type type, antlr4::ParserRuleContext * ctx = nullptr);
 
         string get_next_tmp();
     private:

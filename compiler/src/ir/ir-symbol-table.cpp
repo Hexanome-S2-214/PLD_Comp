@@ -2,14 +2,14 @@
 #include "ir-reg.h"
 #include "ir-base.h"
 
-IR::Symbol::Symbol(string id, int offset, Type type, antlr4::ParserRuleContext * ctx) : id(id), offset(offset), type(type), ctx(ctx) {}
+IR::Symbol::Symbol(IRBase * parent, string id, int offset, Type type, antlr4::ParserRuleContext * ctx) : IRBase(parent), id(id), offset(offset), type(type), ctx(ctx) {}
 
 void IR::Symbol::gen_asm(ostream& o)
 {
-    o << offset << IR::IRRegStack().get_asm_str();
+    o << offset << IR::IRRegStack(this).get_asm_str();
 }
 
-IR::Symbol * IR::SymbolTable::declare_symbol(string id, Type type, antlr4::ParserRuleContext * ctx)
+IR::Symbol * IR::SymbolTable::declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx)
 {
     if (symbols.find(id) != symbols.end())
     {
@@ -17,7 +17,7 @@ IR::Symbol * IR::SymbolTable::declare_symbol(string id, Type type, antlr4::Parse
         exit(1);
     }
 
-    IR::Symbol * symbol = new IR::Symbol(id, symbol_offset, type, ctx);
+    IR::Symbol * symbol = new IR::Symbol(parent, id, symbol_offset, type, ctx);
     symbols[id] = *symbol;
 
     symbol_offset -= SYMBOL_SIZE;
@@ -25,10 +25,10 @@ IR::Symbol * IR::SymbolTable::declare_symbol(string id, Type type, antlr4::Parse
     return symbol;
 }
 
-IR::Symbol * IR::SymbolTable::declare_tmp(Type type, antlr4::ParserRuleContext * ctx)
+IR::Symbol * IR::SymbolTable::declare_tmp(IRBase * parent, Type type, antlr4::ParserRuleContext * ctx)
 {
     string tmp = get_next_tmp();
-    return declare_symbol(tmp, type, ctx);
+    return declare_symbol(parent, tmp, type, ctx);
 }
 
 IR::Symbol * IR::SymbolTable::get_symbol(string id, antlr4::ParserRuleContext * ctx)

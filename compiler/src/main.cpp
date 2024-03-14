@@ -46,7 +46,7 @@ int main(int argn, const char **argv)
       exit(1);
   }
 
-  IR::CFG cfg;
+  IR::CFG cfg(IR::X86);
   IRVisitor visitor(&cfg);
 
   visitor.visit(tree);
