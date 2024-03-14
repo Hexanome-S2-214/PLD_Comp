@@ -18,7 +18,7 @@ IR::Symbol * IR::SymbolTable::declare_symbol(IRBase * parent, string id, Type ty
     }
 
     IR::Symbol * symbol = new IR::Symbol(parent, id, symbol_offset, type, ctx);
-    symbols[id] = *symbol;
+    symbols[id] = symbol;
 
     symbol_offset -= SYMBOL_SIZE;
 
@@ -39,9 +39,9 @@ IR::Symbol * IR::SymbolTable::get_symbol(string id, antlr4::ParserRuleContext * 
         exit(1);
     }
 
-    symbols[id].used = true;
+    symbols[id]->used = true;
 
-    return &symbols[id];
+    return symbols[id];
 }
 
 string IR::SymbolTable::get_next_tmp()

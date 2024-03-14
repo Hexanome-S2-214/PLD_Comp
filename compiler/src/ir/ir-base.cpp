@@ -11,8 +11,3 @@ string IR::IRBase::get_asm_str()
     
     return ss.str();
 }
-
-IR::IRBase * IR::IRBase::get_parent()
-{
-    return parent;
-}

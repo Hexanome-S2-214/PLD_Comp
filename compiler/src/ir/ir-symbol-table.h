@@ -41,7 +41,7 @@ namespace IR
 
         string get_next_tmp();
     private:
-        map<string, Symbol> symbols;
+        map<string, Symbol *> symbols;
         int symbol_offset = -SYMBOL_SIZE;
         int tmp_offset = 0;
     };
