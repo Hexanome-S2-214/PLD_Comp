@@ -13,13 +13,14 @@ namespace IR
     class IRBase
     {
     public:
-        IRBase(IRBase * parent) : arch(parent->arch) {}
-        IRBase(IRArch arch) : arch(arch) {}
+        IRBase(IRBase * parent);
+        IRBase(IRArch arch);
         ~IRBase() = default;
 
         virtual void gen_asm(ostream& o) = 0;
         string get_asm_str();
     private:
+        IRBase * parent;
         IRArch arch;
     };
 };
