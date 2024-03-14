@@ -12,7 +12,7 @@ namespace IR
     class IRInstrAssign : public IRInstr
     {
     public:
-        IRInstrAssign(BasicBlock * bb, string id) : IRInstr(bb), id(id) {};
+        IRInstrAssign(BasicBlock * bb, antlr4::ParserRuleContext * ctx, string id) : IRInstr(bb, ctx), id(id) {};
 
         void gen_asm(ostream& o) override;
     private:

@@ -12,7 +12,7 @@ namespace IR
     class IRInstrExprPlus : public IRInstr
     {
     public:
-        IRInstrExprPlus(BasicBlock * bb, string src, string dest) : IRInstr(bb), src(src), dest(dest) {};
+        IRInstrExprPlus(BasicBlock * bb, antlr4::ParserRuleContext * ctx, string src, string dest) : IRInstr(bb, ctx), src(src), dest(dest) {};
 
         void gen_asm(ostream& o) override;
     private:

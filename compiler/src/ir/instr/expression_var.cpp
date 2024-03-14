@@ -6,7 +6,7 @@
 
 void IR::IRInstrExprVar::gen_asm(ostream& o)
 {
-    Symbol * symbol = this->get_bb()->get_cfg()->get_symbol_table()->get_symbol(this->id);
+    Symbol * symbol = this->get_bb()->get_cfg()->get_symbol_table()->get_symbol(this->id, get_ctx());
 
-    IR::IRInstrMov(get_bb(), symbol->get_asm_str(), IR::IRRegA(this).get_asm_str()).gen_asm(o);
+    IR::IRInstrMov(get_bb(), get_ctx(), symbol->get_asm_str(), IR::IRRegA(this).get_asm_str()).gen_asm(o);
 }

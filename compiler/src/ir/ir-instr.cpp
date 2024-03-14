@@ -9,4 +9,9 @@ namespace IR
     {
         return this->get_bb()->get_cfg()->get_symbol_table();
     }
+
+    antlr4::ParserRuleContext * IRInstr::get_ctx()
+    {
+        return this->ctx;
+    }
 }
