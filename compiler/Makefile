@@ -13,7 +13,7 @@ all: ifcc
 
 ##########################################
 # link together all pieces of our compiler 
-SRC=$(wildcard src/*.cpp src/**/*.cpp)
+SRC=$(wildcard src/*.cpp src/**/*.cpp src/**/**/*.cpp)
 OBJECTS=build/ifccLexer.o \
 	build/ifccVisitor.o \
 	build/ifccParser.o \

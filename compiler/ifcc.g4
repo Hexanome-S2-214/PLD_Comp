@@ -9,12 +9,25 @@ axiom
      ;
 
 prog
-     : 'int' 'main' '(' ')' '{' statement* '}'
+     : 'int' 'main' '(' ')' '{'
+               content*
+               '}'
+     ;
+
+content
+     : statement
+     | struct_element
      ;
 
 statement
      : declarationRule        # declaration
      | instructionRule        # instruction
+     ;
+
+struct_element
+     : struct_bloc
+     | struct_if_else
+     | struct_while
      ;
 
 //=============================================
@@ -65,6 +78,22 @@ expr
      | VAR                              #atomVar
      | NUM                              #atomNum
      | '(' expr ')'                     #atomParExpr
+     ;
+
+//=============================================
+// Structures de contrôle
+//=============================================
+
+struct_bloc
+     : '{' content* '}'
+     ;
+
+struct_if_else
+     : 'if' '(' expr ')' struct_bloc ('else' struct_bloc)?
+     ;
+
+struct_while
+     : 'while' '(' expr ')' struct_bloc
      ;
 
 //=============================================
