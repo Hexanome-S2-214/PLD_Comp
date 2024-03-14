@@ -1,10 +1,10 @@
 .antlr
 
-compiler/build
-compiler/generated
-compiler/ifcc
+compiler/src/build*
+compiler/src/generated*
+compiler/src/ifcc
 
-ifcc-test-output
+compiler/ifcc-test-output
 
 .DS_Store
 
