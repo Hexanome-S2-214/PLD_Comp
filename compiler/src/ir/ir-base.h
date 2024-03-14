@@ -20,6 +20,9 @@ namespace IR
 
         virtual void gen_asm(ostream& o) = 0;
         string get_asm_str();
+
+        IRBase * get_parent();
+        ErrorReporter::ErrorReporter * get_error_reporter();
     private:
         IRBase * parent;
         IRArch arch;

@@ -5,6 +5,7 @@
 #include "antlr4-runtime.h"
 #include "ir-type.h"
 #include "ir-base.h"
+#include "../error-reporter/error-reporter.h"
 
 #define SYMBOL_SIZE 4
 
@@ -31,7 +32,7 @@ namespace IR
     class SymbolTable
     {
     public:
-        SymbolTable() {};
+        SymbolTable(ErrorReporter::ErrorReporter * error_reporter) : error_reporter(error_reporter) {};
         ~SymbolTable() = default;
 
         Symbol * declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx = nullptr);
@@ -44,5 +45,6 @@ namespace IR
         map<string, Symbol *> symbols;
         int symbol_offset = -SYMBOL_SIZE;
         int tmp_offset = 0;
+        ErrorReporter::ErrorReporter * error_reporter;
     };
 }

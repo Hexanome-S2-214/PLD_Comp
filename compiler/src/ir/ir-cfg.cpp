@@ -4,7 +4,7 @@
 
 IR::CFG::CFG(IRArch arch, ErrorReporter::ErrorReporter * error_reporter) : IRBase(arch, error_reporter)
 {
-    symbol_table = new SymbolTable();
+    symbol_table = new SymbolTable(this->get_error_reporter());
 
     blocks.push_back(new BasicBlock(this, "entry"));
 }

@@ -1,6 +1,7 @@
 #include "ir-symbol-table.h"
 #include "ir-reg.h"
 #include "ir-base.h"
+#include "../error-reporter/compiler-error-token.h"
 
 IR::Symbol::Symbol(IRBase * parent, string id, int offset, Type type, antlr4::ParserRuleContext * ctx) : IRBase(parent), id(id), offset(offset), type(type), ctx(ctx) {}
 
@@ -13,7 +14,7 @@ IR::Symbol * IR::SymbolTable::declare_symbol(IRBase * parent, string id, Type ty
 {
     if (symbols.find(id) != symbols.end())
     {
-        cerr << "Error: symbol " << id << " already declared" << endl;
+        this->error_reporter->reportError(new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "symbol " + id + " already declared", ctx));
         exit(1);
     }
 
@@ -35,7 +36,7 @@ IR::Symbol * IR::SymbolTable::get_symbol(string id, antlr4::ParserRuleContext * 
 {
     if (symbols.find(id) == symbols.end())
     {
-        cerr << "Error: symbol " << id << " not declared" << endl;
+        this->error_reporter->reportError(new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "symbol " + id + " not declared", ctx));
         exit(1);
     }
 
