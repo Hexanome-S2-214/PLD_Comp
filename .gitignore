@@ -1,4 +1,5 @@
-compiler/.antlr
+.antlr
+
 compiler/build
 compiler/generated
 compiler/ifcc
@@ -10,6 +11,8 @@ ifcc-test-output
 .vscode/*
 .venv
 
+*.mk
 
 __pycache__
 .pytest_cache
+*.json
