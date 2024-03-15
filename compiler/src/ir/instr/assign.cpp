@@ -11,7 +11,7 @@ namespace IR
         Symbol * symbol = this->get_bb()->get_cfg()->get_symbol_table()->get_symbol(this->id, get_ctx());
 
         paste_properties(
-            (new IRInstrMov())
+            (new IRInstrMov)
                 ->set_src(IR::IRRegA(this).get_asm_str())
                 ->set_dest(symbol->get_asm_str())
         )->gen_asm(o);

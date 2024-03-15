@@ -26,7 +26,7 @@ antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
 
     cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, ctx);
     cfg->add_instr(
-        (new IR::IRInstrAssign())
+        (new IR::IRInstrAssign)
             ->set_id(ctx->VAR()->getText())
             ->set_ctx(ctx)
     );
@@ -38,7 +38,7 @@ antlrcpp::Any IRVisitor::visitAffectationRule(ifccParser::AffectationRuleContext
 {
     this->visit(ctx->expr());
     cfg->add_instr(
-        (new IR::IRInstrAssign())
+        (new IR::IRInstrAssign)
             ->set_id(ctx->VAR()->getText())
             ->set_ctx(ctx)
     );
@@ -49,7 +49,7 @@ antlrcpp::Any IRVisitor::visitAffectationRule(ifccParser::AffectationRuleContext
 antlrcpp::Any IRVisitor::visitExprConst(ifccParser::ExprConstContext *ctx)
 {
     cfg->add_instr(
-        (new IR::IRInstrExprCst())
+        (new IR::IRInstrExprCst)
             ->set_value(ctx->CONST()->getText())
             ->set_ctx(ctx)
     );
@@ -60,7 +60,7 @@ antlrcpp::Any IRVisitor::visitExprConst(ifccParser::ExprConstContext *ctx)
 antlrcpp::Any IRVisitor::visitExprVar(ifccParser::ExprVarContext *ctx)
 {
     cfg->add_instr(
-        (new IR::IRInstrExprVar())
+        (new IR::IRInstrExprVar)
             ->set_id(ctx->VAR()->getText())
             ->set_ctx(ctx)
     );
