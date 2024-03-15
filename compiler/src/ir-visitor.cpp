@@ -13,6 +13,9 @@
 #include "ir/instr/expression_plus.h"
 #include "ir/instr/expression_minus.h"
 #include "ir/instr/mov.h"
+#include "ir/instr/comp.h"
+#include "ir/instr/sete.h"
+#include "ir/instr/movzbl.h"
 
 ////////////////////////////////////////////
 // DECLARATION/AFFECTATION
@@ -203,6 +206,58 @@ antlrcpp::Any IRVisitor::visitExprUnaryMinus(ifccParser::ExprUnaryMinusContext *
 
     cfg->add_instr(
         (new IR::IRInstrExprUnaryMinus)
+            ->set_ctx(ctx)
+    );
+
+    return 0;
+}
+
+////////////////////////////////////////////
+// COMPARAISONS
+////////////////////////////////////////////
+
+antlrcpp::Any IRVisitor::visitExprEqComparaison(ifccParser::ExprEqComparaisonContext *ctx) {
+    
+    //évaluation à gauche
+    this->visit(ctx->expr(0));
+
+    // IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    // cfg->add_instr(
+    //     (new IR::IRInstrAssign)
+    //         ->set_id(varTemp->id)
+    //         ->set_ctx(ctx)
+    // );
+
+    //on stocke dans ECX
+    cfg->add_instr(
+        (new IR::IRInstrMov)
+            ->set_src(IR::IRRegA(cfg).get_asm_str())
+            ->set_dest(IR::IRRegC(cfg).get_asm_str())
+            ->set_ctx(ctx)
+    );
+
+    //évaluation à droite
+    this->visit(ctx->expr(1));
+
+    //comparaison EAX (droite) et ECX (gauche)
+    cfg->add_instr(
+        (new IR::IRInstrComp)
+            ->set_src(IR::IRRegA(cfg).get_asm_str())
+            ->set_dest(IR::IRRegC(cfg).get_asm_str())
+            ->set_ctx(ctx)
+    );
+
+    //résultat de la comparaison dans EAX
+    cfg->add_instr(
+        (new IR::IRInstrSete)
+            ->set_dest(IR::IRRegAL(cfg).get_asm_str())
+            ->set_ctx(ctx)
+    );
+
+    cfg->add_instr(
+        (new IR::IRInstrMovzbl)
+            ->set_src(IR::IRRegAL(cfg).get_asm_str())
+            ->set_dest(IR::IRRegA(cfg).get_asm_str())
             ->set_ctx(ctx)
     );
 

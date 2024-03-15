@@ -69,4 +69,15 @@ namespace IR
             o << "(%rbp)";
         }
     };
+
+    class IRRegAL : public IRReg
+    {
+    public:
+        IRRegAL(IRBase * parent) : IRReg(parent) {};
+        
+        void gen_asm(ostream& o) override
+        {
+            o << "%al";
+        }
+    };
 };

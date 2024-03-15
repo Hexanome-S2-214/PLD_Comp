@@ -25,6 +25,8 @@ public:
     virtual antlrcpp::Any visitExprModulo(ifccParser::ExprModuloContext *ctx) override;
 
     virtual antlrcpp::Any visitExprUnaryMinus(ifccParser::ExprUnaryMinusContext *ctx) override;
+
+    virtual antlrcpp::Any visitExprEqComparaison(ifccParser::ExprEqComparaisonContext *ctx) override;
 private:
     IR::CFG * cfg;
 };
