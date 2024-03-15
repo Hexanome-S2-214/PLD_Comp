@@ -89,7 +89,7 @@ os.mkdir('ifcc-test-output')
 # n'implémente pas dans tous les détails (affectations enchaînées avec parenthèses par exemple)
 # ATTENTION A PAS METTRE DE TEST QUI DEVRAIT MARCHER
 flag_remove_tests_fail_but_ok = args.rm_fail_ok
-fail_but_ok = ['inv_plus_mult.c', 'inv_plus_div.c', 'inv_affect_enchainee.c', 'affect_enchainee_parentheses.c']
+fail_but_ok = ['inv_mult_plus.c', 'inv_div_plus.c', 'inv_affect_enchainee.c', 'affect_enchainee_parentheses.c']
     
 ## Then we process the inputs arguments i.e. filenames or subtrees
 inputfilenames=[]

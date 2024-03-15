@@ -1,6 +1,6 @@
 int main() {
     int a; int b;
-    a = 0x0F0F0F0F;
-    b = 0x0F0F0F0F;
+    a = 545345345;
+    b = 7765765756;
     return a | b == b & a;
 }
