@@ -8,8 +8,10 @@
 #include "../generated/ifccParser.h"
 #include "../generated/ifccBaseVisitor.h"
 
-#include "CodeGenVisitor.h"
-#include "SymbolTableVisitor.h"
+// #include "CodeGenVisitor.h"
+// #include "SymbolTableVisitor.h"
+#include "ir/ir-cfg.h"
+#include "ir-visitor.h"
 
 using namespace antlr4;
 using namespace std;
@@ -44,22 +46,18 @@ int main(int argn, const char **argv)
       exit(1);
   }
 
-  SymbolTableVisitor s;
-  s.visit(tree);
-  s.checkAllVariablesUsed();
+  IR::CFG cfg;
+  IRVisitor visitor(&cfg);
 
-  std::cout<< ".globl main\n" ;
-  std::cout<< " main: \n" ;
-  std::cout<< "    # prologue\n" ;
-  std::cout<< "    pushq %rbp\n" ;
-  std::cout<< "    movq %rsp, %rbp\n" ;
+  visitor.visit(tree);
 
-  CodeGenVisitor v(&s);
-  v.visit(tree);
-  
-  std::cout << "    # epilogue\n";
-  std::cout << "    popq %rbp\n";
-  std::cout << "    ret\n";
+  cfg.gen_asm(cout);
+
+  // SymbolTableVisitor s;
+  // s.visit(tree);
+  // s.checkAllVariablesUsed();
+  // CodeGenVisitor v(&s);
+  // v.visit(tree);
 
   return 0;
 }

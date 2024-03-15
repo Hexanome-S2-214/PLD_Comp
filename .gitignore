@@ -1,15 +1,16 @@
-compiler/.antlr
-compiler/build
-compiler/generated
-compiler/ifcc
+.antlr
 
-ifcc-test-output
+**/build*
+**/generated*
+**/ifcc-test-output*
 
 .DS_Store
 
 .vscode/*
 .venv
 
+*.mk
 
 __pycache__
 .pytest_cache
+*.json
