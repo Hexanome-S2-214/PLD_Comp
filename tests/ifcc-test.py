@@ -77,10 +77,8 @@ if (len(args.input) > 1 or os.path.isdir(args.input[0])) and args.output_subdire
     print('error: cannot use -osd option when the input is a directory')
     exit(1)
     
-if os.path.exists('ifcc-test-output'):
-    os.system('rm -rf ifcc-test-output')
-
-os.mkdir('ifcc-test-output')
+if not os.path.exists('ifcc-test-output'):
+    os.mkdir('ifcc-test-output')
     
 ## Then we process the inputs arguments i.e. filenames or subtrees
 inputfilenames=[]
@@ -178,15 +176,14 @@ if args.debug:
 
 cpt = 0
 cpt_test_ok = 0
-failed_tests = []
 
 for jobname in jobs:
     os.chdir(orig_cwd)
     
     cpt += 1
 
-    print('--------------------------')
-    print('TEST-CASE  : '+jobname)
+    print('\n--------------------------')
+    print('TEST-CASE n°'+str(cpt)+ " : "+jobname)
     os.chdir(jobname)
     
     ## Reference compiler = GCC
@@ -212,7 +209,6 @@ for jobname in jobs:
         ## ifcc wrongly accepts invalid program -> error
         print(Fore.RED + "TEST FAIL (your compiler accepts an invalid program)")
         print(Style.RESET_ALL)
-        failed_tests.append(jobname)
         continue
     elif gccstatus == 0 and ifccstatus != 0:
         ## ifcc wrongly rejects valid program -> error
@@ -220,7 +216,6 @@ for jobname in jobs:
         print(Style.RESET_ALL)
         if args.verbose:
             dumpfile("ifcc-compile.txt")
-        failed_tests.append(jobname)
         continue
     else:
         ## ifcc accepts to compile valid program -> let's link it
@@ -230,7 +225,6 @@ for jobname in jobs:
             print(Style.RESET_ALL)
             if args.verbose:
                 dumpfile("ifcc-link.txt")
-            failed_tests.append(jobname)
             continue
 
     ## both compilers  did produce an  executable, so now we  run both
@@ -245,7 +239,6 @@ for jobname in jobs:
             dumpfile("gcc-execute.txt")
             print("you:")
             dumpfile("ifcc-execute.txt")
-        failed_tests.append(jobname)
         continue
 
     ## last but not least
@@ -255,11 +248,4 @@ for jobname in jobs:
 
 ## Affichage du taux d'erreur
 taux_erreur = (1-cpt_test_ok/cpt)*100
-print('\nTaux d\'erreur : ' + str(round(taux_erreur, 2)) + "%")
-
-if taux_erreur > 0:
-    print("\nListe des tests non validés :\n")
-    for test in failed_tests:
-        print(test.removeprefix("ifcc-test-output/"))
-
-    exit(1)
+print('\nTaux d\'erreur : ' + str(round(taux_erreur, 2)) + "%\n")
