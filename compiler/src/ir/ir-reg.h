@@ -40,6 +40,15 @@ namespace IR
         }
     };
 
+    class IRRegD : public IRReg
+    {
+    public:
+        void gen_asm(ostream& o) override
+        {
+            o << "%edx";
+        }
+    };
+
     class IRRegStack : public IRReg
     {
     public:

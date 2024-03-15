@@ -15,11 +15,16 @@ public:
     virtual antlrcpp::Any visitAffectationRule(ifccParser::AffectationRuleContext *ctx) override;
     // virtual antlrcpp::Any visitDeclAff(ifccParser::DeclAffContext *ctx) override;
     // virtual antlrcpp::Any visitExprPar(ifccParser::ExprParContext *ctx) override;
-    virtual antlrcpp::Any visitExprConst(ifccParser::ExprConstContext *ctx) override;
+
+    virtual antlrcpp::Any visitExprNum(ifccParser::ExprNumContext *ctx) override;
     virtual antlrcpp::Any visitExprVar(ifccParser::ExprVarContext *ctx) override;
-    virtual antlrcpp::Any visitExprSousSomme(ifccParser::ExprSousSommeContext *ctx) override;
+
+    virtual antlrcpp::Any visitExprSomme(ifccParser::ExprSommeContext *ctx) override;
+    virtual antlrcpp::Any visitExprSoustr(ifccParser::ExprSoustrContext *ctx) override;
     virtual antlrcpp::Any visitExprMultDiv(ifccParser::ExprMultDivContext *ctx) override;
-    virtual antlrcpp::Any visitExprNeg(ifccParser::ExprNegContext *ctx) override;
+    virtual antlrcpp::Any visitExprModulo(ifccParser::ExprModuloContext *ctx) override;
+
+    virtual antlrcpp::Any visitExprUnaryMinus(ifccParser::ExprUnaryMinusContext *ctx) override;
 private:
     IR::CFG * cfg;
 };

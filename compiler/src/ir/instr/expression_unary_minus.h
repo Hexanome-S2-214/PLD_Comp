@@ -9,10 +9,10 @@ namespace IR
 
 namespace IR
 {
-    class IRInstrExprNeg : public IRInstr
+    class IRInstrExprUnaryMinus : public IRInstr
     {
     public:
-        IRInstrExprNeg(BasicBlock *bb) : IRInstr(bb) {};
+        IRInstrExprUnaryMinus(BasicBlock *bb) : IRInstr(bb) {};
         void gen_asm(ostream& o) override;
     };
 }
