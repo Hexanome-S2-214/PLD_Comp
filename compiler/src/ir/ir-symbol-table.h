@@ -31,7 +31,7 @@ namespace IR
     class SymbolTable
     {
     public:
-        SymbolTable(ErrorReporter::ErrorReporter * error_reporter) : error_reporter(error_reporter) {};
+        SymbolTable() {};
         ~SymbolTable() = default;
 
         Symbol * declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx = nullptr);
@@ -40,10 +40,11 @@ namespace IR
         Symbol * declare_tmp(IRBase * parent, Type type, antlr4::ParserRuleContext * ctx = nullptr);
 
         string get_next_tmp();
+
+        ErrorReporter::ErrorReporter * error_reporter;
     private:
         map<string, Symbol *> symbols;
         int symbol_offset = -SYMBOL_SIZE;
         int tmp_offset = 0;
-        ErrorReporter::ErrorReporter * error_reporter;
     };
 }

@@ -26,6 +26,8 @@ namespace IR
 
         void add_instr(IRBase * instr);
 
+        IRBase * set_error_reporter(ErrorReporter::ErrorReporter * error_reporter);
+
         SymbolTable * get_symbol_table();
         BasicBlock * get_current_bb();
     private:

@@ -4,9 +4,17 @@
 
 IR::CFG::CFG()
 {
-    symbol_table = new SymbolTable(this->get_error_reporter());
+    symbol_table = new SymbolTable();
 
     blocks.push_back(new BasicBlock(this, "entry"));
+}
+
+IR::IRBase * IR::CFG::set_error_reporter(ErrorReporter::ErrorReporter * error_reporter)
+{
+    IRBase::set_error_reporter(error_reporter);
+    symbol_table->error_reporter = error_reporter;
+
+    return this;
 }
 
 void IR::CFG::gen_asm(ostream& o)

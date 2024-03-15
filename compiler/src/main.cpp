@@ -61,8 +61,8 @@ int main(int argn, const char **argv)
 
   IR::CFG * cfg = static_cast<IR::CFG *>(
     (new IR::CFG())
-      ->set_arch(IR::X86)
       ->set_error_reporter(error_reporter)
+      ->set_arch(IR::X86)
   );
   IRVisitor visitor(cfg);
 
