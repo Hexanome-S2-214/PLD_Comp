@@ -249,3 +249,6 @@ for jobname in jobs:
 ## Affichage du taux d'erreur
 taux_erreur = (1-cpt_test_ok/cpt)*100
 print('\nTaux d\'erreur : ' + str(round(taux_erreur, 2)) + "%\n")
+
+if taux_erreur > 0:
+    exit(1)
