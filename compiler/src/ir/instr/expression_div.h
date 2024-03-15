@@ -6,16 +6,13 @@ namespace IR
 }
 
 #include "../ir-instr.h"
+#include "base-instr.h"
 
 namespace IR
 {
-    class IRInstrExprDiv : public IRInstr
+    class IRInstrExprDiv : public IRInstr, public IRInstrBaseSrc<IRInstrExprDiv>
     {
     public:
-        IRInstrExprDiv(BasicBlock * bb, antlr4::ParserRuleContext * ctx, string src) : IRInstr(bb, ctx), src(src) {};
-
         void gen_asm(ostream& o) override;
-    private:
-        string src;
     };
 }

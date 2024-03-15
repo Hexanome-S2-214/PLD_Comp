@@ -16,14 +16,10 @@ namespace IR
     class IRInstr : public IRBase
     {
     public:
-        IRInstr(BasicBlock * bb, antlr4::ParserRuleContext * ctx) : IRBase(bb), bb(bb), ctx(ctx) {}
+        IRInstr() {}
         ~IRInstr() = default;
 
-        BasicBlock * get_bb() { return bb; };
+        BasicBlock * get_bb();
         SymbolTable * get_symbol_table();
-        antlr4::ParserRuleContext * get_ctx();
-    private:
-        BasicBlock * bb;
-        antlr4::ParserRuleContext * ctx;
     };
 };

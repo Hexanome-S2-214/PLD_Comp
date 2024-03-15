@@ -59,12 +59,16 @@ int main(int argn, const char **argv)
       exit(1);
   }
 
-  IR::CFG cfg(IR::X86, error_reporter);
-  IRVisitor visitor(&cfg);
+  IR::CFG * cfg = static_cast<IR::CFG *>(
+    (new IR::CFG())
+      ->set_arch(IR::X86)
+      ->set_error_reporter(error_reporter)
+  );
+  IRVisitor visitor(cfg);
 
   visitor.visit(tree);
 
-  cfg.gen_asm(cout);
+  cfg->gen_asm(cout);
 
   // SymbolTableVisitor s;
   // s.visit(tree);

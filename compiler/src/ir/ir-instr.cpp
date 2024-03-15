@@ -7,11 +7,11 @@ namespace IR
 {
     SymbolTable * IRInstr::get_symbol_table()
     {
-        return this->get_bb()->get_cfg()->get_symbol_table();
+        return get_bb()->get_cfg()->get_symbol_table();
     }
 
-    antlr4::ParserRuleContext * IRInstr::get_ctx()
+    BasicBlock * IRInstr::get_bb()
     {
-        return this->ctx;
+        return get_parent<BasicBlock>();
     }
 }

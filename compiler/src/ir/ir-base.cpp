@@ -1,27 +1,102 @@
 #include <sstream>
 #include "ir-base.h"
+#include "ir-cfg.h"
+#include "ir-basic-block.h"
+#include "ir-instr.h"
 
 using namespace std;
 
-IR::IRBase::IRBase(IRBase * parent) : parent(parent), arch(parent->arch) {}
-
-IR::IRBase::IRBase(IRArch arch, ErrorReporter::ErrorReporter * error_reporter) : parent(nullptr), arch(arch), error_reporter(error_reporter) {}
-
-string IR::IRBase::get_asm_str()
+namespace IR
 {
-    stringstream ss;
+    IRBase::IRBase() : parent(nullptr), arch(UNDEFINED), ctx(nullptr), error_reporter(nullptr) {}
 
-    gen_asm(ss);
-    
-    return ss.str();
-}
+    string IRBase::get_asm_str()
+    {
+        stringstream ss;
 
-IR::IRBase * IR::IRBase::get_parent()
-{
-    return parent;
-}
+        gen_asm(ss);
+        
+        return ss.str();
+    }
 
-ErrorReporter::ErrorReporter * IR::IRBase::get_error_reporter()
-{
-    return error_reporter;
+    IRBase * IRBase::set_arch(IRArch arch)
+    {
+        this->arch = arch;
+
+        return this;
+    }
+
+    IRBase * IRBase::set_ctx(antlr4::ParserRuleContext * ctx)
+    {
+        this->ctx = ctx;
+
+        return this;
+    }
+
+    IRBase * IRBase::set_error_reporter(ErrorReporter::ErrorReporter * error_reporter)
+    {
+        this->error_reporter = error_reporter;
+
+        return this;
+    }
+
+    IRBase * IRBase::set_parent(IRBase * parent)
+    {
+        this->parent = parent;
+
+        if (this->arch == UNDEFINED)
+            this->arch = parent->arch;
+
+        if (this->ctx == nullptr)
+            this->ctx = parent->ctx;
+
+        if (this->error_reporter == nullptr)
+            this->error_reporter = parent->error_reporter;
+
+        return this;
+    }
+
+    IRBase * IRBase::paste_properties(IRBase * other)
+    {
+        other->set_arch(arch);
+        other->set_ctx(ctx);
+        other->set_error_reporter(error_reporter);
+        other->set_parent(parent);
+
+        return other;
+    }
+
+    template<>
+    IRBase * IRBase::get_parent()
+    {
+        return parent;
+    }
+
+    template<>
+    CFG* IRBase::get_parent()
+    {
+        return dynamic_cast<CFG *>(parent);
+    }
+
+    template<>
+    BasicBlock* IRBase::get_parent()
+    {
+        return dynamic_cast<BasicBlock *>(parent);
+    }
+
+    template<>
+    IRInstr* IRBase::get_parent()
+    {
+        return dynamic_cast<IRInstr *>(parent);
+    }
+
+    antlr4::ParserRuleContext* IRBase::get_ctx()
+    {
+        return ctx;
+    }
+
+    ErrorReporter::ErrorReporter * IRBase::get_error_reporter()
+    {
+        return error_reporter;
+    }
 }

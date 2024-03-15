@@ -17,15 +17,16 @@ namespace IR
     class CFG : public IRBase
     {
     public:
-        CFG(IRArch arch, ErrorReporter::ErrorReporter * error_reporter);
+        CFG();
         ~CFG() = default;
 
         void gen_asm(ostream& o) override;
         void gen_asm_prologue(ostream& o);
         void gen_asm_epilogue(ostream& o);
 
-        SymbolTable * get_symbol_table();
+        void add_instr(IRBase * instr);
 
+        SymbolTable * get_symbol_table();
         BasicBlock * get_current_bb();
     private:
         vector<BasicBlock *> blocks;

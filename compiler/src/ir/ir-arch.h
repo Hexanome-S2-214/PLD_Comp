@@ -1,5 +1,6 @@
 namespace IR {
     enum IRArch {
+        UNDEFINED,
         X86,
         ARM,
     };

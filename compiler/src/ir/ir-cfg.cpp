@@ -2,7 +2,7 @@
 #include "ir-basic-block.h"
 #include "ir-symbol-table.h"
 
-IR::CFG::CFG(IRArch arch, ErrorReporter::ErrorReporter * error_reporter) : IRBase(arch, error_reporter)
+IR::CFG::CFG()
 {
     symbol_table = new SymbolTable(this->get_error_reporter());
 
@@ -35,6 +35,11 @@ void IR::CFG::gen_asm_epilogue(ostream& o)
     o << "    # epilogue\n";
     o << "    popq %rbp\n";
     o << "    ret\n";
+}
+
+void IR::CFG::add_instr(IR::IRBase * instr)
+{
+    get_current_bb()->add_instr(instr);
 }
 
 IR::SymbolTable * IR::CFG::get_symbol_table()

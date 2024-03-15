@@ -3,7 +3,10 @@
 #include "ir-base.h"
 #include "../error-reporter/compiler-error-token.h"
 
-IR::Symbol::Symbol(IRBase * parent, string id, int offset, Type type, antlr4::ParserRuleContext * ctx) : IRBase(parent), id(id), offset(offset), type(type), ctx(ctx) {}
+IR::Symbol::Symbol(IRBase * parent, string id, int offset, Type type, antlr4::ParserRuleContext * ctx) : id(id), offset(offset), type(type) {
+    set_parent(parent);
+    set_ctx(ctx);
+}
 
 void IR::Symbol::gen_asm(ostream& o)
 {

@@ -5,15 +5,14 @@
 
 IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label) : BasicBlock(cfg, label, nullptr, nullptr) {}
 
-IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label, IR::BasicBlock * exit_true, IR::BasicBlock * exit_false) : IRBase(cfg), cfg(cfg), label(label), exit_true(exit_true), exit_false(exit_false)
-{
-    // this->test_var = this->cfg->get_symbol_table()->get_next_tmp();
-    // this->cfg->get_symbol_table()->declare_symbol(this->test_var, Bool);
+IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label, IR::BasicBlock * exit_true, IR::BasicBlock * exit_false) : label(label), exit_true(exit_true), exit_false(exit_false) {
+    set_parent(cfg);
 }
 
-void IR::BasicBlock::add_instr(IR::IRInstr * instr)
+void IR::BasicBlock::add_instr(IR::IRBase * instr)
 {
-    instrs.push_back(instr);
+    instr->set_parent(this);
+    instrs.push_back(static_cast<IR::IRInstr*>(instr));
 }
 
 void IR::BasicBlock::gen_asm(ostream& o)
@@ -51,4 +50,9 @@ void IR::BasicBlock::set_exit_false(IR::BasicBlock * exit_false)
 string IR::BasicBlock::get_label()
 {
     return label;
+}
+
+IR::CFG * IR::BasicBlock::get_cfg()
+{
+    return this->get_parent<IR::CFG>();
 }

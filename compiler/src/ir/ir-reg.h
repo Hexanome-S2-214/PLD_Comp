@@ -9,7 +9,9 @@ namespace IR
 {
     class IRReg : public IRBase {
     public:
-        IRReg(IRBase * parent) : IRBase(parent) {};
+        IRReg(IRBase * parent) {
+            set_parent(parent);
+        };
         ~IRReg() = default;
     };
 
