@@ -3,6 +3,7 @@
 **/build*
 **/generated*
 **/ifcc-test-output*
+compiler/ifcc
 
 .DS_Store
 

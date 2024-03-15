@@ -2,11 +2,12 @@
 
 namespace IR
 {
-    class BasicBlock;
     class SymbolTable;
 }
 
 #include "ir-base.h"
+#include "ir-basic-block.h"
+#include "antlr4-runtime.h"
 
 using namespace std;
 
@@ -15,12 +16,10 @@ namespace IR
     class IRInstr : public IRBase
     {
     public:
-        IRInstr(BasicBlock * bb) : bb(bb) {}
+        IRInstr() {}
         ~IRInstr() = default;
 
-        BasicBlock * get_bb() { return bb; };
+        BasicBlock * get_bb();
         SymbolTable * get_symbol_table();
-    private:
-        BasicBlock * bb;
     };
 };

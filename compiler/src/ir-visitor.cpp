@@ -20,23 +20,33 @@
 
 antlrcpp::Any IRVisitor::visitDeclStdRule(ifccParser::DeclStdRuleContext *ctx)
 {
-    cfg->get_symbol_table()->declare_symbol(ctx->VAR()->getText(), IR::Int, ctx);
+    cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, ctx);
     return 0;
 }
 
 antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
 {
     this->visit(ctx->rvalue());
-    cfg->get_symbol_table()->declare_symbol(ctx->VAR()->getText(), IR::Int, ctx);
-    cfg->get_current_bb()->add_instr(new IR::IRInstrAssign(cfg->get_current_bb(), ctx->VAR()->getText()));
+
+    cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, ctx);
+    cfg->add_instr(
+        (new IR::IRInstrAssign)
+            ->set_id(ctx->VAR()->getText())
+            ->set_ctx(ctx)
+    );
+
     return 0;
 }
 
 antlrcpp::Any IRVisitor::visitAffectationRule(ifccParser::AffectationRuleContext *ctx)
 {
     this->visit(ctx->rvalue());
-    cfg->get_current_bb()->add_instr(new IR::IRInstrAssign(cfg->get_current_bb(), ctx->VAR()->getText()));
-    
+    cfg->add_instr(
+        (new IR::IRInstrAssign)
+            ->set_id(ctx->VAR()->getText())
+            ->set_ctx(ctx)
+    );
+
     return 0;
 }
 
@@ -45,12 +55,23 @@ antlrcpp::Any IRVisitor::visitAffectationRule(ifccParser::AffectationRuleContext
 ////////////////////////////////////////////
 
 antlrcpp::Any IRVisitor::visitExprNum(ifccParser::ExprNumContext *ctx){
-    cfg->get_current_bb()->add_instr(new IR::IRInstrExprCst(cfg->get_current_bb(), ctx->NUM()->getText()));
+    cfg->add_instr(
+        (new IR::IRInstrExprCst)
+            ->set_value(ctx->NUM()->getText())
+            ->set_ctx(ctx)
+    );
+
     return 0;
 }
 
-antlrcpp::Any IRVisitor::visitExprVar(ifccParser::ExprVarContext *ctx){
-    cfg->get_current_bb()->add_instr(new IR::IRInstrExprVar(cfg->get_current_bb(), ctx->VAR()->getText()));
+antlrcpp::Any IRVisitor::visitExprVar(ifccParser::ExprVarContext *ctx)
+{
+    cfg->add_instr(
+        (new IR::IRInstrExprVar)
+            ->set_id(ctx->VAR()->getText())
+            ->set_ctx(ctx)
+    );
+
     return 0;
 }
 
@@ -58,53 +79,116 @@ antlrcpp::Any IRVisitor::visitExprVar(ifccParser::ExprVarContext *ctx){
 // OPERATIONS ARITHMETIQUES
 ////////////////////////////////////////////
 
-antlrcpp::Any IRVisitor::visitExprSomme(ifccParser::ExprSommeContext *ctx){
+antlrcpp::Any IRVisitor::visitExprSomme(ifccParser::ExprSommeContext *ctx) {
     this->visit(ctx->expr(0));
-    IR::Symbol* varTemp = this->cfg->get_symbol_table()->declare_tmp(IR::Int,ctx);
-    cfg->get_current_bb()->add_instr(new IR::IRInstrAssign(cfg->get_current_bb(), varTemp->id));  
+
+    IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    cfg->add_instr(
+        (new IR::IRInstrAssign)
+            ->set_id(varTemp->id)
+            ->set_ctx(ctx)
+    );
+
     this->visit(ctx->expr(1));
-    cfg->get_current_bb()->add_instr(new IR::IRInstrExprPlus(cfg->get_current_bb(), varTemp->get_asm_str(), IR::IRRegA().get_asm_str()));
-    
+
+    cfg->add_instr(
+        (new IR::IRInstrExprPlus)
+            ->set_src(varTemp->get_asm_str())
+            ->set_dest(IR::IRRegA(cfg).get_asm_str())
+            ->set_ctx(ctx)
+    );
+
     return 0;
 }
 
 antlrcpp::Any IRVisitor::visitExprSoustr(ifccParser::ExprSoustrContext *ctx) {
     this->visit(ctx->expr(0));
-    IR::Symbol* varTemp = this->cfg->get_symbol_table()->declare_tmp(IR::Int,ctx);
-    cfg->get_current_bb()->add_instr(new IR::IRInstrAssign(cfg->get_current_bb(), varTemp->id));  
+
+    IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    cfg->add_instr(
+        (new IR::IRInstrAssign)
+            ->set_id(varTemp->id)
+            ->set_ctx(ctx)
+    );
+
     this->visit(ctx->expr(1));
 
-    cfg->get_current_bb()->add_instr(new IR::IRInstrMov(cfg->get_current_bb(), IR::IRRegA().get_asm_str(), IR::IRRegB().get_asm_str()));
-    cfg->get_current_bb()->add_instr(new IR::IRInstrMov(cfg->get_current_bb(), varTemp->get_asm_str(), IR::IRRegA().get_asm_str()));
-    cfg->get_current_bb()->add_instr(new IR::IRInstrExprMinus(cfg->get_current_bb(), IR::IRRegB().get_asm_str(), IR::IRRegA().get_asm_str()));
+    cfg->add_instr(
+        (new IR::IRInstrMov)
+            ->set_src(IR::IRRegA(cfg).get_asm_str())
+            ->set_dest(IR::IRRegB(cfg).get_asm_str())
+            ->set_ctx(ctx)
+    );
+    cfg->add_instr(
+        (new IR::IRInstrMov)
+            ->set_src(varTemp->get_asm_str())
+            ->set_dest(IR::IRRegA(cfg).get_asm_str())
+            ->set_ctx(ctx)
+    );
+    cfg->add_instr(
+        (new IR::IRInstrExprMinus)
+            ->set_src(IR::IRRegB(cfg).get_asm_str())
+            ->set_dest(IR::IRRegA(cfg).get_asm_str())
+            ->set_ctx(ctx)
+    );
 
     return 0;
 }
 
-antlrcpp::Any IRVisitor::visitExprMultDiv(ifccParser::ExprMultDivContext *ctx){
+antlrcpp::Any IRVisitor::visitExprMultDiv(ifccParser::ExprMultDivContext *ctx)
+{
     this->visit(ctx->expr(0));
-    IR::Symbol* varTemp = this->cfg->get_symbol_table()->declare_tmp(IR::Int,ctx);
-    cfg->get_current_bb()->add_instr(new IR::IRInstrAssign(cfg->get_current_bb(), varTemp->id));  
+
+    IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    cfg->add_instr(
+        (new IR::IRInstrAssign)
+            ->set_id(varTemp->id)
+            ->set_ctx(ctx)
+    );
+    
     this->visit(ctx->expr(1));
 
-    if(ctx->OP_MULT()->getText() == "*")
-        cfg->get_current_bb()->add_instr(new IR::IRInstrExprMult(cfg->get_current_bb(), varTemp->get_asm_str(), IR::IRRegA().get_asm_str()));
+    if (ctx->OP_MULT()->getText() == "*")
+        cfg->add_instr(
+            (new IR::IRInstrExprMult)
+                ->set_src(varTemp->get_asm_str())
+                ->set_dest(IR::IRRegA(cfg).get_asm_str())
+                ->set_ctx(ctx)
+        );
     else
-        cfg->get_current_bb()->add_instr(new IR::IRInstrExprDiv(cfg->get_current_bb(), varTemp->get_asm_str()));
-        
+        cfg->add_instr(
+            (new IR::IRInstrExprDiv)
+                ->set_src(varTemp->get_asm_str())
+                ->set_ctx(ctx)
+        );
+
     return 0;
 }
 
 antlrcpp::Any IRVisitor::visitExprModulo(ifccParser::ExprModuloContext *ctx) {
     this->visit(ctx->expr(0));
-    IR::Symbol* varTemp = this->cfg->get_symbol_table()->declare_tmp(IR::Int,ctx);
-    cfg->get_current_bb()->add_instr(new IR::IRInstrAssign(cfg->get_current_bb(), varTemp->id));
+
+    IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    cfg->add_instr(
+        (new IR::IRInstrAssign)
+            ->set_id(varTemp->id)
+            ->set_ctx(ctx)
+    );
+    
     this->visit(ctx->expr(1));
 
-    cfg->get_current_bb()->add_instr(new IR::IRInstrExprDiv(cfg->get_current_bb(), varTemp->get_asm_str()));
-
+    cfg->add_instr(
+        (new IR::IRInstrExprDiv)
+            ->set_src(varTemp->get_asm_str())
+            ->set_ctx(ctx)
+    );
     //il faut mettre EDX dans EAX -> c'est ce registre qui contient le reste après idivl
-    cfg->get_current_bb()->add_instr(new IR::IRInstrMov(cfg->get_current_bb(), IR::IRRegD().get_asm_str(), IR::IRRegA().get_asm_str()));
+    cfg->add_instr(
+        (new IR::IRInstrMov)
+            ->set_src(IR::IRRegD(cfg).get_asm_str())
+            ->set_dest(IR::IRRegA(cfg).get_asm_str())
+            ->set_ctx(ctx)
+    );
 
     return 0;
 }
@@ -116,6 +200,11 @@ antlrcpp::Any IRVisitor::visitExprModulo(ifccParser::ExprModuloContext *ctx) {
 antlrcpp::Any IRVisitor::visitExprUnaryMinus(ifccParser::ExprUnaryMinusContext *ctx)
 {
     this->visit(ctx->expr());
-    cfg->get_current_bb()->add_instr(new IR::IRInstrExprUnaryMinus(cfg->get_current_bb()));
+
+    cfg->add_instr(
+        (new IR::IRInstrExprUnaryMinus)
+            ->set_ctx(ctx)
+    );
+
     return 0;
 }

@@ -5,6 +5,7 @@
 #include "antlr4-runtime.h"
 #include "ir-type.h"
 #include "ir-base.h"
+#include "../error-reporter/error-reporter.h"
 
 #define SYMBOL_SIZE 4
 
@@ -15,7 +16,7 @@ namespace IR
     class Symbol : public IR::IRBase
     {
     public:
-        Symbol(string id, int offset, Type type, antlr4::ParserRuleContext * ctx = nullptr);
+        Symbol(IRBase * parent, string id, int offset, Type type, antlr4::ParserRuleContext * ctx = nullptr);
         Symbol() {};
         ~Symbol() = default;
 
@@ -25,7 +26,6 @@ namespace IR
         int offset;
         bool used = false;
         Type type;
-        antlr4::ParserRuleContext * ctx;
     };
 
     class SymbolTable
@@ -34,14 +34,16 @@ namespace IR
         SymbolTable() {};
         ~SymbolTable() = default;
 
-        Symbol * declare_symbol(string id, Type type, antlr4::ParserRuleContext * ctx = nullptr);
+        Symbol * declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx = nullptr);
         Symbol * get_symbol(string id, antlr4::ParserRuleContext * ctx = nullptr);
 
-        Symbol * declare_tmp(Type type, antlr4::ParserRuleContext * ctx = nullptr);
+        Symbol * declare_tmp(IRBase * parent, Type type, antlr4::ParserRuleContext * ctx = nullptr);
 
         string get_next_tmp();
+
+        ErrorReporter::ErrorReporter * error_reporter;
     private:
-        map<string, Symbol> symbols;
+        map<string, Symbol *> symbols;
         int symbol_offset = -SYMBOL_SIZE;
         int tmp_offset = 0;
     };

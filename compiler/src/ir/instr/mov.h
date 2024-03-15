@@ -6,17 +6,13 @@ namespace IR
 }
 
 #include "../ir-instr.h"
+#include "base-instr.h"
 
 namespace IR
 {
-    class IRInstrMov : public IRInstr
+    class IRInstrMov : public IRInstr, public IRInstrBaseSrc<IRInstrMov>, public IRInstrBaseDest<IRInstrMov>
     {
     public:
-        IRInstrMov(BasicBlock * bb, string src, string dest) : IRInstr(bb), src(src), dest(dest) {};
-
         void gen_asm(ostream& o) override;
-    private:
-        string src;
-        string dest;
     };
 }

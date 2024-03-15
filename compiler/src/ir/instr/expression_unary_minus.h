@@ -12,7 +12,6 @@ namespace IR
     class IRInstrExprUnaryMinus : public IRInstr
     {
     public:
-        IRInstrExprUnaryMinus(BasicBlock *bb) : IRInstr(bb) {};
         void gen_asm(ostream& o) override;
     };
 }

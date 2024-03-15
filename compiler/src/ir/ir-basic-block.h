@@ -18,9 +18,9 @@ namespace IR
     public:
         BasicBlock(CFG * cfg, string label);
         BasicBlock(CFG * cfg, string label, BasicBlock * exit_true, BasicBlock * exit_false);
-        ~BasicBlock();
+        ~BasicBlock() = default;
 
-        void add_instr(IRInstr * instr);
+        void add_instr(IRBase * instr);
 
         void gen_asm(ostream& o) override;
 
@@ -28,11 +28,10 @@ namespace IR
         void set_exit_false(BasicBlock * exit_false);
 
         string get_label();
-        CFG * get_cfg() { return cfg; }
+        CFG * get_cfg();
     private:
         BasicBlock * exit_true;
         BasicBlock * exit_false;
-        CFG * cfg;
         vector<IRInstr *> instrs;
         string label;
         string test_var;

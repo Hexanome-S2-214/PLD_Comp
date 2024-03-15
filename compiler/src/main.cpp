@@ -12,6 +12,8 @@
 // #include "SymbolTableVisitor.h"
 #include "ir/ir-cfg.h"
 #include "ir-visitor.h"
+#include "error-reporter/error-reporter.h"
+#include "error-reporter/error-listener.h"
 
 using namespace antlr4;
 using namespace std;
@@ -32,12 +34,23 @@ int main(int argn, const char **argv)
   
   ANTLRInputStream input(in.str());
 
+  ErrorReporter::ErrorReporter * error_reporter = new ErrorReporter::ErrorReporter();
+  ErrorReporter::ErrorListener * error_listener = new ErrorReporter::ErrorListener(error_reporter);
+
   ifccLexer lexer(&input);
+
+  lexer.removeErrorListeners();
+  lexer.addErrorListener(error_listener);
+
   CommonTokenStream tokens(&lexer);
 
   tokens.fill();
 
   ifccParser parser(&tokens);
+
+  parser.removeErrorListeners();
+  parser.addErrorListener(error_listener);
+
   tree::ParseTree* tree = parser.axiom();
 
   if(parser.getNumberOfSyntaxErrors() != 0)
@@ -46,12 +59,16 @@ int main(int argn, const char **argv)
       exit(1);
   }
 
-  IR::CFG cfg;
-  IRVisitor visitor(&cfg);
+  IR::CFG * cfg = static_cast<IR::CFG *>(
+    (new IR::CFG())
+      ->set_error_reporter(error_reporter)
+      ->set_arch(IR::X86)
+  );
+  IRVisitor visitor(cfg);
 
   visitor.visit(tree);
 
-  cfg.gen_asm(cout);
+  cfg->gen_asm(cout);
 
   // SymbolTableVisitor s;
   // s.visit(tree);

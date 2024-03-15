@@ -9,6 +9,14 @@ IR::CFG::CFG()
     blocks.push_back(new BasicBlock(this, "entry"));
 }
 
+IR::IRBase * IR::CFG::set_error_reporter(ErrorReporter::ErrorReporter * error_reporter)
+{
+    IRBase::set_error_reporter(error_reporter);
+    symbol_table->error_reporter = error_reporter;
+
+    return this;
+}
+
 void IR::CFG::gen_asm(ostream& o)
 {
     gen_asm_prologue(o);
@@ -35,6 +43,11 @@ void IR::CFG::gen_asm_epilogue(ostream& o)
     o << "    # epilogue\n";
     o << "    popq %rbp\n";
     o << "    ret\n";
+}
+
+void IR::CFG::add_instr(IR::IRBase * instr)
+{
+    get_current_bb()->add_instr(instr);
 }
 
 IR::SymbolTable * IR::CFG::get_symbol_table()

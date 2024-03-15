@@ -5,6 +5,6 @@ namespace IR
 {
     void IRInstrExprUnaryMinus::gen_asm(ostream& o)
     {
-        o << "\tnegl " << IR::IRRegA().get_asm_str() << endl;
+        o << "\tnegl " << IRRegA(this).get_asm_str() << endl;
     }
 }

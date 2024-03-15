@@ -6,16 +6,13 @@ namespace IR
 }
 
 #include "../ir-instr.h"
+#include "base-instr.h"
 
 namespace IR
 {
-    class IRInstrAssign : public IRInstr
+    class IRInstrAssign : public IRInstr, public IRInstrBaseId<IRInstrAssign>
     {
     public:
-        IRInstrAssign(BasicBlock * bb, string id) : IRInstr(bb), id(id) {};
-
         void gen_asm(ostream& o) override;
-    private:
-        string id;
     };
 }

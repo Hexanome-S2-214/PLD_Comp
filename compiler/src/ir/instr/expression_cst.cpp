@@ -4,7 +4,14 @@
 #include "../ir-cfg.h"
 #include "../ir-reg.h"
 
-void IR::IRInstrExprCst::gen_asm(ostream& o)
+namespace IR
 {
-    IR::IRInstrMov(get_bb(), "$" + this->value, IR::IRRegA().get_asm_str()).gen_asm(o);
+    void IRInstrExprCst::gen_asm(ostream& o)
+    {
+        paste_properties(
+            (new IRInstrMov)
+                ->set_src("$" + this->value)
+                ->set_dest(IR::IRRegA(this).get_asm_str())
+        )->gen_asm(o);
+    }
 }
