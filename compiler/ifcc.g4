@@ -69,23 +69,26 @@ returnStmtRule
      ;
 
 //=============================================
-// Non-terminaux
+// Expressions
 //=============================================
 
 expr
-     : '-' expr                         #exprUnaryMinus
-     | '!' expr                         #atomUnaryNot
+     : '(' expr ')'                     #exprParExpr
+     | '-' expr                         #exprUnaryMinus
+     | '!' expr                         #exprUnaryNot
      | expr OP_MULT expr                #exprMultDiv
      | expr MODULO expr                 #exprModulo
      | expr '+' expr                    #exprSomme
      | expr '-' expr                    #exprSoustr
      | expr COMPARAISON expr            #exprComparaison
      | expr EQ_COMPARAISON expr         #exprEqComparaison
+     | expr B_AND expr                  #exprAndBAB
+     | expr B_XOR expr                  #exprXorBAB
+     | expr B_OR expr                   #exprOrBAB
      | expr AND expr                    #exprAnd
      | expr OR expr                     #exprOr
      | VAR                              #exprVar
      | NUM                              #exprNum
-     | '(' expr ')'                     #exprParExpr
      ;
 
 //=============================================

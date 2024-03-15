@@ -16,6 +16,7 @@
 #include "ir/instr/comp.h"
 #include "ir/instr/movzbl.h"
 #include "ir/instr/set_flag_comp.h"
+#include "ir/instr/expression_bit_a_bit.h"
 
 ////////////////////////////////////////////
 // DECLARATION/AFFECTATION
@@ -294,6 +295,82 @@ antlrcpp::Any IRVisitor::visitExprComparaison(ifccParser::ExprComparaisonContext
         (new IR::IRInstrMovzbl)
             ->set_src(IR::IRRegAL(cfg).get_asm_str())
             ->set_dest(IR::IRRegA(cfg).get_asm_str())
+            ->set_ctx(ctx)
+    );
+
+    return 0;
+}
+
+////////////////////////////////////////////
+// OPERATEURS BIT-A-BIT
+////////////////////////////////////////////
+
+antlrcpp::Any IRVisitor::visitExprAndBAB(ifccParser::ExprAndBABContext *ctx) {
+
+    this->visit(ctx->expr(0));
+
+    IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    cfg->add_instr(
+        (new IR::IRInstrAssign)
+            ->set_id(varTemp->id)
+            ->set_ctx(ctx)
+    );
+    
+    this->visit(ctx->expr(1));
+
+    cfg->add_instr(
+        (new IR::IRInstrExprBitABit)
+            ->set_src(varTemp->get_asm_str())
+            ->set_dest(IR::IRRegA(cfg).get_asm_str())
+            ->set_symbol(ctx->B_AND()->getText())
+            ->set_ctx(ctx)
+    );
+
+    return 0;
+}
+
+antlrcpp::Any IRVisitor::visitExprXorBAB(ifccParser::ExprXorBABContext *ctx) {
+    
+    this->visit(ctx->expr(0));
+
+    IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    cfg->add_instr(
+        (new IR::IRInstrAssign)
+            ->set_id(varTemp->id)
+            ->set_ctx(ctx)
+    );
+    
+    this->visit(ctx->expr(1));
+
+    cfg->add_instr(
+        (new IR::IRInstrExprBitABit)
+            ->set_src(varTemp->get_asm_str())
+            ->set_dest(IR::IRRegA(cfg).get_asm_str())
+            ->set_symbol(ctx->B_XOR()->getText())
+            ->set_ctx(ctx)
+    );
+
+    return 0;
+}
+
+antlrcpp::Any IRVisitor::visitExprOrBAB(ifccParser::ExprOrBABContext *ctx) {
+
+    this->visit(ctx->expr(0));
+
+    IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    cfg->add_instr(
+        (new IR::IRInstrAssign)
+            ->set_id(varTemp->id)
+            ->set_ctx(ctx)
+    );
+    
+    this->visit(ctx->expr(1));
+
+    cfg->add_instr(
+        (new IR::IRInstrExprBitABit)
+            ->set_src(varTemp->get_asm_str())
+            ->set_dest(IR::IRRegA(cfg).get_asm_str())
+            ->set_symbol(ctx->B_OR()->getText())
             ->set_ctx(ctx)
     );
 

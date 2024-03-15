@@ -28,6 +28,10 @@ public:
 
     virtual antlrcpp::Any visitExprEqComparaison(ifccParser::ExprEqComparaisonContext *ctx) override;
     virtual antlrcpp::Any visitExprComparaison(ifccParser::ExprComparaisonContext *ctx) override;
+
+    virtual antlrcpp::Any visitExprAndBAB(ifccParser::ExprAndBABContext *ctx) override;
+    virtual antlrcpp::Any visitExprXorBAB(ifccParser::ExprXorBABContext *ctx) override;
+    virtual antlrcpp::Any visitExprOrBAB(ifccParser::ExprOrBABContext *ctx) override;
 private:
     IR::CFG * cfg;
 };
