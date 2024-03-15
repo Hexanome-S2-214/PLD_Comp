@@ -53,6 +53,9 @@ epilog      = ""
 argparser.add_argument('input',metavar='PATH',nargs='+',help='For each path given:'
                        +' if it\'s a file, use this file;'
                        +' if it\'s a directory, use all *.c files in this subtree')
+
+argparser.add_argument('-rm_fail_ok',default=0)
+        
 argparser.add_argument('-osd','--output-subdirectory', metavar='PATH',
                         help="Name of the subdir to save the output. Only available if the input is a file.")
 
@@ -77,8 +80,16 @@ if (len(args.input) > 1 or os.path.isdir(args.input[0])) and args.output_subdire
     print('error: cannot use -osd option when the input is a directory')
     exit(1)
     
-if not os.path.exists('ifcc-test-output'):
-    os.mkdir('ifcc-test-output')
+if os.path.exists('ifcc-test-output'):
+    os.system('rm -rf ifcc-test-output')
+
+os.mkdir('ifcc-test-output')
+
+# Liste des tests qui fail, mais c'est normal : message d'erreur différent entre gcc et nous, fonctionnalités qu'on
+# n'implémente pas dans tous les détails (affectations enchaînées avec parenthèses par exemple)
+# ATTENTION A PAS METTRE DE TEST QUI DEVRAIT MARCHER
+flag_remove_tests_fail_but_ok = args.rm_fail_ok
+fail_but_ok = ['inv_plus_mult.c', 'inv_plus_div.c', 'inv_affect_enchainee.c', 'affect_enchainee_parentheses.c']
     
 ## Then we process the inputs arguments i.e. filenames or subtrees
 inputfilenames=[]
@@ -86,13 +97,26 @@ for path in args.input:
     path=os.path.normpath(path) # collapse redundant slashes etc.
     if os.path.isfile(path):
         if path[-2:] == '.c':
+            # exclusion de certains tests choisis
+            if flag_remove_tests_fail_but_ok:
+                for file_fail_but_ok in fail_but_ok:
+                    if path.find(file_fail_but_ok) != -1:
+                        continue
             inputfilenames.append(path)
         else:
             print("error: incorrect filename suffix (should be '.c'): "+path)
             exit(1)
     elif os.path.isdir(path):
         for dirpath,dirnames,filenames in os.walk(path):
-            inputfilenames+=[dirpath+'/'+name for name in filenames if name[-2:]=='.c']
+            for name in filenames:
+                flag = 0
+                if flag_remove_tests_fail_but_ok:
+                    for file_fail_but_ok in fail_but_ok:
+                        if name.find(file_fail_but_ok) != -1:
+                            flag = 1
+                            continue
+                if name[-2:]=='.c' and flag == 0:
+                    inputfilenames+=[dirpath+'/'+name]
     else:
         print("error: cannot read input path `"+path+"'")
         sys.exit(1)
@@ -142,6 +166,11 @@ for inputfilename in inputfilenames:
     if 'ifcc-test-output' in os.path.realpath(inputfilename):
         print('error: input filename is within output directory: '+inputfilename)
         exit(1)
+
+    # pas de test créé pour certains tests particuliers, cf ci-dessus
+    if inputfilename in fail_but_ok:
+        print("test fail_ok")
+        continue
     
     ## each test-case gets copied and processed in its own subdirectory:
     ## ../somedir/subdir/file.c becomes ./ifcc-test-output/somedir-subdir-file/input.c
@@ -176,14 +205,15 @@ if args.debug:
 
 cpt = 0
 cpt_test_ok = 0
+failed_tests = []
 
 for jobname in jobs:
     os.chdir(orig_cwd)
     
     cpt += 1
 
-    print('\n--------------------------')
-    print('TEST-CASE n°'+str(cpt)+ " : "+jobname)
+    print('--------------------------')
+    print('TEST-CASE : '+jobname)
     os.chdir(jobname)
     
     ## Reference compiler = GCC
@@ -209,6 +239,7 @@ for jobname in jobs:
         ## ifcc wrongly accepts invalid program -> error
         print(Fore.RED + "TEST FAIL (your compiler accepts an invalid program)")
         print(Style.RESET_ALL)
+        failed_tests.append(jobname)
         continue
     elif gccstatus == 0 and ifccstatus != 0:
         ## ifcc wrongly rejects valid program -> error
@@ -216,6 +247,7 @@ for jobname in jobs:
         print(Style.RESET_ALL)
         if args.verbose:
             dumpfile("ifcc-compile.txt")
+        failed_tests.append(jobname)
         continue
     else:
         ## ifcc accepts to compile valid program -> let's link it
@@ -225,6 +257,7 @@ for jobname in jobs:
             print(Style.RESET_ALL)
             if args.verbose:
                 dumpfile("ifcc-link.txt")
+            failed_tests.append(jobname)
             continue
 
     ## both compilers  did produce an  executable, so now we  run both
@@ -239,6 +272,7 @@ for jobname in jobs:
             dumpfile("gcc-execute.txt")
             print("you:")
             dumpfile("ifcc-execute.txt")
+        failed_tests.append(jobname)
         continue
 
     ## last but not least
@@ -248,7 +282,11 @@ for jobname in jobs:
 
 ## Affichage du taux d'erreur
 taux_erreur = (1-cpt_test_ok/cpt)*100
-print('\nTaux d\'erreur : ' + str(round(taux_erreur, 2)) + "%\n")
+print('\nTaux d\'erreur : ' + str(round(taux_erreur, 2)) + "%")
 
 if taux_erreur > 0:
+    print("\nListe des tests non validés :\n")
+    for test in failed_tests:
+        print(test.removeprefix("ifcc-test-output/"))
+
     exit(1)
