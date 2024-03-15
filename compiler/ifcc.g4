@@ -49,15 +49,23 @@ declStdRule
      ;
 
 declAffRule
-     : CONST? (INT|CHAR) VAR '=' expr ';'
+     : CONST? (INT|CHAR) VAR '=' rvalue ';'
      ;
 
 affectationRule
-     : VAR '=' (expr | affectationRule) ';'
+     : VAR '=' rvalue ';'
+     ;
+
+affectationRule2
+     : VAR '=' rvalue
+     ;
+
+rvalue
+     : ( affectationRule2 | expr)
      ;
 
 returnStmtRule
-     : RETURN (expr | affectationRule) ';'
+     : RETURN rvalue ';'
      ;
 
 //=============================================
@@ -65,19 +73,19 @@ returnStmtRule
 //=============================================
 
 expr
-     : expr '+' expr                    #exprSomme
-     | expr '-' expr                    #exprSoustr
-     | '-' expr                         #exprUnaryMinus
+     : '-' expr                         #exprUnaryMinus
      | '!' expr                         #atomUnaryNot
      | expr OP_MULT expr                #exprMultDiv
      | expr MODULO expr                 #exprModulo
+     | expr '+' expr                    #exprSomme
+     | expr '-' expr                    #exprSoustr
      | expr COMPARAISON expr            #exprComparaison
      | expr EQ_COMPARAISON expr         #exprEqComparaison
      | expr AND expr                    #exprAnd
      | expr OR expr                     #exprOr
-     | VAR                              #atomVar
-     | NUM                              #atomNum
-     | '(' expr ')'                     #atomParExpr
+     | VAR                              #exprVar
+     | NUM                              #exprNum
+     | '(' expr ')'                     #exprParExpr
      ;
 
 //=============================================
@@ -115,7 +123,6 @@ CHAR
 INT
      : 'int'
      ;
-
 
 NUM
      : [0-9]+

@@ -1,5 +1,6 @@
 int main() {
-    int x = (-5)%(-2);
+    int a=2;
+    int x = 5%a;
 
     return x;
 }

@@ -1,9 +1,9 @@
-#include "expression_neg.h"
+#include "expression_unary_minus.h"
 #include "../ir-reg.h"
 
 namespace IR
 {
-    void IRInstrExprNeg::gen_asm(ostream& o)
+    void IRInstrExprUnaryMinus::gen_asm(ostream& o)
     {
         o << "\tnegl " << IR::IRRegA().get_asm_str() << endl;
     }
