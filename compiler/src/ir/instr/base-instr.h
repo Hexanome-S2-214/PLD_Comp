@@ -53,4 +53,16 @@ namespace IR
     protected:
         string value;
     };
+
+    template <class Ref>
+    class IRInstrBaseSymbol
+    {
+    public:
+        Ref * set_symbol(string symbol) {
+            this->symbol = symbol;
+            return static_cast<Ref*>(this);
+        }
+    protected:
+        string symbol;
+    };
 }
