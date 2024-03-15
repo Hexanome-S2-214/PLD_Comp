@@ -51,6 +51,8 @@ namespace IR
     class IRRegD : public IRReg
     {
     public:
+        IRRegD(IRBase * parent) : IRReg(parent) {};
+
         void gen_asm(ostream& o) override
         {
             o << "%edx";

@@ -97,6 +97,8 @@ antlrcpp::Any IRVisitor::visitExprSomme(ifccParser::ExprSommeContext *ctx) {
             ->set_dest(IR::IRRegA(cfg).get_asm_str())
             ->set_ctx(ctx)
     );
+
+    return 0;
 }
 
 antlrcpp::Any IRVisitor::visitExprSoustr(ifccParser::ExprSoustrContext *ctx) {
@@ -129,6 +131,8 @@ antlrcpp::Any IRVisitor::visitExprSoustr(ifccParser::ExprSoustrContext *ctx) {
             ->set_dest(IR::IRRegA(cfg).get_asm_str())
             ->set_ctx(ctx)
     );
+
+    return 0;
 }
 
 antlrcpp::Any IRVisitor::visitExprMultDiv(ifccParser::ExprMultDivContext *ctx)
