@@ -9,7 +9,7 @@ namespace IR
 
 namespace IR
 {
-    class IRInstrExprNeg : public IRInstr
+    class IRInstrExprUnaryMinus : public IRInstr
     {
     public:
         void gen_asm(ostream& o) override;

@@ -8,8 +8,8 @@
 #include "../generated/ifccParser.h"
 #include "../generated/ifccBaseVisitor.h"
 
-#include "CodeGenVisitor.h"
-#include "SymbolTableVisitor.h"
+// #include "CodeGenVisitor.h"
+// #include "SymbolTableVisitor.h"
 #include "ir/ir-cfg.h"
 #include "ir-visitor.h"
 #include "error-reporter/error-reporter.h"
