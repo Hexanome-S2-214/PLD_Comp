@@ -377,44 +377,53 @@ antlrcpp::Any IRVisitor::visitExprOrBAB(ifccParser::ExprOrBABContext *ctx) {
 
 antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *ctx) {
     IR::BasicBlock * expr_bb = cfg->get_current_bb();
+    // Evaluate IF expression
     this->visit(ctx->expr());
 
+    // Create labels for jumps
     string if_false_label = cfg->get_next_bb_label();
     string exit_label = cfg->get_next_bb_label();
 
+    // Push exit to stack for children
     cfg->stack.push_back(exit_label); // Push own exit
 
     cfg->set_current_bb(expr_bb);
+    // Compare IF result
     cfg->add_instr(
         (new IR::IRInstrCheat)
             ->set_instr("cmpl $1, %eax")
             ->set_ctx(ctx)
     );
+    // Jump if false
     cfg->add_instr(
         (new IR::IRInstrCheat)
             ->set_instr("jne " + if_false_label)
             ->set_ctx(ctx)
     );
-
-    // ...
+    // Visit if true
     this->visit(ctx->struct_bloc(0)); // Add if true
 
+    // Jump to exit when if complete
     cfg->add_instr(
         (new IR::IRInstrCheat)
             ->set_instr("jmp " + exit_label + "")
             ->set_ctx(ctx)
     );
 
+    // Add if false
     IR::BasicBlock * if_false = new IR::BasicBlock(cfg, if_false_label, nullptr, nullptr);
     cfg->add_bb(if_false);
     this->visit(ctx->struct_bloc(1));
     if_false->set_exit(exit_label);
 
-    cfg->stack.pop_back(); // Pop own exit
+    // Pop exit from stack
+    cfg->stack.pop_back();
 
+    // Add exit
     IR::BasicBlock * exit_bb = new IR::BasicBlock(cfg, exit_label, nullptr, nullptr);
     cfg->add_bb(exit_bb);
 
+    // Set exit from parent
     if (cfg->stack.size() > 0)
     {
         string parent_exit = cfg->stack.back();
@@ -423,54 +432,6 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
             exit_bb->set_exit(parent_exit);
         }
     }
-
-    // ===========================
-
-    // IR::BasicBlock * if_true = cfg->create_bb();
-    // IR::BasicBlock * if_false = cfg->create_bb();
-    // IR::BasicBlock * exit_block = cfg->create_bb();
-
-    // cfg->stack.push_back(exit_block);
-    // cfg->set_current_bb(if_true);
-    // this->visit(ctx->struct_bloc(0));
-    // if_true->set_exit(exit_block);
-    // expr_bb->set_exit_true(if_true);
-
-    // cfg->stack.push_back(exit_block);
-    // cfg->set_current_bb(if_false);
-    // this->visit(ctx->struct_bloc(1));
-    // if_false->set_exit(exit_block);
-    // expr_bb->set_exit_false(if_false);
-
-    // cfg->set_current_bb(exit_block);
-
-    // IR::BasicBlock * parent_exit = cfg->stack.back();
-    // cfg->stack.pop_back();
-    // if (parent_exit != nullptr)
-    // {
-    //     exit_block->set_exit(parent_exit);
-    // }
-
-    // ===========================
-
-    // IR::BasicBlock * if_true = cfg->create_bb();
-    // this->visit(ctx->struct_bloc(0));
-    // expr_bb->set_exit_true(if_true);
-
-    // IR::BasicBlock * if_false;
-    // if (ctx->struct_bloc().size() > 1)
-    // {
-    //     if_false = cfg->create_bb();
-    //     this->visit(ctx->struct_bloc(1));
-    //     expr_bb->set_exit_false(if_false);
-    // }
-
-    // IR::BasicBlock * exit_block = cfg->create_bb();
-    // if_true->set_exit(exit_block);
-
-    // if (if_false != nullptr) {
-    //     if_false->set_exit(exit_block);
-    // }
 
     return 0;
 }
