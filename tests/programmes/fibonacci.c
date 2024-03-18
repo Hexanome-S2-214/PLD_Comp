@@ -3,16 +3,16 @@ int main() {
     int result = 0;
     
     if (n < 2) {
-        result = n;
+        result = 1;
     } else {
-        int tmp1 = 0;
+        int tmp1 = 1;
         int tmp2 = 1;
         int i=2;
 
         while(i<=n) {
-            result = result + tmp1 + tmp2;
-            tmp2 = tmp2 + tmp1;
+            result = tmp1 + tmp2;
             tmp1 = tmp2;
+            tmp2 = result;
             i = i+1;
         }
     }
