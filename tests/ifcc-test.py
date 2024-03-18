@@ -243,6 +243,7 @@ for jobname in jobs:
         ## ifcc wrongly rejects valid program -> error
         print(Fore.RED +"TEST FAIL (your compiler rejects a valid program)")
         print(Style.RESET_ALL)
+        failed_tests.append(jobname)
         if args.verbose:
             dumpfile("ifcc-compile.txt")
         failed_tests.append(jobname)
@@ -253,6 +254,7 @@ for jobname in jobs:
         if ldstatus:
             print(Fore.RED +"TEST FAIL (your compiler produces incorrect assembly)")
             print(Style.RESET_ALL)
+            failed_tests.append(jobname)
             if args.verbose:
                 dumpfile("ifcc-link.txt")
             failed_tests.append(jobname)
@@ -265,6 +267,7 @@ for jobname in jobs:
     if open("gcc-execute.txt").read() != open("ifcc-execute.txt").read() :
         print(Fore.RED +"TEST FAIL (different results at execution)")
         print(Style.RESET_ALL)
+        failed_tests.append(jobname)
         if args.verbose:
             print("GCC:")
             dumpfile("gcc-execute.txt")
@@ -280,7 +283,10 @@ for jobname in jobs:
 
 ## Affichage du taux d'erreur
 taux_erreur = (1-cpt_test_ok/cpt)*100
-print('\nTaux d\'erreur : ' + str(round(taux_erreur, 2)) + "%")
+print('\nTaux d\'erreur : ' + str(round(taux_erreur, 2)) + "%\n")
+print('Tests failed :')
+for test in failed_tests:
+    print("\t"+test)
 
 if taux_erreur > 0:
     print("\nListe des tests non validés :\n")
