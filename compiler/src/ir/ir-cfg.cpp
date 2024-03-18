@@ -38,11 +38,12 @@ void IR::CFG::gen_asm_prologue(ostream& o)
     o << " main: \n" ;
     o << "    #prologue\n" ;
     o << "    pushq %rbp\n" ;
-    o << "    movq %rsp, %rbp\n" ;
+    o << "    movq %rsp, %rbp\n\n" ;
 }
 
 void IR::CFG::gen_asm_epilogue(ostream& o)
 {
+    o << "\n";
     o << "    # epilogue\n";
     o << "    popq %rbp\n";
     o << "    ret\n";

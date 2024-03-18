@@ -246,7 +246,6 @@ for jobname in jobs:
         failed_tests.append(jobname)
         if args.verbose:
             dumpfile("ifcc-compile.txt")
-        failed_tests.append(jobname)
         continue
     else:
         ## ifcc accepts to compile valid program -> let's link it
@@ -257,7 +256,6 @@ for jobname in jobs:
             failed_tests.append(jobname)
             if args.verbose:
                 dumpfile("ifcc-link.txt")
-            failed_tests.append(jobname)
             continue
 
     ## both compilers  did produce an  executable, so now we  run both
@@ -273,7 +271,6 @@ for jobname in jobs:
             dumpfile("gcc-execute.txt")
             print("you:")
             dumpfile("ifcc-execute.txt")
-        failed_tests.append(jobname)
         continue
 
     ## last but not least
@@ -288,9 +285,4 @@ print('Tests failed :')
 for test in failed_tests:
     print("\t"+test)
 
-if taux_erreur > 0:
-    print("\nListe des tests non validés :\n")
-    for test in failed_tests:
-        print(test.removeprefix("ifcc-test-output/"))
-
-    exit(1)
+exit(1)
