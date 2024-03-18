@@ -6,5 +6,6 @@ namespace IR
     {
         Int,
         Bool,
+        Char,
     };
 };

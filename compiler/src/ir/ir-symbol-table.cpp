@@ -13,7 +13,7 @@ void IR::Symbol::gen_asm(ostream& o)
     o << offset << IR::IRRegStack(this).get_asm_str();
 }
 
-IR::Symbol * IR::SymbolTable::declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx)
+IR::Symbol * IR::SymbolTable::declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx, int tableSize)
 {
     if (symbols.find(id) != symbols.end())
     {
@@ -24,7 +24,19 @@ IR::Symbol * IR::SymbolTable::declare_symbol(IRBase * parent, string id, Type ty
     IR::Symbol * symbol = new IR::Symbol(parent, id, symbol_offset, type, ctx);
     symbols[id] = symbol;
 
-    symbol_offset -= SYMBOL_SIZE;
+    if(type == IR::Int){
+        if(tableSize == -1){
+            symbol_offset -= INT_SIZE;
+        } else {
+            symbol_offset -= INT_SIZE * tableSize;
+        }
+    } else if (type == IR::Char){
+        if(tableSize == -1){
+            symbol_offset -= CHAR_SIZE;
+        } else {
+            symbol_offset -= CHAR_SIZE * tableSize;
+        }
+    }
 
     return symbol;
 }

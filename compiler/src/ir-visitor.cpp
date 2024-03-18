@@ -18,7 +18,7 @@
 // DECLARATION/AFFECTATION
 ////////////////////////////////////////////
 
-antlrcpp::Any IRVisitor::visitDeclStdRule(ifccParser::DeclStdRuleContext *ctx)
+antlrcpp::Any IRVisitor::visitSimpleDecl(ifccParser::SimpleDeclContext *ctx)
 {
     cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, ctx);
     return 0;
@@ -35,6 +35,16 @@ antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
             ->set_ctx(ctx)
     );
 
+    return 0;
+}
+
+antlrcpp::Any IRVisitor::visitTableDecl(ifccParser::TableDeclContext *ctx)
+{
+    if(ctx->CHAR()){
+        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Char,ctx, stoi(ctx->NUM()->getText()));
+    } else if (ctx->INT()) {
+        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int,ctx, stoi(ctx->NUM()->getText()));
+    }
     return 0;
 }
 

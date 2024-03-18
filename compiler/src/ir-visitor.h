@@ -10,8 +10,9 @@ class IRVisitor : public ifccBaseVisitor
 public:
     IRVisitor(IR::CFG * cfg) : cfg(cfg) {}
 
-    virtual antlrcpp::Any visitDeclStdRule(ifccParser::DeclStdRuleContext *ctx) override;
+    virtual antlrcpp::Any visitSimpleDecl(ifccParser::SimpleDeclContext *ctx) override;
     virtual antlrcpp::Any visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx) override;
+    virtual antlrcpp::Any visitTableDecl(ifccParser::TableDeclContext *ctx) override;
     virtual antlrcpp::Any visitAffectationRule(ifccParser::AffectationRuleContext *ctx) override;
     // virtual antlrcpp::Any visitDeclAff(ifccParser::DeclAffContext *ctx) override;
     // virtual antlrcpp::Any visitExprPar(ifccParser::ExprParContext *ctx) override;
