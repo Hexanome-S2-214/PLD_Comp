@@ -285,4 +285,10 @@ print('Tests failed :')
 for test in failed_tests:
     print("\t"+test)
 
-exit(1)
+
+
+
+# Exit with error code if there are any failed tests
+# This is important for CI/CD pipelines
+if taux_erreur > 0:
+    exit(1)
