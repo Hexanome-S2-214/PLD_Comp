@@ -34,7 +34,7 @@ namespace IR
         void set_current_bb(BasicBlock * bb);
         string get_next_bb_label();
         void add_bb(BasicBlock * bb);
-        vector<string> stack;
+        vector<string> stack; // TODO: Make private and add push/pop methods (also maybe rename to something that means something)
     private:
         vector<BasicBlock *> blocks;
         BasicBlock * current_bb;
