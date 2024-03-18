@@ -19,8 +19,7 @@ public:
     virtual antlrcpp::Any visitExprNum(ifccParser::ExprNumContext *ctx) override;
     virtual antlrcpp::Any visitExprVar(ifccParser::ExprVarContext *ctx) override;
 
-    virtual antlrcpp::Any visitExprSomme(ifccParser::ExprSommeContext *ctx) override;
-    virtual antlrcpp::Any visitExprSoustr(ifccParser::ExprSoustrContext *ctx) override;
+    virtual antlrcpp::Any visitExprSumSous(ifccParser::ExprSumSousContext *ctx) override;
     virtual antlrcpp::Any visitExprMultDiv(ifccParser::ExprMultDivContext *ctx) override;
     virtual antlrcpp::Any visitExprModulo(ifccParser::ExprModuloContext *ctx) override;
 

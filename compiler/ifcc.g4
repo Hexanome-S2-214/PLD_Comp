@@ -78,8 +78,7 @@ expr
      | '!' expr                         #exprUnaryNot
      | expr OP_MULT expr                #exprMultDiv
      | expr MODULO expr                 #exprModulo
-     | expr '+' expr                    #exprSomme
-     | expr '-' expr                    #exprSoustr
+     | expr op_add=('+' | '-') expr     #exprSumSous
      | expr COMPARAISON expr            #exprComparaison
      | expr EQ_COMPARAISON expr         #exprEqComparaison
      | expr B_AND expr                  #exprAndBAB
@@ -166,6 +165,11 @@ COMPARAISON
 OP_MULT
      : '*'
      | '/'
+     ;
+
+OP_SUM
+     : '+'
+     | '-'
      ;
 
 MODULO

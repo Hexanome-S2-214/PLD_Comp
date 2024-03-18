@@ -17,6 +17,7 @@
 #include "ir/instr/movzbl.h"
 #include "ir/instr/set_flag_comp.h"
 #include "ir/instr/expression_bit_a_bit.h"
+#include "error-reporter/compiler-error-token.h"
 
 ////////////////////////////////////////////
 // DECLARATION/AFFECTATION
@@ -83,7 +84,7 @@ antlrcpp::Any IRVisitor::visitExprVar(ifccParser::ExprVarContext *ctx)
 // OPERATIONS ARITHMETIQUES
 ////////////////////////////////////////////
 
-antlrcpp::Any IRVisitor::visitExprSomme(ifccParser::ExprSommeContext *ctx) {
+antlrcpp::Any IRVisitor::visitExprSumSous(ifccParser::ExprSumSousContext *ctx) {
     this->visit(ctx->expr(0));
 
     IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
@@ -95,46 +96,42 @@ antlrcpp::Any IRVisitor::visitExprSomme(ifccParser::ExprSommeContext *ctx) {
 
     this->visit(ctx->expr(1));
 
-    cfg->add_instr(
-        (new IR::IRInstrExprPlus)
-            ->set_src(varTemp->get_asm_str())
-            ->set_dest(IR::IRRegA(cfg).get_asm_str())
-            ->set_ctx(ctx)
-    );
-
-    return 0;
-}
-
-antlrcpp::Any IRVisitor::visitExprSoustr(ifccParser::ExprSoustrContext *ctx) {
-    this->visit(ctx->expr(0));
-
-    IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
-    cfg->add_instr(
-        (new IR::IRInstrAssign)
-            ->set_id(varTemp->id)
-            ->set_ctx(ctx)
-    );
-
-    this->visit(ctx->expr(1));
-
-    cfg->add_instr(
+    if (ctx->op_add->getText() == "+")
+    {
+        cfg->add_instr(
+            (new IR::IRInstrExprPlus)
+                ->set_src(varTemp->get_asm_str())
+                ->set_dest(IR::IRRegA(cfg).get_asm_str())
+                ->set_ctx(ctx)
+        );
+    }
+    else if (ctx->op_add->getText() == "-")
+    {
+        cfg->add_instr(
         (new IR::IRInstrMov)
             ->set_src(IR::IRRegA(cfg).get_asm_str())
             ->set_dest(IR::IRRegB(cfg).get_asm_str())
             ->set_ctx(ctx)
-    );
-    cfg->add_instr(
-        (new IR::IRInstrMov)
-            ->set_src(varTemp->get_asm_str())
-            ->set_dest(IR::IRRegA(cfg).get_asm_str())
-            ->set_ctx(ctx)
-    );
-    cfg->add_instr(
-        (new IR::IRInstrExprMinus)
-            ->set_src(IR::IRRegB(cfg).get_asm_str())
-            ->set_dest(IR::IRRegA(cfg).get_asm_str())
-            ->set_ctx(ctx)
-    );
+        );
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(varTemp->get_asm_str())
+                ->set_dest(IR::IRRegA(cfg).get_asm_str())
+                ->set_ctx(ctx)
+        );
+        cfg->add_instr(
+            (new IR::IRInstrExprMinus)
+                ->set_src(IR::IRRegB(cfg).get_asm_str())
+                ->set_dest(IR::IRRegA(cfg).get_asm_str())
+                ->set_ctx(ctx)
+        );
+    }
+    else
+    {
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Unrecognized operator", ctx)
+        );
+    }
 
     return 0;
 }
