@@ -468,3 +468,49 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
 
     return 0;
 }
+
+antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx) {
+
+    IR::BasicBlock * expr_bb = cfg->get_current_bb();
+
+    //Labels for new blocks
+    string end_while_label = cfg->get_next_bb_label();
+    string body_label = cfg->get_next_bb_label();
+
+    //Jump to condition/end-while block
+    cfg->add_instr(
+        (new IR::IRInstrJump)
+            ->set_symbol("jmp")
+            ->set_dest(end_while_label)
+            ->set_ctx(ctx)
+    );
+
+    //Parsing of body block
+    IR::BasicBlock * body_bb = new IR::BasicBlock(cfg, body_label, nullptr, nullptr);
+    cfg->add_bb(body_bb);
+    this->visit(ctx->struct_bloc());
+    body_bb->set_exit(end_while_label);
+
+    //Parsing of condition/end-while block
+    IR::BasicBlock * end_while_bb = new IR::BasicBlock(cfg, end_while_label, nullptr, nullptr);
+    cfg->add_bb(end_while_bb);
+    this->visit(ctx->expr());
+
+    //test result
+    cfg->add_instr(
+        (new IR::IRInstrComp)
+            ->set_src("$1")
+            ->set_dest(IR::IRRegA(cfg).get_asm_str())
+            ->set_ctx(ctx)
+    );
+
+    //if condition is evaluated to "true" -> jump to body of the while
+    cfg->add_instr(
+        (new IR::IRInstrJump)
+            ->set_symbol("je")
+            ->set_dest(body_label)
+            ->set_ctx(ctx)
+    );
+
+    return 0;
+}
