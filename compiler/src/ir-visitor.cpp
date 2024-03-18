@@ -397,7 +397,7 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
     // Jump if false
     cfg->add_instr(
         (new IR::IRInstrCheat)
-            ->set_instr("jne " + if_false_label)
+            ->set_instr("jne " + if_false_label) // TODO: CHANGE TO exit_label IF NO ELSE
             ->set_ctx(ctx)
     );
     // Visit if true
@@ -410,6 +410,7 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
             ->set_ctx(ctx)
     );
 
+    // TODO: NOT EXECUTE IF NO ELSE
     // Add if false
     IR::BasicBlock * if_false = new IR::BasicBlock(cfg, if_false_label, nullptr, nullptr);
     cfg->add_bb(if_false);
