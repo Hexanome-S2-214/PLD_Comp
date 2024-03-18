@@ -59,14 +59,18 @@ int main(int argn, const char **argv)
       exit(1);
   }
 
+  cerr << 0.1 << endl;
   IR::CFG * cfg = static_cast<IR::CFG *>(
     (new IR::CFG())
       ->set_error_reporter(error_reporter)
       ->set_arch(IR::X86)
   );
+  cerr << 0.2 << endl;
   IRVisitor visitor(cfg);
+  cerr << 0.3 << endl;
 
   visitor.visit(tree);
+  cerr << 0.4 << endl;
 
   cfg->gen_asm(cout);
 

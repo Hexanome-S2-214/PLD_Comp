@@ -2,11 +2,14 @@
 #include "ir-basic-block.h"
 #include "ir-symbol-table.h"
 
+int IR::CFG::bb_count = 2;
+
 IR::CFG::CFG()
 {
     symbol_table = new SymbolTable();
 
-    blocks.push_back(new BasicBlock(this, "entry"));
+    BasicBlock * new_bb = new BasicBlock(this, get_next_bb_label(), nullptr, nullptr);
+    add_bb(new_bb);
 }
 
 IR::IRBase * IR::CFG::set_error_reporter(ErrorReporter::ErrorReporter * error_reporter)
@@ -55,7 +58,38 @@ IR::SymbolTable * IR::CFG::get_symbol_table()
     return symbol_table;
 }
 
+void IR::CFG::set_current_bb(IR::BasicBlock * bb)
+{
+    current_bb = bb;
+}
+
 IR::BasicBlock * IR::CFG::get_current_bb()
 {
-    return blocks.back();
+    return current_bb;
 }
+
+string IR::CFG::get_next_bb_label()
+{
+    string label = ".L" + to_string(IR::CFG::bb_count);
+    IR::CFG::bb_count++;
+    return label;
+}
+
+void IR::CFG::add_bb(IR::BasicBlock * bb)
+{
+    blocks.push_back(bb);
+    set_current_bb(bb);
+}
+
+// IR::BasicBlock * IR::CFG::create_bb(IR::BasicBlock * exit_true, IR::BasicBlock * exit_false)
+// {
+//     string label = ".L" + to_string(IR::CFG::bb_count);
+//     IR::CFG::bb_count++;
+
+//     BasicBlock * new_bb = new BasicBlock(this, label, exit_true, exit_false);
+
+//     blocks.push_back(new_bb);
+//     current_bb = new_bb;
+    
+//     return new_bb;
+// }

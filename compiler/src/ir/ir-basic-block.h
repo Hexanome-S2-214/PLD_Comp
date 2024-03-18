@@ -26,12 +26,14 @@ namespace IR
 
         void set_exit_true(BasicBlock * exit_true);
         void set_exit_false(BasicBlock * exit_false);
+        void set_exit(string exit);
 
         string get_label();
         CFG * get_cfg();
     private:
         BasicBlock * exit_true;
         BasicBlock * exit_false;
+        string exit_label;
         vector<IRInstr *> instrs;
         string label;
         string test_var;

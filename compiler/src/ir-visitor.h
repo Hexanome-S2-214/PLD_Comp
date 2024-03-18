@@ -31,6 +31,8 @@ public:
     virtual antlrcpp::Any visitExprAndBAB(ifccParser::ExprAndBABContext *ctx) override;
     virtual antlrcpp::Any visitExprXorBAB(ifccParser::ExprXorBABContext *ctx) override;
     virtual antlrcpp::Any visitExprOrBAB(ifccParser::ExprOrBABContext *ctx) override;
+
+    virtual antlrcpp::Any visitStruct_if_else(ifccParser::Struct_if_elseContext *ctx) override;
 private:
     IR::CFG * cfg;
 };
