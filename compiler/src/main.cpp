@@ -70,11 +70,5 @@ int main(int argn, const char **argv)
 
   cfg->gen_asm(cout);
 
-  // SymbolTableVisitor s;
-  // s.visit(tree);
-  // s.checkAllVariablesUsed();
-  // CodeGenVisitor v(&s);
-  // v.visit(tree);
-
   return 0;
 }

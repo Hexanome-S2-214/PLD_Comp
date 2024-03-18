@@ -4,7 +4,7 @@ namespace IR
 {
     void IRInstrSetFlagComp::gen_asm(ostream& o)
     {
-        if      (symbol == "==")    { o << "\tsete " << dest << endl; } 
+        if      (symbol == "==" or symbol == "!")    { o << "\tsete " << dest << endl; } 
         else if (symbol == "!=")    { o << "\tsetne " << dest << endl; }
         else if (symbol == ">")     { o << "\tsetg " << dest << endl; }
         else if (symbol == "<")     { o << "\tsetl " << dest << endl; }

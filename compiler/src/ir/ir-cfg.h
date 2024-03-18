@@ -29,9 +29,17 @@ namespace IR
         IRBase * set_error_reporter(ErrorReporter::ErrorReporter * error_reporter);
 
         SymbolTable * get_symbol_table();
+
         BasicBlock * get_current_bb();
+        void set_current_bb(BasicBlock * bb);
+        string get_next_bb_label();
+        void add_bb(BasicBlock * bb);
+        vector<string> stack; // TODO: Make private and add push/pop methods (also maybe rename to something that means something)
     private:
         vector<BasicBlock *> blocks;
+        BasicBlock * current_bb;
         SymbolTable * symbol_table;
+
+        static int bb_count;
     };
 };

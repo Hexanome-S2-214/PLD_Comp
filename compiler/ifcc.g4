@@ -74,10 +74,8 @@ returnStmtRule
 
 expr
      : '(' expr ')'                     #exprParExpr
-     | '-' expr                         #exprUnaryMinus
-     | '!' expr                         #exprUnaryNot
-     | expr OP_MULT expr                #exprMultDiv
-     | expr MODULO expr                 #exprModulo
+     | op_unary=('-' | '!') expr        #exprUnary
+     | expr OP_MULT expr                #exprMultDivMod
      | expr op_add=('+' | '-') expr     #exprSumSous
      | expr COMPARAISON expr            #exprComparaison
      | expr EQ_COMPARAISON expr         #exprEqComparaison
@@ -165,6 +163,7 @@ COMPARAISON
 OP_MULT
      : '*'
      | '/'
+     | '%'
      ;
 
 OP_SUM
