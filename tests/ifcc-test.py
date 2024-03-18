@@ -80,10 +80,8 @@ if (len(args.input) > 1 or os.path.isdir(args.input[0])) and args.output_subdire
     print('error: cannot use -osd option when the input is a directory')
     exit(1)
     
-if os.path.exists('ifcc-test-output'):
-    os.system('rm -rf ifcc-test-output')
-
-os.mkdir('ifcc-test-output')
+if not os.path.exists('ifcc-test-output'):
+    os.mkdir('ifcc-test-output')
 
 # Liste des tests qui fail, mais c'est normal : message d'erreur différent entre gcc et nous, fonctionnalités qu'on
 # n'implémente pas dans tous les détails (affectations enchaînées avec parenthèses par exemple)
