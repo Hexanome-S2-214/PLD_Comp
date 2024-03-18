@@ -26,27 +26,6 @@ void IR::BasicBlock::gen_asm(ostream& o)
         instr->gen_asm(o);
     }
 
-    // if(exit_false != nullptr)
-    // {
-    //     if (exit_true != nullptr)
-    //     {
-    //         o << "\tcmpl $0, " << IR::IRRegA(this).get_asm_str() << endl;
-    //         o << "\tje " << exit_true->get_label() << endl;
-    //         o << "\tjmp " << exit_false->get_label() << endl;
-    //     }
-    //     else
-    //     {
-    //         o << "\tjmp " << exit_false->get_label() << endl;
-    //     }
-    // } else {
-    //     if (exit_true != nullptr)
-    //     {
-    //         o << "\tcmpl $0, " << IR::IRRegA(this).get_asm_str() << endl;
-    //         o << "\tje " << exit_true->get_label() << endl;
-    //         o << "\tjmp " << exit_true->exit_false->get_label() << endl;
-    //     }
-    // }
-
     if (exit_label != "")
     {
         o << "\tjmp " << exit_label << "" << endl;
