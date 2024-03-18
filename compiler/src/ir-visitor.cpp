@@ -13,6 +13,7 @@
 #include "ir/instr/expression_plus.h"
 #include "ir/instr/expression_minus.h"
 #include "ir/instr/mov.h"
+#include "ir/instr/assignTable.h"
 
 ////////////////////////////////////////////
 // DECLARATION/AFFECTATION
@@ -48,11 +49,23 @@ antlrcpp::Any IRVisitor::visitTableDecl(ifccParser::TableDeclContext *ctx)
     return 0;
 }
 
-antlrcpp::Any IRVisitor::visitAffectationRule(ifccParser::AffectationRuleContext *ctx)
+antlrcpp::Any IRVisitor::visitSimpleAff(ifccParser::SimpleAffContext *ctx)
 {
     this->visit(ctx->rvalue());
     cfg->add_instr(
         (new IR::IRInstrAssign)
+            ->set_id(ctx->VAR()->getText())
+            ->set_ctx(ctx)
+    );
+
+    return 0;
+}
+
+antlrcpp::Any IRVisitor::visitTableAff(ifccParser::TableAffContext *ctx)
+{
+    this->visit(ctx->rvalue());
+    cfg->add_instr(
+        (new IR::IRInstrAssignTable(stoi(ctx->NUM()->getText())))
             ->set_id(ctx->VAR()->getText())
             ->set_ctx(ctx)
     );

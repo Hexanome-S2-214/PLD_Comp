@@ -45,8 +45,8 @@ instructionRule
      ;
 
 declStdRule
-     : CONST? (INT|CHAR) VAR ';' #simpleDecl
-     | CONST? (INT | CHAR) VAR '[' NUM ']' ';' #tableDecl
+     : CONST? (INT|CHAR) VAR ';'                  #simpleDecl
+     | CONST? (INT | CHAR) VAR '[' NUM ']' ';'    #tableDecl
      ;
 
 declAffRule
@@ -54,7 +54,8 @@ declAffRule
      ;
 
 affectationRule
-     : VAR '=' rvalue ';'
+     : VAR '=' rvalue ';'               #simpleAff
+     | VAR '[' NUM ']' '=' rvalue ';'   #tableAff
      ;
 
 affectationRule2

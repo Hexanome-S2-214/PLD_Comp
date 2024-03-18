@@ -68,3 +68,11 @@ string IR::SymbolTable::get_next_tmp()
     return tmp;
 }
 
+void IR::SymbolT::gen_asm(ostream &o)
+{
+    if(type == IR::Int){
+        o << offset - index*INT_SIZE << IR::IRRegStack(this).get_asm_str();
+    }else if (type == IR::Char){
+        o << offset - index*CHAR_SIZE << IR::IRRegStack(this).get_asm_str();
+    }
+}

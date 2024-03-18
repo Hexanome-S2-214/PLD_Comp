@@ -29,6 +29,14 @@ namespace IR
         Type type;
     };
 
+    class SymbolT: public Symbol
+    {
+        public:
+        SymbolT(IRBase * parent, string id, int offset, Type type, antlr4::ParserRuleContext * ctx = nullptr, int idx = 0) : Symbol(parent, id, offset, type, ctx), index(idx) {}
+        void gen_asm(ostream& o) override;
+        int index;
+    };
+
     class SymbolTable
     {
     public:
