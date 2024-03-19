@@ -6,6 +6,7 @@
 #include "ir-type.h"
 #include "ir-base.h"
 #include "../error-reporter/error-reporter.h"
+#include "params/ir-symbol.h"
 
 #define SYMBOL_SIZE 4
 
@@ -13,21 +14,6 @@ using namespace std;
 
 namespace IR
 {
-    class Symbol : public IR::IRBase
-    {
-    public:
-        Symbol(IRBase * parent, string id, int offset, Type type, antlr4::ParserRuleContext * ctx = nullptr);
-        Symbol() {};
-        ~Symbol() = default;
-
-        void gen_asm(ostream& o) override;
-
-        string id;
-        int offset;
-        bool used = false;
-        Type type;
-    };
-
     class SymbolTable
     {
     public:
