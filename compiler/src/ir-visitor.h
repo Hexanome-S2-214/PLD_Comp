@@ -31,6 +31,8 @@ public:
 
     virtual antlrcpp::Any visitStruct_if_else(ifccParser::Struct_if_elseContext *ctx) override;
     virtual antlrcpp::Any visitStruct_while(ifccParser::Struct_whileContext *ctx) override;
+
+    virtual antlrcpp::Any visitFunctionCallRule(ifccParser::FunctionCallRuleContext *ctx) override;
 private:
     IR::CFG * cfg;
 };

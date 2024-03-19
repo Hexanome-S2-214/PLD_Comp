@@ -7,6 +7,7 @@
     "python.testing.pytestEnabled": true,
     "remote.autoForwardPortsFallback": 0,
     "files.associations": {
-        "not_unaire.C": "cpp"
+        "not_unaire.C": "cpp",
+        "ostream": "cpp"
     }
 }

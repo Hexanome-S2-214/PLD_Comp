@@ -80,4 +80,26 @@ namespace IR
             o << "%al";
         }
     };
+
+    class IRRegEDI : public IRReg
+    {
+    public:
+        IRRegEDI(IRBase * parent) : IRReg(parent) {};
+        
+        void gen_asm(ostream& o) override
+        {
+            o << "%edi";
+        }
+    };
+
+    class IRRegESI : public IRReg
+    {
+    public:
+        IRRegESI(IRBase * parent) : IRReg(parent) {};
+        
+        void gen_asm(ostream& o) override
+        {
+            o << "%esi";
+        }
+    };
 };

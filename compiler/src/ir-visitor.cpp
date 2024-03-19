@@ -19,6 +19,7 @@
 #include "ir/instr/expression_bit_a_bit.h"
 #include "ir/instr/intr-cheat.h"
 #include "ir/instr/jump.h"
+#include "ir/instr/call.h"
 #include "error-reporter/compiler-error-token.h"
 
 ////////////////////////////////////////////
@@ -511,6 +512,71 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
             ->set_dest(body_label)
             ->set_ctx(ctx)
     );
+
+    return 0;
+}
+
+////////////////////////////////////////////
+// FONCTIONS
+////////////////////////////////////////////
+
+// PUTCHAR ET GETCHAR UNIQUEMENT -> PAS DE GESTION DES APPELS DE FONCTIONS PERSO
+
+
+antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleContext *ctx) {
+
+    cerr << "1" << endl;
+    cfg->add_instr(
+        (new IR::IRInstrCheat)
+            ->set_instr("movl $0, %eax")
+            ->set_ctx(ctx)
+    );
+
+    cerr << "2" << endl;
+    //Put parameters in the dedicated registers
+    //TODO : changer les dest -> d'abord %edi, puis %esi...
+    for(int i=0; i < ctx->fparam().size(); ++i) {
+        cerr << "enter for" << endl;
+
+        //If param is a cst
+        if (ctx->fparam(i)->NUM()) {
+            
+            cfg->add_instr(
+                (new IR::IRInstrMov)
+                    ->set_src("$" + ctx->fparam(i)->getText())
+                    ->set_dest(IR::IRRegA(cfg).get_asm_str())
+                    ->set_ctx(ctx)
+            );
+        }
+        //If it's a variable
+        else if (ctx->fparam(i)->VAR()) {
+            
+            string src = cfg->get_symbol_table()->get_symbol(ctx->fparam(i)->getText())->get_asm_str();
+            cerr << "var found" << endl;
+            cfg->add_instr(
+                (new IR::IRInstrMov)
+                    ->set_src(src)
+                    ->set_dest(IR::IRRegA(cfg).get_asm_str())
+                    ->set_ctx(ctx)
+            );
+        }
+
+        // %eax to %edi (NB : in the future not necessarily %edi)
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(IR::IRRegA(cfg).get_asm_str())
+                ->set_dest(IR::IRRegEDI(cfg).get_asm_str())
+                ->set_ctx(ctx)
+        );
+    }
+    cerr << "3" << endl;
+    //call instruction
+    cfg->add_instr(
+        (new IR::IRInstrCall)
+            ->set_symbol(ctx->fname->getText())
+            ->set_ctx(ctx)
+    );
+    cerr << "4" << endl;
 
     return 0;
 }

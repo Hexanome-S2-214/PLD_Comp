@@ -42,6 +42,7 @@ declarationRule
 instructionRule
      : returnStmtRule    # returnStmt
      | affectationRule   # affectation
+     | functionCallRule  # functionCall
      ;
 
 declStdRule
@@ -61,11 +62,16 @@ affectationRule2
      ;
 
 rvalue
-     : ( affectationRule2 | expr)
+     : (affectationRule2 | expr)
+     | functionCallRule
      ;
 
 returnStmtRule
      : RETURN rvalue ';'
+     ;
+
+functionCallRule
+     : fname=VAR '(' fparam* ')' ';'?   //2 possibilités : dans affectationRule -> pas de ';' ; dans instructionRule -> ';'
      ;
 
 //=============================================
@@ -102,6 +108,15 @@ struct_if_else
 
 struct_while
      : 'while' '(' expr ')' struct_bloc
+     ;
+
+//=============================================
+// Fonctions
+//=============================================
+
+fparam
+     : VAR
+     | NUM
      ;
 
 //=============================================
