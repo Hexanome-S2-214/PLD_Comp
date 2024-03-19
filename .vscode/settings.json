@@ -8,6 +8,7 @@
     "remote.autoForwardPortsFallback": 0,
     "files.associations": {
         "not_unaire.C": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "iostream": "cpp"
     }
 }

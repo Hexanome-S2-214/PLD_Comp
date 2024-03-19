@@ -526,11 +526,11 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
 antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleContext *ctx) {
 
     cerr << "1" << endl;
-    cfg->add_instr(
-        (new IR::IRInstrCheat)
-            ->set_instr("movl $0, %eax")
-            ->set_ctx(ctx)
-    );
+    // cfg->add_instr(
+    //     (new IR::IRInstrCheat)
+    //         ->set_instr("movl $0, %eax")
+    //         ->set_ctx(ctx)
+    // );
 
     cerr << "2" << endl;
     //Put parameters in the dedicated registers
