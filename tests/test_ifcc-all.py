@@ -1,3 +1,4 @@
+import shutil
 import pytest
 from subprocess import run
 import glob
@@ -15,6 +16,11 @@ def get_pretty_name(file_param: Tuple[int, str]) -> str:
 @pytest.fixture(params=enumerate(get_files_path(PROGRAMS_DIR)), ids=get_pretty_name)
 def file_param(request):
     return request.param
+
+@pytest.fixture(scope='session', autouse=True)
+def setup():
+    shutil.rmtree('ifcc-test-output', ignore_errors=True)
+    pass
 
 def test_programs(file_param):
     index, file_path = file_param
