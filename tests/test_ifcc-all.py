@@ -39,7 +39,7 @@ def test_programs(file_param):
     if result.returncode == 0:
         assert True
     elif allow_fail:
-        pytest.skip(f"Test skipped for {file_path}")
+        pytest.xfail(f"Test failed for {file_path} (as expected)")
     else:
         pytest.fail(f"""
             Test failed for {file_path} with exit code {result.returncode}:
