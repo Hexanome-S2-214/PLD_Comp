@@ -5,6 +5,14 @@
 
 namespace IR
 {
+    SymbolTable::~SymbolTable()
+    {
+        for (pair<const string, Symbol *> symbol : symbols)
+        {
+            delete symbol.second;
+        }
+    }
+
     Symbol * SymbolTable::declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx)
     {
         if (symbols.find(id) != symbols.end())

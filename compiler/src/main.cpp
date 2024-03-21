@@ -70,5 +70,8 @@ int main(int argn, const char **argv)
 
   cfg->gen_asm(cout);
 
+  delete cfg;
+  delete error_reporter;
+
   return 0;
 }
