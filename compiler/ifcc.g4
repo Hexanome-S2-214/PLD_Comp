@@ -61,7 +61,7 @@ affectationRule2
      ;
 
 rvalue
-     : ( affectationRule2 | expr)
+     : ( affectationRule2 | expr | '(' expr ')' | '(' affectationRule2 ')')
      ;
 
 returnStmtRule
