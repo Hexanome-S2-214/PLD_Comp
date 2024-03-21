@@ -18,7 +18,7 @@ namespace IR
     {
     public:
         SymbolTable() {};
-        ~SymbolTable() = default;
+        ~SymbolTable();
 
         Symbol * declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx = nullptr);
         Symbol * get_symbol(string id, antlr4::ParserRuleContext * ctx = nullptr);

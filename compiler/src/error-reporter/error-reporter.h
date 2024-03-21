@@ -10,6 +10,7 @@ namespace ErrorReporter
     public:
         ErrorReporter() = default;
         ErrorReporter(bool printErrors);
+        ~ErrorReporter();
 
         /*
         * Add error to reporter

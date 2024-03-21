@@ -11,6 +11,10 @@ namespace IR
     class IRInstrBaseSrc
     {
     public:
+        ~IRInstrBaseSrc() {
+            delete src;
+        }
+
         Ref* set_src(IRParam * src) {
             src->set_parent(static_cast<Ref*>(this));
             this->src = src;
@@ -24,6 +28,10 @@ namespace IR
     class IRInstrBaseDest
     {
     public:
+        ~IRInstrBaseDest() {
+            delete dest;
+        }
+        
         Ref * set_dest(IRParam * dest) {
             dest->set_parent(static_cast<Ref*>(this));
             this->dest = dest;
@@ -37,6 +45,10 @@ namespace IR
     class IRInstrBaseValue
     {
     public:
+        ~IRInstrBaseValue() {
+            delete value;
+        }
+
         Ref * set_value(IRParam * value) {
             value->set_parent(static_cast<Ref*>(this));
             this->value = value;
@@ -50,6 +62,10 @@ namespace IR
     class IRInstrBaseSymbol
     {
     public:
+        ~IRInstrBaseSymbol() {
+            delete symbol;
+        }
+        
         Ref * set_symbol(IRParam * symbol) {
             symbol->set_parent(static_cast<Ref*>(this));
             this->symbol = symbol;

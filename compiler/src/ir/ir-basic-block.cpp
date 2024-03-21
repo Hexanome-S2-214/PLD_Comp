@@ -8,6 +8,14 @@ IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label, IR::BasicBlock * exit_tr
     set_parent(cfg);
 }
 
+IR::BasicBlock::~BasicBlock()
+{
+    for (IR::IRInstr * instr : instrs)
+    {
+        delete instr;
+    }
+}
+
 void IR::BasicBlock::add_instr(IR::IRBase * instr)
 {
     instr->set_parent(this);
