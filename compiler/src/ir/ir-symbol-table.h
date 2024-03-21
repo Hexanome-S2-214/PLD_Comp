@@ -30,7 +30,7 @@ namespace IR
         ErrorReporter::ErrorReporter * error_reporter;
     private:
         map<string, Symbol *> symbols;
-        int symbol_offset = -SYMBOL_SIZE;
+        int symbol_offset = 0;
         int tmp_offset = 0;
     };
 }

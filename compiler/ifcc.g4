@@ -84,6 +84,7 @@ expr
      | expr B_OR expr                   #exprOrBAB
      | expr AND expr                    #exprAnd
      | expr OR expr                     #exprOr
+     | CHARACTER                        #exprCharacter
      | VAR                              #exprVar
      | NUM                              #exprNum
      ;
@@ -130,6 +131,12 @@ NUM
 
 VAR
      : [a-zA-Z][a-zA-Z0-9_]*
+     ;
+
+
+CHARACTER
+     : '"' [a-zA-Z0-9_ ] '"'
+     | '\'' [a-zA-Z0-9_ ] '\''
      ;
 
 COMMENT
