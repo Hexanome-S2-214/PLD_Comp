@@ -2,18 +2,16 @@
 #include "mov.h"
 #include "../ir-basic-block.h"
 #include "../ir-cfg.h"
-#include "../ir-reg.h"
+#include "../params/ir-reg.h"
 
 namespace IR
 {
     void IRInstrExprVar::gen_asm(ostream& o)
     {
-        Symbol * symbol = this->get_bb()->get_cfg()->get_symbol_table()->get_symbol(this->id, get_ctx());
-
         paste_properties(
             (new IRInstrMov)
-                ->set_src(symbol->get_asm_str())
-                ->set_dest(IR::IRRegA(this).get_asm_str())
+                ->set_src(symbol)
+                ->set_dest(new IRRegA)
         )->gen_asm(o);
     }
 }

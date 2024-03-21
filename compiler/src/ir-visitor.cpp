@@ -3,7 +3,9 @@
 #include "ir/ir-cfg.h"
 #include "ir/ir-type.h"
 #include "ir/ir-basic-block.h"
-#include "ir/ir-reg.h"
+#include "ir/params/ir-reg.h"
+#include "ir/params/ir-symbol.h"                
+#include "ir/params/ir-const.h"
 #include "ir/instr/assign.h"
 #include "ir/instr/expression_unary_minus.h"
 #include "ir/instr/expression_cst.h"
@@ -35,10 +37,11 @@ antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
 {
     this->visit(ctx->rvalue());
 
-    cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, ctx);
+    IR::Symbol * symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, ctx);
+
     cfg->add_instr(
         (new IR::IRInstrAssign)
-            ->set_id(ctx->VAR()->getText())
+            ->set_symbol(symbol)
             ->set_ctx(ctx)
     );
 
@@ -48,9 +51,27 @@ antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
 antlrcpp::Any IRVisitor::visitAffectationRule(ifccParser::AffectationRuleContext *ctx)
 {
     this->visit(ctx->rvalue());
+
+    IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
+
     cfg->add_instr(
         (new IR::IRInstrAssign)
-            ->set_id(ctx->VAR()->getText())
+            ->set_symbol(symbol)
+            ->set_ctx(ctx)
+    );
+
+    return 0;
+}
+
+antlrcpp::Any IRVisitor::visitAffectationRule2(ifccParser::AffectationRule2Context *ctx)
+{
+    this->visit(ctx->rvalue());
+
+    IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
+
+    cfg->add_instr(
+        (new IR::IRInstrAssign)
+            ->set_symbol(symbol)
             ->set_ctx(ctx)
     );
 
@@ -64,7 +85,10 @@ antlrcpp::Any IRVisitor::visitAffectationRule(ifccParser::AffectationRuleContext
 antlrcpp::Any IRVisitor::visitExprNum(ifccParser::ExprNumContext *ctx){
     cfg->add_instr(
         (new IR::IRInstrExprCst)
-            ->set_value(ctx->NUM()->getText())
+            ->set_value(
+                (new IR::IRConst)
+                    ->set_value(ctx->NUM()->getText())
+            )
             ->set_ctx(ctx)
     );
 
@@ -75,7 +99,9 @@ antlrcpp::Any IRVisitor::visitExprVar(ifccParser::ExprVarContext *ctx)
 {
     cfg->add_instr(
         (new IR::IRInstrExprVar)
-            ->set_id(ctx->VAR()->getText())
+            ->set_symbol(
+                cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx)
+            )
             ->set_ctx(ctx)
     );
 
@@ -92,7 +118,7 @@ antlrcpp::Any IRVisitor::visitExprSumSous(ifccParser::ExprSumSousContext *ctx) {
     IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
         (new IR::IRInstrAssign)
-            ->set_id(varTemp->id)
+            ->set_symbol(varTemp)
             ->set_ctx(ctx)
     );
 
@@ -102,8 +128,8 @@ antlrcpp::Any IRVisitor::visitExprSumSous(ifccParser::ExprSumSousContext *ctx) {
     {
         cfg->add_instr(
             (new IR::IRInstrExprPlus)
-                ->set_src(varTemp->get_asm_str())
-                ->set_dest(IR::IRRegA(cfg).get_asm_str())
+                ->set_src(varTemp)
+                ->set_dest(new IR::IRRegA)
                 ->set_ctx(ctx)
         );
     }
@@ -111,20 +137,20 @@ antlrcpp::Any IRVisitor::visitExprSumSous(ifccParser::ExprSumSousContext *ctx) {
     {
         cfg->add_instr(
         (new IR::IRInstrMov)
-            ->set_src(IR::IRRegA(cfg).get_asm_str())
-            ->set_dest(IR::IRRegB(cfg).get_asm_str())
+            ->set_src(new IR::IRRegA)
+            ->set_dest(new IR::IRRegB)
             ->set_ctx(ctx)
         );
         cfg->add_instr(
             (new IR::IRInstrMov)
-                ->set_src(varTemp->get_asm_str())
-                ->set_dest(IR::IRRegA(cfg).get_asm_str())
+                ->set_src(varTemp)
+                ->set_dest(new IR::IRRegA)
                 ->set_ctx(ctx)
         );
         cfg->add_instr(
             (new IR::IRInstrExprMinus)
-                ->set_src(IR::IRRegB(cfg).get_asm_str())
-                ->set_dest(IR::IRRegA(cfg).get_asm_str())
+                ->set_src(new IR::IRRegB)
+                ->set_dest(new IR::IRRegA)
                 ->set_ctx(ctx)
         );
     }
@@ -145,7 +171,7 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
     IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
         (new IR::IRInstrAssign)
-            ->set_id(varTemp->id)
+            ->set_symbol(varTemp)
             ->set_ctx(ctx)
     );
     
@@ -154,14 +180,14 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
     if (ctx->OP_MULT()->getText() == "*")
         cfg->add_instr(
             (new IR::IRInstrExprMult)
-                ->set_src(varTemp->get_asm_str())
-                ->set_dest(IR::IRRegA(cfg).get_asm_str())
+                ->set_src(varTemp)
+                ->set_dest(new IR::IRRegA)
                 ->set_ctx(ctx)
         );
     else
         cfg->add_instr(
             (new IR::IRInstrExprDiv)
-                ->set_src(varTemp->get_asm_str())
+                ->set_src(varTemp)
                 ->set_ctx(ctx)
         );
 
@@ -169,8 +195,8 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
             //Modulo : il faut mettre EDX dans EAX -> c'est ce registre qui contient le reste après idivl
             cfg->add_instr(
                 (new IR::IRInstrMov)
-                    ->set_src(IR::IRRegD(cfg).get_asm_str())
-                    ->set_dest(IR::IRRegA(cfg).get_asm_str())
+                    ->set_src(new IR::IRRegD)
+                    ->set_dest(new IR::IRRegA)
                     ->set_ctx(ctx)
             );
         }
@@ -196,21 +222,27 @@ antlrcpp::Any IRVisitor::visitExprUnary(ifccParser::ExprUnaryContext *ctx)
         //comparaison EAX (droite) et ECX (gauche)
         cfg->add_instr(
             (new IR::IRInstrComp)
-                ->set_src("$0")
-                ->set_dest(IR::IRRegA(cfg).get_asm_str())
+                ->set_src(
+                    (new IR::IRConst)->set_value("0")
+                )
+                ->set_dest(new IR::IRRegA)
                 ->set_ctx(ctx)
         );
         //résultat de la comparaison dans EAX
         cfg->add_instr(
             (new IR::IRInstrSetFlagComp)
-                ->set_symbol(ctx->op_unary->getText())
-                ->set_dest(IR::IRRegAL(cfg).get_asm_str())
+                ->set_op(ctx->op_unary->getText())
+                ->set_dest(
+                    (new IR::IRRegA)->set_size(IR::Byte)
+                )
                 ->set_ctx(ctx)
         );
         cfg->add_instr(
             (new IR::IRInstrMovzbl)
-                ->set_src(IR::IRRegAL(cfg).get_asm_str())
-                ->set_dest(IR::IRRegA(cfg).get_asm_str())
+                ->set_src(
+                    (new IR::IRRegA)->set_size(IR::Byte)
+                )
+                ->set_dest(new IR::IRRegA)
                 ->set_ctx(ctx)
         );
     }
@@ -230,8 +262,8 @@ antlrcpp::Any IRVisitor::visitExprEqComparaison(ifccParser::ExprEqComparaisonCon
     //on stocke dans ECX
     cfg->add_instr(
         (new IR::IRInstrMov)
-            ->set_src(IR::IRRegA(cfg).get_asm_str())
-            ->set_dest(IR::IRRegC(cfg).get_asm_str())
+            ->set_src(new IR::IRRegA)
+            ->set_dest(new IR::IRRegC)
             ->set_ctx(ctx)
     );
 
@@ -241,23 +273,27 @@ antlrcpp::Any IRVisitor::visitExprEqComparaison(ifccParser::ExprEqComparaisonCon
     //comparaison EAX (droite) et ECX (gauche)
     cfg->add_instr(
         (new IR::IRInstrComp)
-            ->set_src(IR::IRRegA(cfg).get_asm_str())
-            ->set_dest(IR::IRRegC(cfg).get_asm_str())
+            ->set_src(new IR::IRRegA)
+            ->set_dest(new IR::IRRegC)
             ->set_ctx(ctx)
     );
 
     //résultat de la comparaison dans EAX
     cfg->add_instr(
         (new IR::IRInstrSetFlagComp)
-            ->set_symbol(ctx->EQ_COMPARAISON()->getText())
-            ->set_dest(IR::IRRegAL(cfg).get_asm_str())
+            ->set_op(ctx->EQ_COMPARAISON()->getText())
+            ->set_dest(
+                (new IR::IRRegA)->set_size(IR::Byte)
+            )
             ->set_ctx(ctx)
     );
 
     cfg->add_instr(
         (new IR::IRInstrMovzbl)
-            ->set_src(IR::IRRegAL(cfg).get_asm_str())
-            ->set_dest(IR::IRRegA(cfg).get_asm_str())
+            ->set_src(
+                (new IR::IRRegA)->set_size(IR::Byte)
+            )
+            ->set_dest(new IR::IRRegA)
             ->set_ctx(ctx)
     );
 
@@ -272,8 +308,8 @@ antlrcpp::Any IRVisitor::visitExprComparaison(ifccParser::ExprComparaisonContext
     //on stocke dans ECX
     cfg->add_instr(
         (new IR::IRInstrMov)
-            ->set_src(IR::IRRegA(cfg).get_asm_str())
-            ->set_dest(IR::IRRegC(cfg).get_asm_str())
+            ->set_src(new IR::IRRegA)
+            ->set_dest(new IR::IRRegC)
             ->set_ctx(ctx)
     );
 
@@ -283,23 +319,27 @@ antlrcpp::Any IRVisitor::visitExprComparaison(ifccParser::ExprComparaisonContext
     //comparaison EAX (droite) et ECX (gauche)
     cfg->add_instr(
         (new IR::IRInstrComp)
-            ->set_src(IR::IRRegA(cfg).get_asm_str())
-            ->set_dest(IR::IRRegC(cfg).get_asm_str())
+            ->set_src(new IR::IRRegA)
+            ->set_dest(new IR::IRRegC)
             ->set_ctx(ctx)
     );
 
     //résultat de la comparaison dans EAX
     cfg->add_instr(
         (new IR::IRInstrSetFlagComp)
-            ->set_symbol(ctx->COMPARAISON()->getText())
-            ->set_dest(IR::IRRegAL(cfg).get_asm_str())
+            ->set_op(ctx->COMPARAISON()->getText())
+            ->set_dest(
+                (new IR::IRRegA)->set_size(IR::Byte)
+            )
             ->set_ctx(ctx)
     );
 
     cfg->add_instr(
         (new IR::IRInstrMovzbl)
-            ->set_src(IR::IRRegAL(cfg).get_asm_str())
-            ->set_dest(IR::IRRegA(cfg).get_asm_str())
+            ->set_src(
+                (new IR::IRRegA)->set_size(IR::Byte)
+            )
+            ->set_dest(new IR::IRRegA)
             ->set_ctx(ctx)
     );
 
@@ -317,7 +357,7 @@ antlrcpp::Any IRVisitor::visitExprAndBAB(ifccParser::ExprAndBABContext *ctx) {
     IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
         (new IR::IRInstrAssign)
-            ->set_id(varTemp->id)
+            ->set_symbol(varTemp)
             ->set_ctx(ctx)
     );
     
@@ -325,9 +365,9 @@ antlrcpp::Any IRVisitor::visitExprAndBAB(ifccParser::ExprAndBABContext *ctx) {
 
     cfg->add_instr(
         (new IR::IRInstrExprBitABit)
-            ->set_src(varTemp->get_asm_str())
-            ->set_dest(IR::IRRegA(cfg).get_asm_str())
-            ->set_symbol(ctx->B_AND()->getText())
+            ->set_src(varTemp)
+            ->set_dest(new IR::IRRegA)
+            ->set_op(ctx->B_AND()->getText())
             ->set_ctx(ctx)
     );
 
@@ -341,7 +381,7 @@ antlrcpp::Any IRVisitor::visitExprXorBAB(ifccParser::ExprXorBABContext *ctx) {
     IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
         (new IR::IRInstrAssign)
-            ->set_id(varTemp->id)
+            ->set_symbol(varTemp)
             ->set_ctx(ctx)
     );
     
@@ -349,9 +389,9 @@ antlrcpp::Any IRVisitor::visitExprXorBAB(ifccParser::ExprXorBABContext *ctx) {
 
     cfg->add_instr(
         (new IR::IRInstrExprBitABit)
-            ->set_src(varTemp->get_asm_str())
-            ->set_dest(IR::IRRegA(cfg).get_asm_str())
-            ->set_symbol(ctx->B_XOR()->getText())
+            ->set_src(varTemp)
+            ->set_dest(new IR::IRRegA)
+            ->set_op(ctx->B_XOR()->getText())
             ->set_ctx(ctx)
     );
 
@@ -365,7 +405,7 @@ antlrcpp::Any IRVisitor::visitExprOrBAB(ifccParser::ExprOrBABContext *ctx) {
     IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
         (new IR::IRInstrAssign)
-            ->set_id(varTemp->id)
+            ->set_symbol(varTemp)
             ->set_ctx(ctx)
     );
     
@@ -373,9 +413,9 @@ antlrcpp::Any IRVisitor::visitExprOrBAB(ifccParser::ExprOrBABContext *ctx) {
 
     cfg->add_instr(
         (new IR::IRInstrExprBitABit)
-            ->set_src(varTemp->get_asm_str())
-            ->set_dest(IR::IRRegA(cfg).get_asm_str())
-            ->set_symbol(ctx->B_OR()->getText())
+            ->set_src(varTemp)
+            ->set_dest(new IR::IRRegA)
+            ->set_op(ctx->B_OR()->getText())
             ->set_ctx(ctx)
     );
 
@@ -406,8 +446,10 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
     // Compare IF result
     cfg->add_instr(
         (new IR::IRInstrComp)
-            ->set_src("$1")
-            ->set_dest(IR::IRRegA(cfg).get_asm_str())
+            ->set_src(
+                (new IR::IRConst)->set_value("1")
+            )
+            ->set_dest(new IR::IRRegA)
             ->set_ctx(ctx)
     );
 
@@ -425,8 +467,8 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
     //Jump after condition evaluation
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_symbol("jne")
-            ->set_dest(jump_after_eval_cond)
+            ->set_op("jne")
+            ->set_label(jump_after_eval_cond)
             ->set_ctx(ctx)
     );
 
@@ -436,8 +478,8 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
     // Jump to endif block when if complete
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_symbol("jmp")
-            ->set_dest(exit_label)
+            ->set_op("jmp")
+            ->set_label(exit_label)
             ->set_ctx(ctx)
     );
 
@@ -480,8 +522,8 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
     //Jump to condition/end-while block
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_symbol("jmp")
-            ->set_dest(end_while_label)
+            ->set_op("jmp")
+            ->set_label(end_while_label)
             ->set_ctx(ctx)
     );
 
@@ -499,16 +541,18 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
     //test result
     cfg->add_instr(
         (new IR::IRInstrComp)
-            ->set_src("$1")
-            ->set_dest(IR::IRRegA(cfg).get_asm_str())
+            ->set_src(
+                (new IR::IRConst)->set_value("1")
+            )
+            ->set_dest(new IR::IRRegA)
             ->set_ctx(ctx)
     );
 
     //if condition is evaluated to "true" -> jump to body of the while
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_symbol("je")
-            ->set_dest(body_label)
+            ->set_op("je")
+            ->set_label(body_label)
             ->set_ctx(ctx)
     );
 

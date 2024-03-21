@@ -1,7 +1,6 @@
 #include "ir-basic-block.h"
 #include "ir-cfg.h"
 #include "ir-instr.h"
-#include "ir-reg.h"
 
 IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label) : BasicBlock(cfg, label, nullptr, nullptr) {}
 
