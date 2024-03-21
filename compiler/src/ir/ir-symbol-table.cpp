@@ -21,6 +21,8 @@ namespace IR
             exit(1);
         }
 
+        symbol_offset -= type.size;
+        
         Symbol * symbol = new Symbol;
 
         symbol->set_parent(parent);
@@ -31,7 +33,6 @@ namespace IR
 
         symbols[id] = symbol;
 
-        symbol_offset -= SYMBOL_SIZE;
 
         return symbol;
     }

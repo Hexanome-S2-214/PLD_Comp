@@ -15,6 +15,7 @@
 #include "ir/instr/expression_plus.h"
 #include "ir/instr/expression_minus.h"
 #include "ir/instr/mov.h"
+#include "ir/instr/character.h"
 #include "ir/instr/comp.h"
 #include "ir/instr/movzbl.h"
 #include "ir/instr/set_flag_comp.h"
@@ -29,7 +30,14 @@
 
 antlrcpp::Any IRVisitor::visitDeclStdRule(ifccParser::DeclStdRuleContext *ctx)
 {
-    cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, ctx);
+    if(ctx->getTokens(ifccParser::INT).size() >= 1)
+    {
+        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, ctx);
+    }else if(ctx->getTokens(ifccParser::CHAR).size() >= 1)
+    {
+        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Char, ctx);
+    }
+
     return 0;
 }
 
@@ -37,7 +45,14 @@ antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
 {
     this->visit(ctx->rvalue());
 
-    IR::Symbol * symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, ctx);
+    IR::Symbol *symbol;
+    if (ctx->getTokens(ifccParser::INT).size() >= 1)
+    {
+        symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, ctx);
+    }else if(ctx->getTokens(ifccParser::CHAR).size() >= 1)
+    {
+        symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Char, ctx);
+    }
 
     cfg->add_instr(
         (new IR::IRInstrAssign)
@@ -81,6 +96,20 @@ antlrcpp::Any IRVisitor::visitAffectationRule2(ifccParser::AffectationRule2Conte
 ////////////////////////////////////////////
 // EXPRESSIONS TERMINALES
 ////////////////////////////////////////////
+antlrcpp::Any IRVisitor::visitExprCharacter(ifccParser::ExprCharacterContext *ctx){
+    std::string text = ctx->CHARACTER()->getText();
+    if (!text.empty())
+    {
+        int ascii_value = static_cast<int>(text[1]);
+        cfg->add_instr(
+            (new IR::IRInstrCharacter)
+                ->set_value((new IR::IRConst)->set_value(std::to_string(ascii_value)))
+                ->set_ctx(ctx)
+        );
+    }
+
+    return 0;
+}
 
 antlrcpp::Any IRVisitor::visitExprNum(ifccParser::ExprNumContext *ctx){
     cfg->add_instr(

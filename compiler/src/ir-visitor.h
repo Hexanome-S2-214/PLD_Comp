@@ -15,6 +15,7 @@ public:
     virtual antlrcpp::Any visitAffectationRule(ifccParser::AffectationRuleContext *ctx) override;
     virtual antlrcpp::Any visitAffectationRule2(ifccParser::AffectationRule2Context *ctx) override;
 
+    virtual antlrcpp::Any visitExprCharacter(ifccParser::ExprCharacterContext *ctx) override;
     virtual antlrcpp::Any visitExprNum(ifccParser::ExprNumContext *ctx) override;
     virtual antlrcpp::Any visitExprVar(ifccParser::ExprVarContext *ctx) override;
 

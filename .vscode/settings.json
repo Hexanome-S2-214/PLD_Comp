@@ -1,12 +1,13 @@
 {
-    "python.testing.pytestArgs": [
-        "tests",
-        "-s"
-    ],
-    "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true,
-    "remote.autoForwardPortsFallback": 0,
-    "files.associations": {
-        "not_unaire.C": "cpp"
-    }
+  "python.testing.pytestArgs": [
+    "tests",
+    "-s"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "remote.autoForwardPortsFallback": 0,
+  "files.associations": {
+    "not_unaire.C": "cpp"
+  },
+  "C_Cpp_Runner.msvcBatchPath": "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Auxiliary/Build/vcvarsall.bat"
 }
