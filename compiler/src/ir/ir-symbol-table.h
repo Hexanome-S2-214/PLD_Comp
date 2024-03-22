@@ -40,6 +40,7 @@ namespace IR
         Symbol * declare_tmp(IRBase * parent, Type type, antlr4::ParserRuleContext * ctx = nullptr);
 
         string get_next_tmp();
+        int get_symbol_offset() { return symbol_offset; }
 
         ErrorReporter::ErrorReporter * error_reporter;
     private:

@@ -9,10 +9,44 @@ axiom
      ;
 
 prog
-     : 'int' 'main' '(' ')' '{'
-               content*
-               '}'
+     : decla_function*
      ;
+
+//=============================================
+// Fonctions
+//=============================================
+
+fparam
+     : ','? (expr | VAR | NUM)
+     ;
+
+decla_fparam
+     : ','? 'int' VAR
+     ;
+
+decla_function
+     : 'int' fname=VAR '(' decla_fparam* ')' struct_bloc
+     ;
+
+//=============================================
+// Structures de contrôle
+//=============================================
+
+struct_bloc
+     : '{' content* '}'
+     ;
+
+struct_if_else
+     : 'if' '(' expr ')' struct_bloc ('else' struct_bloc)?
+     ;
+
+struct_while
+     : 'while' '(' expr ')' struct_bloc
+     ;
+
+//=============================================
+// Règles de base
+//=============================================
 
 content
      : statement
@@ -62,7 +96,8 @@ affectationRule2
      ;
 
 rvalue
-     : (affectationRule2 | expr)
+     : affectationRule2
+     | expr
      | functionCallRule
      ;
 
@@ -92,31 +127,6 @@ expr
      | expr OR expr                     #exprOr
      | VAR                              #exprVar
      | NUM                              #exprNum
-     ;
-
-//=============================================
-// Structures de contrôle
-//=============================================
-
-struct_bloc
-     : '{' content* '}'
-     ;
-
-struct_if_else
-     : 'if' '(' expr ')' struct_bloc ('else' struct_bloc)?
-     ;
-
-struct_while
-     : 'while' '(' expr ')' struct_bloc
-     ;
-
-//=============================================
-// Fonctions
-//=============================================
-
-fparam
-     : VAR
-     | NUM
      ;
 
 //=============================================

@@ -17,19 +17,20 @@ namespace IR
     class CFG : public IRBase
     {
     public:
-        CFG();
+        CFG(string name);
         ~CFG() = default;
 
         void gen_asm(ostream& o) override;
         void gen_asm_prologue(ostream& o);
         void gen_asm_epilogue(ostream& o);
 
+        int calc_st_size();
+
         void add_instr(IRBase * instr);
 
         IRBase * set_error_reporter(ErrorReporter::ErrorReporter * error_reporter);
 
         SymbolTable * get_symbol_table();
-
         BasicBlock * get_current_bb();
         void set_current_bb(BasicBlock * bb);
         string get_next_bb_label();
@@ -41,5 +42,6 @@ namespace IR
         SymbolTable * symbol_table;
 
         static int bb_count;
+        string fname;
     };
 };

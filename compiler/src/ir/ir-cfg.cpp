@@ -4,8 +4,10 @@
 
 int IR::CFG::bb_count = 2;
 
-IR::CFG::CFG()
+IR::CFG::CFG(string name)
 {
+    fname = name;
+
     symbol_table = new SymbolTable();
 
     BasicBlock * new_bb = new BasicBlock(this, get_next_bb_label(), nullptr, nullptr);
@@ -34,21 +36,26 @@ void IR::CFG::gen_asm(ostream& o)
 
 void IR::CFG::gen_asm_prologue(ostream& o)
 {
-    o << ".globl main\n" ;
-    o << " main: \n" ;
-    o << "    #prologue\n" ;
-    o << "    pushq %rbp\n" ;
-    o << "    movq %rsp, %rbp\n\n" ;
-    o << "subq	$16, %rsp\n";
+    o << endl;
+    o << ".globl " << fname << endl;
+    o << fname << ":" << endl;
+    o << "\tpushq %rbp\n" ;
+    o << "\tmovq %rsp, %rbp\n" ;
+    o << "\tsubq $" << calc_st_size() << ", %rsp" << endl;
 }
 
 void IR::CFG::gen_asm_epilogue(ostream& o)
 {
     o << "\n";
-    o << "    # epilogue\n";
-    o << "    leave\n";
-    // o << "    popq %rbp\n";
-    o << "    ret\n";
+    o << "\tleave\n";
+    o << "\tret\n";
+}
+
+int IR::CFG::calc_st_size() {
+    int offset = symbol_table->get_symbol_offset();
+
+    //Remember : 16-bytes steps only
+    return (-offset / 16)*16;
 }
 
 void IR::CFG::add_instr(IR::IRBase * instr)

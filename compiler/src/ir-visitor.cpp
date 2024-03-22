@@ -21,6 +21,7 @@
 #include "ir/instr/jump.h"
 #include "ir/instr/call.h"
 #include "error-reporter/compiler-error-token.h"
+#include "./error-reporter/error-reporter.h"
 
 ////////////////////////////////////////////
 // DECLARATION/AFFECTATION
@@ -520,9 +521,26 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
 // FONCTIONS
 ////////////////////////////////////////////
 
+antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *ctx) {
+
+    //One CFG and one Symbol Table per fonction (careful : CFG contains the ST in our model)
+    //TODO : automatize architecture setting
+    IR::CFG * cfg = static_cast<IR::CFG *>(
+    (new IR::CFG(ctx->fname->getText()))
+      ->set_error_reporter(new ErrorReporter::ErrorReporter())
+      ->set_arch(IR::X86)
+    );
+
+    //Update both in cfg_set AND in the cfg kept as attribute
+    cfg_set->add_cfg(cfg);
+    this->cfg = cfg;
+
+    this->visit(ctx->struct_bloc());
+
+    return 0;
+}
+
 // PUTCHAR ET GETCHAR UNIQUEMENT -> PAS DE GESTION DES APPELS DE FONCTIONS PERSO
-
-
 antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleContext *ctx) {
 
     cerr << "1" << endl;
