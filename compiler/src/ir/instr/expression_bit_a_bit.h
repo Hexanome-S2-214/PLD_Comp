@@ -10,7 +10,7 @@ namespace IR
 
 namespace IR
 {
-    class IRInstrExprBitABit : public IRInstr, public IRInstrBaseSymbol<IRInstrExprBitABit>, public IRInstrBaseSrc<IRInstrExprBitABit> , public IRInstrBaseDest<IRInstrExprBitABit>
+    class IRInstrExprBitABit : public IRInstr, public IRInstrBaseOp<IRInstrExprBitABit>, public IRInstrBaseSrc<IRInstrExprBitABit> , public IRInstrBaseDest<IRInstrExprBitABit>
     {
     public:
         void gen_asm(ostream& o) override;

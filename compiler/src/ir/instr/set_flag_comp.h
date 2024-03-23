@@ -10,7 +10,7 @@ namespace IR
 
 namespace IR
 {
-    class IRInstrSetFlagComp : public IRInstr, public IRInstrBaseSymbol<IRInstrSetFlagComp>, public IRInstrBaseDest<IRInstrSetFlagComp>
+    class IRInstrSetFlagComp : public IRInstr, public IRInstrBaseOp<IRInstrSetFlagComp>, public IRInstrBaseDest<IRInstrSetFlagComp>
     {
     public:
         void gen_asm(ostream& o) override;

@@ -2,7 +2,7 @@
 #include "mov.h"
 #include "../ir-basic-block.h"
 #include "../ir-cfg.h"
-#include "../ir-reg.h"
+#include "../params/ir-reg.h"
 
 namespace IR
 {
@@ -10,16 +10,16 @@ namespace IR
     {
         paste_properties(
             (new IRInstrMov)
-                ->set_src(IR::IRRegA(this).get_asm_str())
-                ->set_dest(IR::IRRegB(this).get_asm_str())
+                ->set_src(new IRRegA)
+                ->set_dest(new IRRegB)
         )->gen_asm(o);
         paste_properties(
             (new IRInstrMov)
                 ->set_src(src)
-                ->set_dest(IR::IRRegA(this).get_asm_str())
+                ->set_dest(new IRRegA)
         )->gen_asm(o);
 
         o << "\tcltd" << endl;
-        o << "\tidivl " << IR::IRRegB(this).get_asm_str() << endl;
+        o << "\tidivl " << (new IRRegB)->get_asm_str() << endl;
     }
 }

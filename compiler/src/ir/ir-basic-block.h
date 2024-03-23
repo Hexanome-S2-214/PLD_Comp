@@ -18,7 +18,7 @@ namespace IR
     public:
         BasicBlock(CFG * cfg, string label);
         BasicBlock(CFG * cfg, string label, BasicBlock * exit_true, BasicBlock * exit_false);
-        ~BasicBlock() = default;
+        ~BasicBlock();
 
         void add_instr(IRBase * instr);
 

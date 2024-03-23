@@ -10,7 +10,7 @@ namespace IR
 
 namespace IR
 {
-    class IRInstrDeclaAff : public IRInstr, public IRInstrBaseId<IRInstrDeclaAff>
+    class IRInstrDeclaAff : public IRInstr, public IRInstrBaseSymbol<IRInstrDeclaAff>
     {
     public:
         void gen_asm(ostream& o) override;
