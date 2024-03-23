@@ -4,6 +4,14 @@
 
 ErrorReporter::ErrorReporter::ErrorReporter(bool printErrors) : printErrors(printErrors) {}
 
+ErrorReporter::ErrorReporter::~ErrorReporter()
+{
+    for (CompilerError * error : this->errors)
+    {
+        delete error;
+    }
+}
+
 void ErrorReporter::ErrorReporter::reportError(CompilerError * error)
 {
     this->errors.push_back(error);

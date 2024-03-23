@@ -1,12 +1,19 @@
 #include "ir-basic-block.h"
 #include "ir-cfg.h"
 #include "ir-instr.h"
-#include "ir-reg.h"
 
 IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label) : BasicBlock(cfg, label, nullptr, nullptr) {}
 
 IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label, IR::BasicBlock * exit_true, IR::BasicBlock * exit_false) : label(label), exit_true(exit_true), exit_false(exit_false) {
     set_parent(cfg);
+}
+
+IR::BasicBlock::~BasicBlock()
+{
+    for (IR::IRInstr * instr : instrs)
+    {
+        delete instr;
+    }
 }
 
 void IR::BasicBlock::add_instr(IR::IRBase * instr)
@@ -17,23 +24,18 @@ void IR::BasicBlock::add_instr(IR::IRBase * instr)
 
 void IR::BasicBlock::gen_asm(ostream& o)
 {
+    if (get_label() != "") {
+        o << get_label() << ":" << endl;
+    }
+
     for (IR::IRInstr * instr : instrs)
     {
         instr->gen_asm(o);
     }
 
-    if(exit_false != nullptr)
+    if (exit_label != "")
     {
-        if (exit_true != nullptr)
-        {
-            o << "\tcmpq $1, " << IR::IRRegA(this).get_asm_str() << endl;
-            o << "\tje " << exit_true->get_label() << endl;
-            o << "\tjmp " << exit_false->get_label() << endl;
-        }
-        else
-        {
-            o << "\tjmp " << exit_false->get_label() << endl;
-        }
+        o << "\tjmp " << exit_label << "" << endl;
     }
 }
 
@@ -45,6 +47,11 @@ void IR::BasicBlock::set_exit_true(IR::BasicBlock * exit_true)
 void IR::BasicBlock::set_exit_false(IR::BasicBlock * exit_false)
 {
     this->exit_false = exit_false;
+}
+
+void IR::BasicBlock::set_exit(string exit_label)
+{
+    this->exit_label = exit_label;
 }
 
 string IR::BasicBlock::get_label()

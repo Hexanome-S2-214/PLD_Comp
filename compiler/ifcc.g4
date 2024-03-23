@@ -63,7 +63,7 @@ affectationRule2
      ;
 
 rvalue
-     : ( affectationRule2 | expr)
+     : ( affectationRule2 | expr | '(' expr ')' | '(' affectationRule2 ')')
      ;
 
 returnStmtRule
@@ -71,23 +71,24 @@ returnStmtRule
      ;
 
 //=============================================
-// Non-terminaux
+// Expressions
 //=============================================
 
 expr
-     : '-' expr                         #exprUnaryMinus
-     | '!' expr                         #atomUnaryNot
-     | expr OP_MULT expr                #exprMultDiv
-     | expr MODULO expr                 #exprModulo
-     | expr '+' expr                    #exprSomme
-     | expr '-' expr                    #exprSoustr
+     : '(' expr ')'                     #exprParExpr
+     | op_unary=('-' | '!') expr        #exprUnary
+     | expr OP_MULT expr                #exprMultDivMod
+     | expr op_add=('+' | '-') expr     #exprSumSous
      | expr COMPARAISON expr            #exprComparaison
      | expr EQ_COMPARAISON expr         #exprEqComparaison
+     | expr B_AND expr                  #exprAndBAB
+     | expr B_XOR expr                  #exprXorBAB
+     | expr B_OR expr                   #exprOrBAB
      | expr AND expr                    #exprAnd
      | expr OR expr                     #exprOr
+     | CHARACTER                        #exprCharacter
      | VAR                              #exprVar
      | NUM                              #exprNum
-     | '(' expr ')'                     #exprParExpr
      ;
 
 //=============================================
@@ -134,6 +135,12 @@ VAR
      : [a-zA-Z][a-zA-Z0-9_]*
      ;
 
+
+CHARACTER
+     : '"' [a-zA-Z0-9_ ] '"'
+     | '\'' [a-zA-Z0-9_ ] '\''
+     ;
+
 COMMENT
      : '/*' .*? '*/' -> skip
      ;
@@ -165,6 +172,12 @@ COMPARAISON
 OP_MULT
      : '*'
      | '/'
+     | '%'
+     ;
+
+OP_SUM
+     : '+'
+     | '-'
      ;
 
 MODULO

@@ -1,20 +1,32 @@
 #include "assignTable.h"
 #include "mov.h"
+#include "movb.h"
 #include "../ir-basic-block.h"
 #include "../ir-cfg.h"
-#include "../ir-reg.h"
+#include "../params/ir-reg.h"
 
 namespace IR
 {
     void IRInstrAssignTable::gen_asm(ostream& o)
     {
-        Symbol * symbol = this->get_bb()->get_cfg()->get_symbol_table()->get_symbol(this->id, get_ctx());
-        SymbolT* symbolT = new SymbolT(symbol->get_parent(), symbol->id, symbol->offset, symbol->type, symbol->get_ctx(), index);
+        IR::SymbolT* symbol_casted = dynamic_cast<IR::SymbolT*>(symbol);
+        if(symbol_casted == nullptr) {
+            return;
+        }
 
-        paste_properties(
-            (new IRInstrMov)
-                ->set_src(IR::IRRegA(this).get_asm_str())
-                ->set_dest(symbolT->get_asm_str())
-        )->gen_asm(o);
+        if(symbol_casted->type == Int){
+            paste_properties(
+                (new IRInstrMov)
+                    ->set_src(new IRRegA)
+                    ->set_dest(symbol)
+            )->gen_asm(o); 
+        }else if(symbol_casted->type == ::IR::Char){
+            paste_properties(
+                (new IRInstrMovb)
+                    ->set_src((new IR::IRRegA)->set_size(IR::Byte))
+                    ->set_dest(symbol)
+            )->gen_asm(o);
+        }
+        return;
     }
 }

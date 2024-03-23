@@ -10,7 +10,7 @@ namespace IR
 
 namespace IR
 {
-    class IRInstrAssignTable : public IRInstr, public IRInstrBaseId<IRInstrAssignTable>
+    class IRInstrAssignTable : public IRInstr, public IRInstrBaseSymbol<IRInstrAssignTable>
     {
     public:
         IRInstrAssignTable(int index) : index(index){};
