@@ -527,8 +527,7 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
     //TODO : automatize architecture setting
     IR::CFG * cfg = static_cast<IR::CFG *>(
     (new IR::CFG(ctx->fname->getText()))
-      ->set_error_reporter(new ErrorReporter::ErrorReporter())
-      ->set_arch(IR::X86)
+      ->set_parent(cfg_set)
     );
 
     //Update both in cfg_set AND in the cfg kept as attribute
@@ -543,19 +542,9 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
 // PUTCHAR ET GETCHAR UNIQUEMENT -> PAS DE GESTION DES APPELS DE FONCTIONS PERSO
 antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleContext *ctx) {
 
-    cerr << "1" << endl;
-    // cfg->add_instr(
-    //     (new IR::IRInstrCheat)
-    //         ->set_instr("movl $0, %eax")
-    //         ->set_ctx(ctx)
-    // );
-
-    cerr << "2" << endl;
-    //Put parameters in the dedicated registers
+        //Put parameters in the dedicated registers
     //TODO : changer les dest -> d'abord %edi, puis %esi...
     for(int i=0; i < ctx->fparam().size(); ++i) {
-        cerr << "enter for" << endl;
-
         //If param is a cst
         if (ctx->fparam(i)->NUM()) {
             
@@ -570,7 +559,6 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
         else if (ctx->fparam(i)->VAR()) {
             
             string src = cfg->get_symbol_table()->get_symbol(ctx->fparam(i)->getText())->get_asm_str();
-            cerr << "var found" << endl;
             cfg->add_instr(
                 (new IR::IRInstrMov)
                     ->set_src(src)
@@ -587,14 +575,12 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
                 ->set_ctx(ctx)
         );
     }
-    cerr << "3" << endl;
     //call instruction
     cfg->add_instr(
         (new IR::IRInstrCall)
             ->set_symbol(ctx->fname->getText())
             ->set_ctx(ctx)
     );
-    cerr << "4" << endl;
 
     return 0;
 }
