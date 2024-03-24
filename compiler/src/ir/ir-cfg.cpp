@@ -14,6 +14,16 @@ IR::CFG::CFG(string name)
     add_bb(new_bb);
 }
 
+IR::CFG::~CFG()
+{
+    delete symbol_table;
+
+    for (BasicBlock * block : blocks)
+    {
+        delete block;
+    }
+}
+
 IR::IRBase * IR::CFG::set_error_reporter(ErrorReporter::ErrorReporter * error_reporter)
 {
     IRBase::set_error_reporter(error_reporter);

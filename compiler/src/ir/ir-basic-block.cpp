@@ -1,12 +1,19 @@
 #include "ir-basic-block.h"
 #include "ir-cfg.h"
 #include "ir-instr.h"
-#include "ir-reg.h"
 
 IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label) : BasicBlock(cfg, label, nullptr, nullptr) {}
 
 IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label, IR::BasicBlock * exit_true, IR::BasicBlock * exit_false) : label(label), exit_true(exit_true), exit_false(exit_false) {
     set_parent(cfg);
+}
+
+IR::BasicBlock::~BasicBlock()
+{
+    for (IR::IRInstr * instr : instrs)
+    {
+        delete instr;
+    }
 }
 
 void IR::BasicBlock::add_instr(IR::IRBase * instr)

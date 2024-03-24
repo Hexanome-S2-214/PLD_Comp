@@ -10,7 +10,7 @@ namespace IR
 
 namespace IR
 {
-    class IRInstrJump : public IRInstr, public IRInstrBaseSymbol<IRInstrJump>, public IRInstrBaseDest<IRInstrJump>
+    class IRInstrJump : public IRInstr, public IRInstrBaseOp<IRInstrJump>, public IRInstrBaseLabel<IRInstrJump>
     {
     public:
         void gen_asm(ostream& o) override;

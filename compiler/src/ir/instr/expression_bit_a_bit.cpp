@@ -4,9 +4,9 @@ namespace IR
 {
     void IRInstrExprBitABit::gen_asm(ostream& o)
     {
-        if      (symbol == "&")    { o << "\tandl " << src << ", " << dest << endl; } 
-        else if (symbol == "^")    { o << "\txorl " << src << ", " << dest << endl; }
-        else if (symbol == "|")    { o << "\torl " << src << ", " << dest << endl; }
+        if      (op == "&")    { o << "\tandl " << src->get_asm_str() << ", " << dest->get_asm_str() << endl; } 
+        else if (op == "^")    { o << "\txorl " << src->get_asm_str() << ", " << dest->get_asm_str() << endl; }
+        else if (op == "|")    { o << "\torl " << src->get_asm_str() << ", " << dest->get_asm_str() << endl; }
     }
 }
 
