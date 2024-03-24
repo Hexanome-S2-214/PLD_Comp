@@ -4,6 +4,7 @@ namespace IR
 {
     class CFG;
     class IRInstr;
+    class IRInstrComposition;
 }
 
 #include <vector>
@@ -21,6 +22,7 @@ namespace IR
         ~BasicBlock();
 
         void add_instr(IRBase * instr);
+        vector<IRInstr *> * get_instrs();
 
         void gen_asm(ostream& o) override;
 

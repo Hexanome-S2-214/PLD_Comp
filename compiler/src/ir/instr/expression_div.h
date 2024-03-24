@@ -6,11 +6,11 @@ namespace IR
 }
 
 #include "../ir-instr.h"
-#include "base-instr.h"
+#include "../ir-attr.h"
 
 namespace IR
 {
-    class IRInstrExprDiv : public IRInstr, public IRInstrBaseSrc<IRInstrExprDiv>
+    class IRInstrExprDiv : public IRInstr
     {
     public:
         void gen_asm(ostream& o) override;
