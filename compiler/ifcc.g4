@@ -17,7 +17,10 @@ prog
 //=============================================
 
 fparam
-     : ','? (expr | VAR | NUM)
+     : ','?
+     (VAR
+     | NUM
+     | expr)
      ;
 
 decla_fparam

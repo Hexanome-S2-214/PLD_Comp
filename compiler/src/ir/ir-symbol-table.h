@@ -7,6 +7,7 @@
 #include "ir-base.h"
 #include "../error-reporter/error-reporter.h"
 #include "params/ir-symbol.h"
+#include "params/ir-reg.h"
 
 #define SYMBOL_SIZE 4
 

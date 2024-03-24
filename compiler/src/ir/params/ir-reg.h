@@ -51,4 +51,22 @@ namespace IR
     public:
         void gen_asm(ostream& o) override;
     };
+
+    class IRRegSrc : public IRReg
+    {
+    public:
+        void gen_asm(ostream& o) override;
+    };
+
+    class IRReg8 : public IRReg
+    {
+    public:
+        void gen_asm(ostream& o) override;
+    };
+
+    class IRReg9 : public IRReg
+    {
+    public:
+        void gen_asm(ostream& o) override;
+    };
 };

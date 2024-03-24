@@ -6,13 +6,15 @@ namespace IR
 }
 
 #include "../ir-instr.h"
+#include "../params/ir-reg.h"
 #include "base-instr.h"
 
 namespace IR
 {
-    class IRInstrAssign : public IRInstr, public IRInstrBaseSymbol<IRInstrAssign>
+    class IRInstrAssign : public IRInstr, public IRInstrBaseSymbol<IRInstrAssign>, public IRInstrBaseSrc<IRInstrAssign>
     {
     public:
+        IRInstrAssign() { this->src = new IR::IRRegA; }
         void gen_asm(ostream& o) override;
     };
 }

@@ -18,13 +18,13 @@ namespace IR
         if(symbol_casted->type == ::IR::Int){
             paste_properties(
                 (new IRInstrMov)
-                    ->set_src(new IRRegA)
+                    ->set_src(src)
                     ->set_dest(symbol)
             )->gen_asm(o); 
         }else if(symbol_casted->type == ::IR::Char){
             paste_properties(
                 (new IRInstrMovb)
-                    ->set_src((new IR::IRRegA)->set_size(IR::Byte))
+                    ->set_src(((IR::IRReg*)src)->set_size(IR::Byte))
                     ->set_dest(symbol)
             )->gen_asm(o);
         }

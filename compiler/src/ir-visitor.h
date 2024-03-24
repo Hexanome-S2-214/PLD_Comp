@@ -43,4 +43,5 @@ public:
 private:
     IR::CfgSet * cfg_set;
     IR::CFG * cfg;   //we keep this CFG (be careful : updated during visit) for simplicity in the code
+    const vector<IR::IRReg *> reg_function_params = {new IR::IRRegDest, new IR::IRRegSrc, new IR::IRRegD, new IR::IRRegC, new IR::IRReg8, new IR::IRReg9};
 };
