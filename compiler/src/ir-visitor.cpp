@@ -42,7 +42,7 @@ antlrcpp::Any IRVisitor::visitDeclStdRule(ifccParser::DeclStdRuleContext *ctx)
         cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Char, ctx);
     }
 
-    return 0;
+    return TYPE_INT;
 }
 
 antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
@@ -64,7 +64,7 @@ antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
             ->set_ctx(ctx)
     );
 
-    return 0;
+    return TYPE_INT;
 }
 
 antlrcpp::Any IRVisitor::visitAffectationRule(ifccParser::AffectationRuleContext *ctx)
@@ -79,7 +79,7 @@ antlrcpp::Any IRVisitor::visitAffectationRule(ifccParser::AffectationRuleContext
             ->set_ctx(ctx)
     );
 
-    return 0;
+    return TYPE_INT;
 }
 
 antlrcpp::Any IRVisitor::visitAffectationRule2(ifccParser::AffectationRule2Context *ctx)
@@ -94,7 +94,7 @@ antlrcpp::Any IRVisitor::visitAffectationRule2(ifccParser::AffectationRule2Conte
             ->set_ctx(ctx)
     );
 
-    return 0;
+    return TYPE_INT;
 }
 
 ////////////////////////////////////////////
@@ -193,7 +193,7 @@ antlrcpp::Any IRVisitor::visitExprSumSous(ifccParser::ExprSumSousContext *ctx) {
         );
     }
 
-    return 0;
+    return TYPE_INT;
 }
 
 antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *ctx)
@@ -233,7 +233,7 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
             );
         }
 
-    return 0;
+    return TYPE_INT;
 }
 
 ////////////////////////////////////////////
@@ -279,7 +279,7 @@ antlrcpp::Any IRVisitor::visitExprUnary(ifccParser::ExprUnaryContext *ctx)
         );
     }
 
-    return 0;
+    return TYPE_INT;
 }
 
 ////////////////////////////////////////////
@@ -329,7 +329,7 @@ antlrcpp::Any IRVisitor::visitExprEqComparaison(ifccParser::ExprEqComparaisonCon
             ->set_ctx(ctx)
     );
 
-    return 0;
+    return TYPE_INT;
 }
 
 antlrcpp::Any IRVisitor::visitExprComparaison(ifccParser::ExprComparaisonContext *ctx) {
@@ -415,7 +415,7 @@ antlrcpp::Any IRVisitor::visitExprAndBAB(ifccParser::ExprAndBABContext *ctx) {
             ->set_ctx(ctx)
     );
 
-    return 0;
+    return TYPE_INT;
 }
 
 antlrcpp::Any IRVisitor::visitExprXorBAB(ifccParser::ExprXorBABContext *ctx) {
@@ -439,7 +439,7 @@ antlrcpp::Any IRVisitor::visitExprXorBAB(ifccParser::ExprXorBABContext *ctx) {
             ->set_ctx(ctx)
     );
 
-    return 0;
+    return TYPE_INT;
 }
 
 antlrcpp::Any IRVisitor::visitExprOrBAB(ifccParser::ExprOrBABContext *ctx) {
@@ -463,7 +463,7 @@ antlrcpp::Any IRVisitor::visitExprOrBAB(ifccParser::ExprOrBABContext *ctx) {
             ->set_ctx(ctx)
     );
 
-    return 0;
+    return TYPE_INT;
 }
 
 ////////////////////////////////////////////
@@ -552,7 +552,7 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
         }
     }
 
-    return 0;
+    return TYPE_INT;
 }
 
 antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx) {
@@ -600,5 +600,5 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
             ->set_ctx(ctx)
     );
 
-    return 0;
+    return TYPE_INT;
 }
