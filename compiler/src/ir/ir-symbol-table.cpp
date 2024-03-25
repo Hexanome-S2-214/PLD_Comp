@@ -29,14 +29,8 @@ namespace IR
         symbol->set_ctx(ctx);
         symbol->id = id;
         symbol->type = type;
-
-        if (personalized_offset == 0) {
-            symbol_offset -= type.size;
-            symbol->offset = symbol_offset;
-        } else {
-            symbol->offset = personalized_offset;
-        }
-        
+        symbol_offset -= type.size;
+        symbol->offset = symbol_offset;
         symbols[id] = symbol;
 
         return symbol;

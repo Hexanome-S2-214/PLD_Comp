@@ -15,6 +15,7 @@ namespace IR
             case QWord:
                 return "cmpq";
         }
+        return "";
     }
 
     void IRInstrComp::gen_asm(ostream& o)

@@ -58,9 +58,9 @@ int main(int argn, const char **argv)
   }
 
   IR::CfgSet * cfg_set = static_cast<IR::CfgSet *>(
-  (new IR::CfgSet())
-    ->set_error_reporter(new ErrorReporter::ErrorReporter())
-    ->set_arch(IR::X86)
+    (new IR::CfgSet())
+      ->set_error_reporter(new ErrorReporter::ErrorReporter())
+      ->set_arch(IR::X86)
   );
   IRVisitor visitor(cfg_set);
 

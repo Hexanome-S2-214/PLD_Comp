@@ -4,9 +4,9 @@ namespace IR
 {
     void IRInstrCall::gen_asm(ostream& o)
     {
-        o << "\tcall " << call;
+        o << "\tcall " << literal;
 
-        if (call == "getchar" || call == "putchar"){
+        if (literal == "getchar" || literal == "putchar"){
             o << "@PLT";
         }
 
