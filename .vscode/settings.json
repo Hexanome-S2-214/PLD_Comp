@@ -1,5 +1,8 @@
 {
-  "python.testing.pytestArgs": ["tests", "-s"],
+  "python.testing.pytestArgs": [
+    "tests",
+    "-s"
+  ],
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
   "remote.autoForwardPortsFallback": 0,
@@ -46,7 +49,10 @@
   "C_Cpp_Runner.compilerArgs": [],
   "C_Cpp_Runner.linkerArgs": [],
   "C_Cpp_Runner.includePaths": [],
-  "C_Cpp_Runner.includeSearch": ["*", "**/*"],
+  "C_Cpp_Runner.includeSearch": [
+    "*",
+    "**/*"
+  ],
   "C_Cpp_Runner.excludeSearch": [
     "**/build",
     "**/build/**",

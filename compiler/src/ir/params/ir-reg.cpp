@@ -7,7 +7,7 @@ namespace IR
         return size;
     }
 
-    void IRRegA::gen_asm(ostream& o)
+    void IRRegA::gen_asm_x86(ostream& o)
     {
         switch (get_size())
         {
@@ -28,7 +28,12 @@ namespace IR
         }
     }
 
-    void IRRegB::gen_asm(ostream& o)
+    void IRRegA::gen_asm_arm(ostream& o)
+    {
+        
+    }
+
+    void IRRegB::gen_asm_x86(ostream& o)
     {
         switch (get_size())
         {
@@ -49,7 +54,12 @@ namespace IR
         }
     }
 
-    void IRRegC::gen_asm(ostream& o)
+    void IRRegB::gen_asm_arm(ostream& o)
+    {
+        
+    }
+
+    void IRRegC::gen_asm_x86(ostream& o)
     {
         switch (get_size())
         {
@@ -70,7 +80,12 @@ namespace IR
         }
     }
 
-    void IRRegD::gen_asm(ostream& o)
+    void IRRegC::gen_asm_arm(ostream& o)
+    {
+        
+    }
+
+    void IRRegD::gen_asm_x86(ostream& o)
     {
         switch (get_size())
         {
@@ -91,8 +106,18 @@ namespace IR
         }
     }
 
-    void IRRegStack::gen_asm(ostream& o)
+    void IRRegD::gen_asm_arm(ostream& o)
+    {
+        
+    }
+
+    void IRRegStack::gen_asm_x86(ostream& o)
     {
         o << "(%rbp)";
+    }
+
+    void IRRegStack::gen_asm_arm(ostream& o)
+    {
+        
     }
 }

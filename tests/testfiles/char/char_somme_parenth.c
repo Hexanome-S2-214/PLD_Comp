@@ -3,6 +3,6 @@ int main(){
     char b = 'b';
     char c = 'z';
     char d = 1000;
-    char c = (a + b) - (c-d);
+    char e = (a + b) - (c-d);
     return c;
 }

@@ -49,7 +49,7 @@ vector<IR::IRInstr *> * IR::BasicBlock::get_instrs()
     return &instrs;
 }
 
-void IR::BasicBlock::gen_asm(ostream& o)
+void IR::BasicBlock::gen_asm_x86(ostream& o)
 {
     if (get_label() != "") {
         o << get_label() << ":" << endl;
@@ -57,13 +57,17 @@ void IR::BasicBlock::gen_asm(ostream& o)
 
     for (IR::IRInstr * instr : instrs)
     {
-        instr->gen_asm(o);
+        instr->gen_asm_x86(o);
     }
 
     if (exit_label != "")
     {
         o << "\tjmp " << exit_label << "" << endl;
     }
+}
+
+void IR::BasicBlock::gen_asm_arm(ostream &o){
+
 }
 
 void IR::BasicBlock::set_exit_true(IR::BasicBlock * exit_true)
