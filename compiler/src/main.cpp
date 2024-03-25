@@ -12,7 +12,6 @@
 // #include "SymbolTableVisitor.h"
 #include "ir/ir-cfg.h"
 #include "ir-visitor.h"
-#include "ir/ir-optimiser.h"
 #include "error-reporter/error-reporter.h"
 #include "error-reporter/error-listener.h"
 
@@ -68,9 +67,6 @@ int main(int argn, const char **argv)
   IRVisitor visitor(cfg);
 
   visitor.visit(tree);
-
-  // IR::IROptimiser optimiser;
-  // optimiser.optimise(cfg);
 
   cfg->gen_asm(cout);
 
