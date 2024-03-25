@@ -14,7 +14,8 @@ namespace IR
     {
     public:
         IRInstrCheat * set_instr(string instr);
-        void gen_asm(ostream& o) override;
+        void gen_asm_x86(ostream& o) override;
+        void gen_asm_arm(ostream& o) override;
     private:
         string instr;
     };

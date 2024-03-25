@@ -68,3 +68,4 @@ gui:
 clean:
 	rm -rf build generated
 	rm -f ifcc
+	rm -rf ../tests/ifcc-test-output

@@ -3,8 +3,12 @@
 
 namespace IR
 {
-    void IRInstrExprUnaryMinus::gen_asm(ostream& o)
+    void IRInstrExprUnaryMinus::gen_asm_x86(ostream& o)
     {
         o << "\tnegl " << (new IRRegA)->get_asm_str() << endl;
+    }
+    
+    void IRInstrExprUnaryMinus::gen_asm_arm(ostream& o)
+    {
     }
 }

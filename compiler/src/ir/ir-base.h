@@ -17,7 +17,9 @@ namespace IR
         IRBase();
         ~IRBase() = default;
 
-        virtual void gen_asm(ostream& o) = 0;
+        void gen_asm(ostream& o);
+        virtual void gen_asm_x86(ostream& o)=0;
+        virtual void gen_asm_arm(ostream &o) = 0;
         string get_asm_str();
 
         IRBase * set_arch(IRArch arch);

@@ -32,19 +32,42 @@ IR::IRBase * IR::CFG::set_error_reporter(ErrorReporter::ErrorReporter * error_re
     return this;
 }
 
-void IR::CFG::gen_asm(ostream& o)
+void IR::CFG::gen_asm_x86(ostream& o)
 {
-    gen_asm_prologue(o);
+    gen_asm_x86_prologue(o);
 
     for (auto block : blocks)
     {
-        block->gen_asm(o);
+        block->gen_asm_x86(o);
     }
 
-    gen_asm_epilogue(o);
+    gen_asm_x86_epilogue(o);
 }
 
-void IR::CFG::gen_asm_prologue(ostream& o)
+void IR::CFG::gen_asm_arm(ostream& o)
+{
+    gen_asm_arm_prologue(o);
+
+    for (auto block : blocks)
+    {
+        block->gen_asm_arm(o);
+    }
+
+    gen_asm_arm_epilogue(o);
+}
+
+void IR::CFG::gen_asm_arm_prologue(ostream& o){
+    o << ".globl main\n";
+    o << "main:\n";
+    o << "    push {fp, lr}\n";
+    o << "    add fp, sp, #4\n";
+}
+
+void IR::CFG::gen_asm_arm_epilogue(ostream& o){
+    o << "    pop {fp, pc}\n";
+}
+
+void IR::CFG::gen_asm_x86_prologue(ostream& o)
 {
     o << endl;
     o << ".globl " << fname << endl;
@@ -55,7 +78,8 @@ void IR::CFG::gen_asm_prologue(ostream& o)
     o << "\tsubq $" << calc_st_size() << ", %rsp" << endl;
 }
 
-void IR::CFG::gen_asm_epilogue(ostream& o)
+
+void IR::CFG::gen_asm_x86_epilogue(ostream& o)
 {
     o << "\n";
     o << "\tleave\n";

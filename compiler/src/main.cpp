@@ -57,10 +57,11 @@ int main(int argn, const char **argv)
       exit(1);
   }
 
+
   IR::CfgSet * cfg_set = static_cast<IR::CfgSet *>(
     (new IR::CfgSet())
       ->set_error_reporter(new ErrorReporter::ErrorReporter())
-      ->set_arch(IR::X86)
+      ->set_arch(IR::IRArch::X86)
   );
   IRVisitor visitor(cfg_set);
 
