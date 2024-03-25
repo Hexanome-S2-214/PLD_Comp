@@ -5,14 +5,14 @@ namespace IR
     class BasicBlock;
 }
 
-#include "../ir-instr.h"
-#include "base-instr.h"
+#include "../ir-instr-comp.h"
+#include "../ir-attr.h"
 
 namespace IR
 {
-    class IRInstrAssign : public IRInstr, public IRInstrBaseSymbol<IRInstrAssign>
+    class IRInstrAssign : public IRInstrComposition, public IRAttrSymbol<IRInstrAssign>
     {
     public:
-        void gen_asm(ostream& o) override;
+        vector<IRInstr *> get_instrs() override;
     };
 }

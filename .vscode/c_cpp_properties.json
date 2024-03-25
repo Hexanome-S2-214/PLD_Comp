@@ -1,16 +1,16 @@
 {
   "configurations": [
-    {
-      "name": "windows-gcc-x64",
-      "includePath": [
-        "${workspaceFolder}/**"
-      ],
-      "defines": [],
-      "cStandard": "${default}",
-      "cppStandard": "${default}",
-      "compilerPath": "gcc",
-      "intelliSenseMode": "windows-gcc-x64"
-    }
+      {
+          "name": "Linux",
+          "includePath": [
+              "${workspaceFolder}/**",
+              "/usr/include/antlr4-runtime"
+          ],
+          "defines": [],
+          "cStandard": "c17",
+          "cppStandard": "c++17",
+          "compilerPath": "/usr/bin/gcc"
+      }
   ],
   "version": 4
 }

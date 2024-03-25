@@ -6,12 +6,12 @@
 
 namespace IR
 {
-    void IRInstrDeclaAff::gen_asm(ostream& o)
+    vector<IRInstr *> IRInstrDeclaAff::get_instrs()
     {
-        paste_properties(
+        return {
             (new IRInstrMov)
-                ->set_src(new IR::IRRegA)
+                ->set_src(new IRRegA)
                 ->set_dest(symbol)
-        )->gen_asm(o);
+        };
     }
 }

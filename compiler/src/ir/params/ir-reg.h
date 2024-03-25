@@ -2,18 +2,15 @@
 
 #include "ir-param.h"
 #include "../ir-type.h"
+#include "../ir-attr.h"
 
 using namespace std;
 
 namespace IR
 {
-    class IRReg : public IRParam
-    {
+    class IRReg : public IRParam, public IRAttrSize<IRReg> {
     public:
-        IRReg * set_size(Size size);
-        Size get_size();
-    private:
-        Size size = DWord;
+        Size get_size() override;
     };
 
     class IRRegA : public IRReg

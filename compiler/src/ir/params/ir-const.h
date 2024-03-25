@@ -1,19 +1,16 @@
 #pragma once
 
 #include "ir-param.h"
+#include "../ir-attr.h"
 
 using namespace std;
 
 namespace IR
 {
-    class IRConst : public IRParam
+    class IRConst : public IRParam, public IRAttrLiteral<IRConst>, public IRAttrSize<IRConst>
     {
     public:
         void gen_asm(ostream& o) override;
-
-        IRConst * set_value(string value);
-        string get_value();
-    private:
-        string value;
+        Size get_size() override;
     };
 }

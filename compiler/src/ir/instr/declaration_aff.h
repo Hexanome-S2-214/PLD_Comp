@@ -1,18 +1,13 @@
 #pragma once
 
-namespace IR
-{
-    class BasicBlock;
-}
-
-#include "../ir-instr.h"
-#include "base-instr.h"
+#include "../ir-instr-comp.h"
+#include "../ir-attr.h"
 
 namespace IR
 {
-    class IRInstrDeclaAff : public IRInstr, public IRInstrBaseSymbol<IRInstrDeclaAff>
+    class IRInstrDeclaAff : public IRInstrComposition, public IRAttrSymbol<IRInstrDeclaAff>
     {
     public:
-        void gen_asm(ostream& o) override;
+        vector<IRInstr *> get_instrs() override;
     };
 }

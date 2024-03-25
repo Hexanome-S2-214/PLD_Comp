@@ -9,6 +9,7 @@ namespace IR
 #include "ir-base.h"
 #include "ir-symbol-table.h"
 #include "../error-reporter/error-reporter.h"
+#include "ir-instr-comp.h"
 
 using namespace std;
 
@@ -31,6 +32,7 @@ namespace IR
         SymbolTable * get_symbol_table();
 
         BasicBlock * get_current_bb();
+        vector<BasicBlock *> get_blocks();
         void set_current_bb(BasicBlock * bb);
         string get_next_bb_label();
         void add_bb(BasicBlock * bb);

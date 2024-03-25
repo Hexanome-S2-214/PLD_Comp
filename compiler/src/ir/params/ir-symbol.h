@@ -12,6 +12,7 @@ namespace IR
         ~Symbol() = default;
 
         void gen_asm(ostream& o) override;
+        Size get_size() override;
 
         string id;
         int offset;

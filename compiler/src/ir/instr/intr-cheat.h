@@ -6,7 +6,7 @@ namespace IR
 }
 
 #include "../ir-instr.h"
-#include "base-instr.h"
+#include "../ir-attr.h"
 
 namespace IR
 {
