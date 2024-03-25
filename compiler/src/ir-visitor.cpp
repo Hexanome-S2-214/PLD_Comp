@@ -36,7 +36,7 @@ antlrcpp::Any IRVisitor::visitDeclStdRule(ifccParser::DeclStdRuleContext *ctx)
         cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Char, ctx);
     }
 
-    return 0;
+    return IR::Int.size;
 }
 
 antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
@@ -58,7 +58,7 @@ antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
             ->set_ctx(ctx)
     );
 
-    return 0;
+    return IR::Int.size;
 }
 
 antlrcpp::Any IRVisitor::visitAffectationRule(ifccParser::AffectationRuleContext *ctx)
@@ -73,7 +73,7 @@ antlrcpp::Any IRVisitor::visitAffectationRule(ifccParser::AffectationRuleContext
             ->set_ctx(ctx)
     );
 
-    return 0;
+    return IR::Int.size;
 }
 
 antlrcpp::Any IRVisitor::visitAffectationRule2(ifccParser::AffectationRule2Context *ctx)
@@ -88,7 +88,7 @@ antlrcpp::Any IRVisitor::visitAffectationRule2(ifccParser::AffectationRule2Conte
             ->set_ctx(ctx)
     );
 
-    return 0;
+    return IR::Int.size;
 }
 
 ////////////////////////////////////////////
@@ -110,7 +110,7 @@ antlrcpp::Any IRVisitor::visitExprCharacter(ifccParser::ExprCharacterContext *ct
         );
     }
 
-    return 0;
+    return IR::Char.size;
 }
 
 antlrcpp::Any IRVisitor::visitExprNum(ifccParser::ExprNumContext *ctx){
@@ -124,20 +124,19 @@ antlrcpp::Any IRVisitor::visitExprNum(ifccParser::ExprNumContext *ctx){
             ->set_ctx(ctx)
     );
 
-    return 0;
+    return IR::Int.size;
 }
 
 antlrcpp::Any IRVisitor::visitExprVar(ifccParser::ExprVarContext *ctx)
 {
+    IR::Symbol *var = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
     cfg->add_instr(
         (new IR::IRInstrExprVar)
             ->set_symbol(
-                cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx)
-            )
-            ->set_ctx(ctx)
-    );
+                var)
+            ->set_ctx(ctx));
 
-    return 0;
+    return var->type.size;
 }
 
 ////////////////////////////////////////////
@@ -193,7 +192,7 @@ antlrcpp::Any IRVisitor::visitExprSumSous(ifccParser::ExprSumSousContext *ctx) {
         );
     }
 
-    return 0;
+    return IR::Int.size;
 }
 
 antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *ctx)
@@ -251,7 +250,7 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
         }
     }
 
-    return 0;
+    return IR::Int.size;
 }
 
 ////////////////////////////////////////////
@@ -298,7 +297,7 @@ antlrcpp::Any IRVisitor::visitExprUnary(ifccParser::ExprUnaryContext *ctx)
         );
     }
 
-    return 0;
+    return IR::Int.size;
 }
 
 ////////////////////////////////////////////
@@ -349,32 +348,45 @@ antlrcpp::Any IRVisitor::visitExprEqComparaison(ifccParser::ExprEqComparaisonCon
             ->set_ctx(ctx)
     );
 
-    return 0;
+    return IR::Int.size;
 }
 
 antlrcpp::Any IRVisitor::visitExprComparaison(ifccParser::ExprComparaisonContext *ctx) {
-    
-    //évaluation à gauche
-    this->visit(ctx->expr(0));
+    IR::Size res = IR::Int.size;
+    // évaluation à gauche
+    IR::Size leftSize = this->visit(ctx->expr(0)).as<IR::Size>();
 
     //on stocke dans ECX
     cfg->add_instr(
         (new IR::IRInstrMov)
-            ->set_src(new IR::IRRegA)
-            ->set_dest(new IR::IRRegC)
+            ->set_src(
+                (new IR::IRRegA)
+                    ->set_size(leftSize)
+            )
+            ->set_dest(
+                (new IR::IRRegC)
+                    ->set_size(leftSize)
+            )
             ->set_ctx(ctx)
     );
 
     //évaluation à droite
-    this->visit(ctx->expr(1));
+    IR::Size rightSize = this->visit(ctx->expr(1)).as<IR::Size>();
+    res = min(leftSize, rightSize);
 
-    //comparaison EAX (droite) et ECX (gauche)
     cfg->add_instr(
         (new IR::IRInstrComp)
-            ->set_src(new IR::IRRegA)
-            ->set_dest(new IR::IRRegC)
+            ->set_src(
+                (new IR::IRRegA)
+                    ->set_size(res)
+            )
+            ->set_dest(
+                (new IR::IRRegC)
+                    ->set_size(res)
+            )
             ->set_ctx(ctx)
     );
+    
 
     //résultat de la comparaison dans EAX
     cfg->add_instr(
@@ -390,13 +402,14 @@ antlrcpp::Any IRVisitor::visitExprComparaison(ifccParser::ExprComparaisonContext
     cfg->add_instr(
         (new IR::IRInstrMov)
             ->set_src(
-                (new IR::IRRegA)->set_size(IR::Byte)
+                (new IR::IRRegA)
+                    ->set_size(IR::Byte)
             )
             ->set_dest(new IR::IRRegA)
             ->set_ctx(ctx)
     );
 
-    return 0;
+    return res;
 }
 
 ////////////////////////////////////////////
@@ -424,7 +437,7 @@ antlrcpp::Any IRVisitor::visitExprAndBAB(ifccParser::ExprAndBABContext *ctx) {
             ->set_ctx(ctx)
     );
 
-    return 0;
+    return IR::Int.size;
 }
 
 antlrcpp::Any IRVisitor::visitExprXorBAB(ifccParser::ExprXorBABContext *ctx) {
@@ -448,7 +461,7 @@ antlrcpp::Any IRVisitor::visitExprXorBAB(ifccParser::ExprXorBABContext *ctx) {
             ->set_ctx(ctx)
     );
 
-    return 0;
+    return IR::Int.size;
 }
 
 antlrcpp::Any IRVisitor::visitExprOrBAB(ifccParser::ExprOrBABContext *ctx) {
@@ -472,7 +485,7 @@ antlrcpp::Any IRVisitor::visitExprOrBAB(ifccParser::ExprOrBABContext *ctx) {
             ->set_ctx(ctx)
     );
 
-    return 0;
+    return IR::Int.size;
 }
 
 ////////////////////////////////////////////
@@ -561,7 +574,7 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
         }
     }
 
-    return 0;
+    return IR::Int.size;
 }
 
 antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx) {
@@ -609,5 +622,5 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
             ->set_ctx(ctx)
     );
 
-    return 0;
+    return IR::Int.size;
 }
