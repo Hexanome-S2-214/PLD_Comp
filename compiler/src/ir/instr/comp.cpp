@@ -17,7 +17,7 @@ namespace IR
         }
     }
 
-    void IRInstrComp::gen_asm(ostream& o)
+    void IRInstrComp::gen_asm_x86(ostream& o)
     {
         if (src->get_size() != dest->get_size())
         {
@@ -25,6 +25,11 @@ namespace IR
         }
 
         o << "\t" << get_op(src->get_size()) << " "<< src->get_asm_str() << ", " << dest->get_asm_str() << endl;
+    }
+
+    void IRInstrComp::gen_asm_arm(ostream& o)
+    {
+        
     }
 }
 

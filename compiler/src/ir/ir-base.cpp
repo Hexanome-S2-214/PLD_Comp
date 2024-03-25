@@ -8,7 +8,20 @@ using namespace std;
 
 namespace IR
 {
-    IRBase::IRBase() : parent(nullptr), arch(UNDEFINED), ctx(nullptr), error_reporter(nullptr) {}
+    IRBase::IRBase() : parent(nullptr), arch(DEFAULT_ARCH), ctx(nullptr), error_reporter(nullptr) {}
+
+    void IRBase::gen_asm(ostream& o){
+        switch(arch){
+            case IR::IRArch::X86:
+                gen_asm_x86(o);
+                break;
+            case IR::IRArch::ARM:
+                gen_asm_arm(o);
+                break;
+            default:
+                throw runtime_error("Undefined architecture");
+        }
+    }
 
     string IRBase::get_asm_str()
     {
@@ -44,8 +57,7 @@ namespace IR
     {
         this->parent = parent;
 
-        if (this->arch == UNDEFINED)
-            this->arch = parent->arch;
+        this->arch = parent->arch;
 
         if (this->ctx == nullptr)
             this->ctx = parent->ctx;

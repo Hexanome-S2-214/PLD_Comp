@@ -6,9 +6,13 @@
 
 namespace IR
 {
-    void IRInstrExprDiv::gen_asm(ostream& o)
+    void IRInstrExprDiv::gen_asm_x86(ostream& o)
     {
         o << "\tcltd" << endl;
         o << "\tidivl " << (new IRRegB)->get_asm_str() << endl;
+    }
+    void IRInstrExprDiv::gen_asm_arm(ostream& o)
+    {
+        
     }
 }
