@@ -6,6 +6,7 @@
 #include "ir/params/ir-reg.h"
 #include "ir/params/ir-symbol.h"                
 #include "ir/params/ir-const.h"
+#include "ir/params/ir-param.h"
 #include "ir/instr/assign.h"
 #include "ir/instr/expression_unary_minus.h"
 #include "ir/instr/expression_cst.h"
@@ -20,7 +21,10 @@
 #include "ir/instr/expression_bit_a_bit.h"
 #include "ir/instr/intr-cheat.h"
 #include "ir/instr/jump.h"
+#include "ir/instr/call.h"
+#include "ir/instr/pushq.h"
 #include "error-reporter/compiler-error-token.h"
+#include "./error-reporter/error-reporter.h"
 
 ////////////////////////////////////////////
 // DECLARATION/AFFECTATION
@@ -94,6 +98,7 @@ antlrcpp::Any IRVisitor::visitAffectationRule2(ifccParser::AffectationRule2Conte
 ////////////////////////////////////////////
 // EXPRESSIONS TERMINALES
 ////////////////////////////////////////////
+
 antlrcpp::Any IRVisitor::visitExprCharacter(ifccParser::ExprCharacterContext *ctx){
     std::string text = ctx->CHARACTER()->getText();
     if (!text.empty())
@@ -623,4 +628,148 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
     );
 
     return IR::Int.size;
+}
+
+////////////////////////////////////////////
+// FONCTIONS
+//
+// WARNING : ONLY INT SUPPORTED FOR NOW / MAX 6 PARAMETERS
+////////////////////////////////////////////
+
+antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *ctx) {
+   
+    //One CFG and one Symbol Table per fonction (careful : CFG contains the ST in our model)
+    IR::CFG * cfg = static_cast<IR::CFG *>(
+        (new IR::CFG(ctx->fname->getText()))
+        ->set_parent(cfg_set)
+    );
+
+    //Update both cfg_set AND current cfg kept as attribute
+    cfg_set->add_cfg(cfg);
+    this->cfg = cfg;
+
+    int nb_params = ctx->decla_fparam().size();
+
+    //Get parameters from registers into temporary variables
+    int stop = nb_params > 6 ? 6 : nb_params;
+    int i=0;
+    while(i < stop) {
+        IR::Symbol *symbol = this->cfg->get_symbol_table()->declare_symbol(cfg, ctx->decla_fparam(i)->VAR()->getText(), IR::Int, ctx);
+        cfg->add_instr(
+            (new IR::IRInstrAssign)
+                ->set_src(reg_function_params[i])
+                ->set_symbol(symbol)
+                ->set_ctx(ctx)
+        );
+        i++;
+    }
+
+    //If more than 6 parameters -> we need to get parameters from the stack
+    //Careful : we declare variables with personnalized offset
+    int offset = 16;
+    for (int i=6 ; i < nb_params ; i++) {
+        IR::Symbol *symbol = this->cfg->get_symbol_table()->declare_symbol(cfg, ctx->decla_fparam(i)->VAR()->getText(), IR::Int, ctx);
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src((new IR::IRRegStack)->set_offset(offset))
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(new IR::IRRegA)
+                ->set_dest(symbol)
+                ->set_ctx(ctx)
+        );
+
+        offset += 8;
+    }
+
+    //Then only, visit block
+    this->visit(ctx->struct_bloc());
+
+    return 0;
+}
+
+antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleContext *ctx) {
+
+    int nb_params = ctx->fparam().size();
+    bool more_6_params = false;
+    int cpt_bytes;
+
+    //If there is more than 6 parameters, we place the remaining parameters on top of the stack
+    if (nb_params > 6) {
+        more_6_params = true;
+        cpt_bytes=0;  //bytes to substract from %rsp after the call
+        for(int i = (nb_params-1); i > 5; i--) {
+            cfg->add_instr(
+                (new IR::IRInstrPushq)
+                    ->set_src((new IR::IRConst)
+                            ->set_literal(ctx->fparam(i)->NUM()->getText())
+                    )
+                    ->set_ctx(ctx)
+            );
+            //TODO : check if always 8 -> btw, why 8 ?
+            cpt_bytes += 8;
+        }
+    }
+
+    //Put parameters in the dedicated registers -> for 7th parameters and beyond, the method is different
+    int i = more_6_params ? 5 : (nb_params-1);
+    while(i >= 0) {
+        //If param is a cst
+        if (ctx->fparam(i)->NUM()) {
+            cfg->add_instr(
+                (new IR::IRInstrMov)
+                    ->set_src(
+                        (new IR::IRConst)
+                            ->set_literal(ctx->fparam(i)->NUM()->getText())
+                    )
+                    ->set_dest(new IR::IRRegA)
+                    ->set_ctx(ctx)
+            );
+        }
+        //If it's a variable
+        else if (ctx->fparam(i)->VAR()) {
+            IR::Symbol* src = cfg->get_symbol_table()->get_symbol(ctx->fparam(i)->VAR()->getText());
+            cfg->add_instr(
+                (new IR::IRInstrMov)
+                    ->set_src(src)
+                    ->set_dest(new IR::IRRegA)
+                    ->set_ctx(ctx)
+            );
+        }
+        //If it's an expression
+        else {
+            this->visit(ctx->fparam(i));
+        }
+        //%eax to available register
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(new IR::IRRegA)
+                ->set_dest(reg_function_params[i])
+                ->set_ctx(ctx)
+        );
+        i--;
+    }
+
+    //call instruction
+    cfg->add_instr(
+        (new IR::IRInstrCall)
+            ->set_literal(ctx->fname->getText())
+            ->set_ctx(ctx)
+    );
+
+    //if more than 6 parameters -> move up %rsp
+    if (more_6_params) {
+        cfg->add_instr(
+            (new IR::IRInstrPushq)
+                ->set_src((new IR::IRConst)
+                        ->set_literal(to_string(cpt_bytes))
+                )
+                ->set_ctx(ctx)
+        );
+    }
+
+    return 0;
 }

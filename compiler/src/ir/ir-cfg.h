@@ -18,7 +18,7 @@ namespace IR
     class CFG : public IRBase
     {
     public:
-        CFG();
+        CFG(string name);
         ~CFG();
 
         void gen_asm_x86(ostream& o) override;
@@ -29,12 +29,13 @@ namespace IR
         void gen_asm_arm_prologue(ostream& o);
         void gen_asm_arm_epilogue(ostream& o);
 
+        int calc_st_size();
+
         void add_instr(IRBase * instr);
 
         IRBase * set_error_reporter(ErrorReporter::ErrorReporter * error_reporter);
 
         SymbolTable * get_symbol_table();
-
         BasicBlock * get_current_bb();
         vector<BasicBlock *> get_blocks();
         void set_current_bb(BasicBlock * bb);
@@ -47,5 +48,6 @@ namespace IR
         SymbolTable * symbol_table;
 
         static int bb_count;
+        string fname;
     };
 };

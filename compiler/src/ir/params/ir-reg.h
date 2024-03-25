@@ -46,5 +46,36 @@ namespace IR
     public:
         void gen_asm_x86(ostream& o) override;
         void gen_asm_arm(ostream& o) override;
+        IRRegStack* set_offset(int offset);
+    private:
+        int offset = 0;
+    };
+
+    class IRRegDest : public IRReg
+    {
+    public:
+        void gen_asm_x86(ostream& o) override;
+        void gen_asm_arm(ostream& o) override;
+    };
+
+    class IRRegSrc : public IRReg
+    {
+    public:
+        void gen_asm_x86(ostream& o) override;
+        void gen_asm_arm(ostream& o) override;
+    };
+
+    class IRReg8 : public IRReg
+    {
+    public:
+        void gen_asm_x86(ostream& o) override;
+        void gen_asm_arm(ostream& o) override;
+    };
+
+    class IRReg9 : public IRReg
+    {
+    public:
+        void gen_asm_x86(ostream& o) override;
+        void gen_asm_arm(ostream& o) override;
     };
 };

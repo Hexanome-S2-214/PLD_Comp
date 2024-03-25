@@ -9,10 +9,44 @@ axiom
      ;
 
 prog
-     : 'int' 'main' '(' ')' '{'
-               content*
-               '}'
+     : decla_function*
      ;
+
+//=============================================
+// Fonctions
+//=============================================
+
+fparam
+     : ','? (VAR | NUM | expr )         //expr includes functionCallRule
+     ;
+
+decla_fparam
+     : ','? 'int' VAR
+     ;
+
+decla_function
+     : 'int' fname=VAR '(' decla_fparam* ')' struct_bloc
+     ;
+
+//=============================================
+// Structures de contrôle
+//=============================================
+
+struct_bloc
+     : '{' content* '}'
+     ;
+
+struct_if_else
+     : 'if' '(' expr ')' struct_bloc ('else' struct_bloc)?
+     ;
+
+struct_while
+     : 'while' '(' expr ')' struct_bloc
+     ;
+
+//=============================================
+// Règles de base
+//=============================================
 
 content
      : statement
@@ -42,6 +76,7 @@ declarationRule
 instructionRule
      : returnStmtRule    # returnStmt
      | affectationRule   # affectation
+     | functionCallRule  # functionCall
      ;
 
 declStdRule
@@ -61,11 +96,17 @@ affectationRule2
      ;
 
 rvalue
-     : ( affectationRule2 | expr | '(' expr ')' | '(' affectationRule2 ')')
+     : affectationRule2
+     | expr
+     | functionCallRule
      ;
 
 returnStmtRule
      : RETURN rvalue ';'
+     ;
+
+functionCallRule
+     : fname=VAR '(' fparam* ')' ';'?   //2 possibilités : dans affectationRule -> pas de ';' ; dans instructionRule -> ';'
      ;
 
 //=============================================
@@ -84,25 +125,10 @@ expr
      | expr B_OR expr                   #exprOrBAB
      | expr AND expr                    #exprAnd
      | expr OR expr                     #exprOr
+     | functionCallRule                 #exprFunctionCall
      | CHARACTER                        #exprCharacter
      | VAR                              #exprVar
      | NUM                              #exprNum
-     ;
-
-//=============================================
-// Structures de contrôle
-//=============================================
-
-struct_bloc
-     : '{' content* '}'
-     ;
-
-struct_if_else
-     : 'if' '(' expr ')' struct_bloc ('else' struct_bloc)?
-     ;
-
-struct_while
-     : 'while' '(' expr ')' struct_bloc
      ;
 
 //=============================================
