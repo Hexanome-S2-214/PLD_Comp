@@ -8,7 +8,6 @@ int func() {
     int a7=1; int b7=2;
     int a8=1; int b8=2;
 
-
     return a+b;
 }
 

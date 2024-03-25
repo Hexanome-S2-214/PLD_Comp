@@ -17,10 +17,7 @@ prog
 //=============================================
 
 fparam
-     : ','?
-     (VAR
-     | NUM
-     | expr)
+     : ','? (VAR | NUM | expr )         //expr includes functionCallRule
      ;
 
 decla_fparam
@@ -128,6 +125,7 @@ expr
      | expr B_OR expr                   #exprOrBAB
      | expr AND expr                    #exprAnd
      | expr OR expr                     #exprOr
+     | functionCallRule                 #exprFunctionCall
      | CHARACTER                        #exprCharacter
      | VAR                              #exprVar
      | NUM                              #exprNum

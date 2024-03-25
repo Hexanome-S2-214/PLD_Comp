@@ -51,6 +51,7 @@ void IR::CFG::gen_asm_prologue(ostream& o)
     o << fname << ":" << endl;
     o << "\tpushq %rbp\n" ;
     o << "\tmovq %rsp, %rbp\n" ;
+    //TODO : handle this via an instr ?
     o << "\tsubq $" << calc_st_size() << ", %rsp" << endl;
 }
 
@@ -64,8 +65,11 @@ void IR::CFG::gen_asm_epilogue(ostream& o)
 int IR::CFG::calc_st_size() {
     int offset = symbol_table->get_symbol_offset();
 
-    //Remember : 16-bytes steps only
-    return (-offset / 16)*16;
+    if (offset == 0) {
+        return 0;
+    } else {
+        return ((-offset / 16)+1)*16;
+    }
 }
 
 void IR::CFG::add_instr(IR::IRBase * instr)

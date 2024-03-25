@@ -99,7 +99,16 @@ namespace IR
 
     void IRRegStack::gen_asm(ostream& o)
     {
+        if (offset != 0) {
+           o << offset; 
+        }
         o << "(%rbp)";
+    }
+
+    IRRegStack* IRRegStack::set_offset(int offset)
+    {
+        this->offset = offset;
+        return this;
     }
 
     void IRRegDest::gen_asm(ostream& o)

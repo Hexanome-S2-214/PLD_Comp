@@ -44,6 +44,9 @@ namespace IR
     {
     public:
         void gen_asm(ostream& o) override;
+        IRRegStack* set_offset(int offset);
+    private:
+        int offset = 0;
     };
 
     class IRRegDest : public IRReg
