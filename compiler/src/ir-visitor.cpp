@@ -17,12 +17,16 @@
 #include "ir/instr/mov.h"
 #include "ir/instr/character.h"
 #include "ir/instr/comp.h"
+#include "ir/instr/compb.h"
 #include "ir/instr/movzbl.h"
 #include "ir/instr/set_flag_comp.h"
 #include "ir/instr/expression_bit_a_bit.h"
 #include "ir/instr/intr-cheat.h"
 #include "ir/instr/jump.h"
 #include "error-reporter/compiler-error-token.h"
+
+#define TYPE_CHAR 1
+#define TYPE_INT 0
 
 ////////////////////////////////////////////
 // DECLARATION/AFFECTATION
@@ -108,7 +112,7 @@ antlrcpp::Any IRVisitor::visitExprCharacter(ifccParser::ExprCharacterContext *ct
         );
     }
 
-    return 0;
+    return TYPE_CHAR;
 }
 
 antlrcpp::Any IRVisitor::visitExprNum(ifccParser::ExprNumContext *ctx){
@@ -121,20 +125,19 @@ antlrcpp::Any IRVisitor::visitExprNum(ifccParser::ExprNumContext *ctx){
             ->set_ctx(ctx)
     );
 
-    return 0;
+    return TYPE_INT;
 }
 
 antlrcpp::Any IRVisitor::visitExprVar(ifccParser::ExprVarContext *ctx)
 {
+    IR::Symbol *var = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
     cfg->add_instr(
         (new IR::IRInstrExprVar)
             ->set_symbol(
-                cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx)
-            )
-            ->set_ctx(ctx)
-    );
+                var)
+            ->set_ctx(ctx));
 
-    return 0;
+    return var->type==IR::Int ? TYPE_INT : TYPE_CHAR;
 }
 
 ////////////////////////////////////////////
@@ -330,9 +333,9 @@ antlrcpp::Any IRVisitor::visitExprEqComparaison(ifccParser::ExprEqComparaisonCon
 }
 
 antlrcpp::Any IRVisitor::visitExprComparaison(ifccParser::ExprComparaisonContext *ctx) {
-    
-    //évaluation à gauche
-    this->visit(ctx->expr(0));
+    auto res = TYPE_INT;
+    // évaluation à gauche
+    auto leftType = this->visit(ctx->expr(0)).as<int>();
 
     //on stocke dans ECX
     cfg->add_instr(
@@ -343,15 +346,27 @@ antlrcpp::Any IRVisitor::visitExprComparaison(ifccParser::ExprComparaisonContext
     );
 
     //évaluation à droite
-    this->visit(ctx->expr(1));
+    auto rightType = this->visit(ctx->expr(1)).as<int>();
 
     //comparaison EAX (droite) et ECX (gauche)
-    cfg->add_instr(
-        (new IR::IRInstrComp)
-            ->set_src(new IR::IRRegA)
-            ->set_dest(new IR::IRRegC)
-            ->set_ctx(ctx)
-    );
+    if(leftType == TYPE_CHAR || rightType == TYPE_CHAR)
+    {
+        res = TYPE_CHAR;
+        cfg->add_instr(
+            (new IR::IRInstrCompb)
+                ->set_src((new IR::IRRegA)->set_size(IR::Byte))
+                ->set_dest((new IR::IRRegC)->set_size(IR::Byte))
+                ->set_ctx(ctx)
+        );
+    }else{
+        res = TYPE_INT;
+        cfg->add_instr(
+            (new IR::IRInstrComp)
+                ->set_src(new IR::IRRegA)
+                ->set_dest(new IR::IRRegC)
+                ->set_ctx(ctx)
+        );
+    }
 
     //résultat de la comparaison dans EAX
     cfg->add_instr(
@@ -372,7 +387,7 @@ antlrcpp::Any IRVisitor::visitExprComparaison(ifccParser::ExprComparaisonContext
             ->set_ctx(ctx)
     );
 
-    return 0;
+    return res;
 }
 
 ////////////////////////////////////////////
