@@ -2,12 +2,6 @@
 
 namespace IR
 {
-    IRReg * IRReg::set_size(Size size)
-    {
-        this->size = size;
-        return this;
-    }
-
     Size IRReg::get_size()
     {
         return size;

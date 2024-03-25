@@ -6,12 +6,15 @@
 
 namespace IR
 {
-    void IRInstrExprCst::gen_asm(ostream& o)
+    vector<IRInstr *> IRInstrExprCst::get_instrs()
     {
-        paste_properties(
+        return {
             (new IRInstrMov)
                 ->set_src(value)
-                ->set_dest(new IRRegA)
-        )->gen_asm(o);
+                ->set_dest(
+                    (new IRRegA)
+                        ->set_size(value->get_size())
+                )
+        };
     }
 }

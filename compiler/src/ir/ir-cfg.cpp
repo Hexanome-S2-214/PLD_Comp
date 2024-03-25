@@ -92,6 +92,11 @@ IR::BasicBlock * IR::CFG::get_current_bb()
     return current_bb;
 }
 
+vector<IR::BasicBlock *> IR::CFG::get_blocks()
+{
+    return blocks;
+}
+
 string IR::CFG::get_next_bb_label()
 {
     string label = ".L" + to_string(IR::CFG::bb_count);
