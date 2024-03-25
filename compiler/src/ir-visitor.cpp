@@ -29,6 +29,21 @@
 // DECLARATION/AFFECTATION
 ////////////////////////////////////////////
 
+antlrcpp::Any IRVisitor::visitSimpleAff(ifccParser::SimpleAffContext *ctx)
+{
+    this->visit(ctx->rvalue());
+
+    IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
+
+    cfg->add_instr(
+        (new IR::IRInstrAssign)
+            ->set_symbol(symbol)
+            ->set_ctx(ctx)
+    );
+
+    return 0;
+}
+
 antlrcpp::Any IRVisitor::visitSimpleDecl(ifccParser::SimpleDeclContext *ctx)
 {
     if(ctx->getTokens(ifccParser::INT).size() >= 1)
