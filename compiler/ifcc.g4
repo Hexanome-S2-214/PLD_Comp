@@ -76,6 +76,7 @@ returnStmtRule
 
 expr
      : '(' expr ')'                     #exprParExpr
+     | VAR '[' NUM ']'                  #exprTable
      | op_unary=('-' | '!') expr        #exprUnary
      | expr OP_MULT expr                #exprMultDivMod
      | expr op_add=('+' | '-') expr     #exprSumSous

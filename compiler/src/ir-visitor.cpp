@@ -119,6 +119,21 @@ antlrcpp::Any IRVisitor::visitAffectationRule2(ifccParser::AffectationRule2Conte
     return 0;
 }
 
+antlrcpp::Any IRVisitor::visitExprTable(ifccParser::ExprTableContext *ctx)
+{
+    IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
+    int offset = stoi(ctx->NUM()->getText());
+
+    cfg->add_instr(
+    (new IR::IRInstrMov)
+        ->set_src(new IR::SymbolT(offset))
+        ->set_dest(new IR::IRRegB)
+        ->set_ctx(ctx)
+    );
+
+    return 0;
+}
+
 // antlrcpp::Any IRVisitor::visitTableAff(ifccParser::TableAffContext *ctx)
 // {
 //     this->visit(ctx->rvalue());
