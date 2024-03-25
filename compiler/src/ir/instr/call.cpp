@@ -2,7 +2,7 @@
 
 namespace IR
 {
-    void IRInstrCall::gen_asm(ostream& o)
+    void IRInstrCall::gen_asm_x86(ostream& o)
     {
         o << "\tcall " << literal;
 
@@ -12,6 +12,12 @@ namespace IR
 
         o << endl;
     }
+
+    void IRInstrCall::gen_asm_arm(ostream& o)
+    {
+        
+    }
+    
 }
 
 

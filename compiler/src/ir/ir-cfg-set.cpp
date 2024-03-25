@@ -1,10 +1,15 @@
 #include "ir-cfg-set.h"
 
-void IR::CfgSet::gen_asm(ostream& o)
+void IR::CfgSet::gen_asm_x86(ostream& o)
 {
     for (auto cfg : cfgs) {
         cfg->gen_asm(o);
     }
+}
+
+void IR::CfgSet::gen_asm_arm(ostream& o)
+{
+    
 }
 
 void IR::CfgSet::set_current_cfg(IR::CFG * cfg)
