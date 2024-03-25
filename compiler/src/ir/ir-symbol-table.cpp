@@ -21,7 +21,16 @@ namespace IR
             exit(1);
         }
 
+        symbol_offset -= type.size;
+
         IR::Symbol * symbol = new IR::Symbol();
+
+        symbol->set_parent(parent);
+        symbol->set_ctx(ctx);
+        symbol->id = id;
+        symbol->offset = symbol_offset;
+        symbol->type = type;
+
         symbols[id] = symbol;
 
         if(type == IR::Int){
