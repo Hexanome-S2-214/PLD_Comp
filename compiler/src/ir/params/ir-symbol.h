@@ -23,6 +23,7 @@ namespace IR
     {
         public:
         SymbolT(int index): index(index){};
+        SymbolT(int index, Symbol* symbol);
         ~SymbolT() = default;
 
         void gen_asm(ostream& o) override;

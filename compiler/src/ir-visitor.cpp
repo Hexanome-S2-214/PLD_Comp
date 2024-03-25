@@ -126,7 +126,7 @@ antlrcpp::Any IRVisitor::visitExprTable(ifccParser::ExprTableContext *ctx)
 
     cfg->add_instr(
     (new IR::IRInstrMov)
-        ->set_src(new IR::SymbolT(offset))
+        ->set_src(new IR::SymbolT(offset, symbol))
         ->set_dest(new IR::IRRegB)
         ->set_ctx(ctx)
     );
