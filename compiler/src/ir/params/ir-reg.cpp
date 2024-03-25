@@ -119,13 +119,18 @@ namespace IR
         o << "(%rbp)";
     }
 
+    void IRRegStack::gen_asm_arm(ostream& o)
+    {
+        
+    }
+
     IRRegStack* IRRegStack::set_offset(int offset)
     {
         this->offset = offset;
         return this;
     }
 
-    void IRRegDest::gen_asm(ostream& o)
+    void IRRegDest::gen_asm_x86(ostream& o)
     {
         switch (get_size())
         {
@@ -146,7 +151,12 @@ namespace IR
         }
     }
 
-    void IRRegSrc::gen_asm(ostream& o)
+    void IRRegDest::gen_asm_arm(ostream& o)
+    {
+        
+    }
+
+    void IRRegSrc::gen_asm_x86(ostream& o)
     {
         switch (get_size())
         {
@@ -167,7 +177,12 @@ namespace IR
         }
     }
 
-    void IRReg8::gen_asm(ostream& o)
+    void IRRegSrc::gen_asm_arm(ostream& o)
+    {
+        
+    }
+
+    void IRReg8::gen_asm_x86(ostream& o)
     {
         switch (get_size())
         {
@@ -188,7 +203,12 @@ namespace IR
         }
     }
 
-    void IRReg9::gen_asm(ostream& o)
+    void IRReg8::gen_asm_arm(ostream& o)
+    {
+        
+    }
+
+    void IRReg9::gen_asm_x86(ostream& o)
     {
         switch (get_size())
         {
@@ -207,5 +227,10 @@ namespace IR
         default:
             break;
         }
+    }
+
+    void IRReg9::gen_asm_arm(ostream& o)
+    {
+        
     }
 }
