@@ -16,16 +16,35 @@ prog
 // Fonctions
 //=============================================
 
-fparam
-     : ','? (VAR | NUM | expr )         //expr includes functionCallRule
+fparam_call
+     : (fparam_call2(',' fparam_call2)*)?
      ;
 
-decla_fparam
-     : ','? 'int' VAR
+fparam_call2
+     : VAR
+     | NUM
+     | expr    //expr includes functionCallRule
+     ;
+
+fparam_decla
+     : (fparam_decla2(',' fparam_decla2)*)?
+     ;
+
+fparam_decla2
+     : 'int' VAR
      ;
 
 decla_function
-     : 'int' fname=VAR '(' decla_fparam* ')' struct_bloc
+     : TYPE_FUNCTION fname=VAR '(' fparam_decla ')' struct_bloc
+     ;
+
+functionCallRule
+     : fname=VAR '(' fparam_call ')'
+     ;
+
+TYPE_FUNCTION
+     : 'int'
+     | 'void'
      ;
 
 //=============================================
@@ -74,9 +93,9 @@ declarationRule
      ;
 
 instructionRule
-     : returnStmtRule    # returnStmt
-     | affectationRule   # affectation
-     | functionCallRule  # functionCall
+     : returnStmtRule         # returnStmt
+     | affectationRule        # affectation
+     | functionCallRule ';'   # functionCall
      ;
 
 declStdRule
@@ -96,17 +115,13 @@ affectationRule2
      ;
 
 rvalue
-     : affectationRule2
+     : functionCallRule       //you can't do func() = func2()
+     | affectationRule2
      | expr
-     | functionCallRule
      ;
 
 returnStmtRule
      : RETURN rvalue ';'
-     ;
-
-functionCallRule
-     : fname=VAR '(' fparam* ')' ';'?   //2 possibilités : dans affectationRule -> pas de ';' ; dans instructionRule -> ';'
      ;
 
 //=============================================
