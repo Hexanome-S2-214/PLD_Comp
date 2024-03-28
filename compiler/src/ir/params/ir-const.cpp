@@ -2,16 +2,14 @@
 
 namespace IR
 {
-    void IRConst::gen_asm(ostream& o) {
-        o << "$" << value;
+    void IRConst::gen_asm_x86(ostream& o) {
+        o << "$" << literal;
     }
-
-    IRConst * IRConst::set_value(string value) {
-        this->value = value;
-        return this;
+    
+    void IRConst::gen_asm_arm(ostream& o) {
     }
-
-    string IRConst::get_value() {
-        return value;
+    
+    Size IRConst::get_size() {
+        return size;
     }
 }

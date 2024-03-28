@@ -4,8 +4,10 @@
 
 int IR::CFG::bb_count = 2;
 
-IR::CFG::CFG()
+IR::CFG::CFG(string name)
 {
+    fname = name;
+
     symbol_table = new SymbolTable();
 
     BasicBlock * new_bb = new BasicBlock(this, get_next_bb_label(), nullptr, nullptr);
@@ -30,33 +32,68 @@ IR::IRBase * IR::CFG::set_error_reporter(ErrorReporter::ErrorReporter * error_re
     return this;
 }
 
-void IR::CFG::gen_asm(ostream& o)
+void IR::CFG::gen_asm_x86(ostream& o)
 {
-    gen_asm_prologue(o);
+    gen_asm_x86_prologue(o);
 
     for (auto block : blocks)
     {
-        block->gen_asm(o);
+        block->gen_asm_x86(o);
     }
 
-    gen_asm_epilogue(o);
+    gen_asm_x86_epilogue(o);
 }
 
-void IR::CFG::gen_asm_prologue(ostream& o)
+void IR::CFG::gen_asm_arm(ostream& o)
 {
-    o << ".globl main\n" ;
-    o << " main: \n" ;
-    o << "    #prologue\n" ;
-    o << "    pushq %rbp\n" ;
-    o << "    movq %rsp, %rbp\n\n" ;
+    gen_asm_arm_prologue(o);
+
+    for (auto block : blocks)
+    {
+        block->gen_asm_arm(o);
+    }
+
+    gen_asm_arm_epilogue(o);
 }
 
-void IR::CFG::gen_asm_epilogue(ostream& o)
+void IR::CFG::gen_asm_arm_prologue(ostream& o){
+    o << ".globl main\n";
+    o << "main:\n";
+    o << "    push {fp, lr}\n";
+    o << "    add fp, sp, #4\n";
+}
+
+void IR::CFG::gen_asm_arm_epilogue(ostream& o){
+    o << "    pop {fp, pc}\n";
+}
+
+void IR::CFG::gen_asm_x86_prologue(ostream& o)
+{
+    o << endl;
+    o << ".globl " << fname << endl;
+    o << fname << ":" << endl;
+    o << "\tpushq %rbp\n" ;
+    o << "\tmovq %rsp, %rbp\n" ;
+    //TODO : handle this via an instr ?
+    o << "\tsubq $" << calc_st_size() << ", %rsp" << endl;
+}
+
+
+void IR::CFG::gen_asm_x86_epilogue(ostream& o)
 {
     o << "\n";
-    o << "    # epilogue\n";
-    o << "    popq %rbp\n";
-    o << "    ret\n";
+    o << "\tleave\n";
+    o << "\tret\n";
+}
+
+int IR::CFG::calc_st_size() {
+    int offset = symbol_table->get_symbol_offset();
+
+    if (offset == 0) {
+        return 0;
+    } else {
+        return ((-offset / 16)+1)*16;
+    }
 }
 
 void IR::CFG::add_instr(IR::IRBase * instr)
@@ -77,6 +114,11 @@ void IR::CFG::set_current_bb(IR::BasicBlock * bb)
 IR::BasicBlock * IR::CFG::get_current_bb()
 {
     return current_bb;
+}
+
+vector<IR::BasicBlock *> IR::CFG::get_blocks()
+{
+    return blocks;
 }
 
 string IR::CFG::get_next_bb_label()

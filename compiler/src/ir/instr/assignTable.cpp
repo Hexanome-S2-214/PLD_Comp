@@ -1,13 +1,12 @@
 #include "assignTable.h"
 #include "mov.h"
-#include "movb.h"
 #include "../ir-basic-block.h"
 #include "../ir-cfg.h"
 #include "../params/ir-reg.h"
 
 namespace IR
 {
-    void IRInstrAssignTable::gen_asm(ostream& o)
+    void IRInstrAssignTable::gen_asm_x86(ostream& o)
     {
         IR::SymbolT* symbol_casted = dynamic_cast<IR::SymbolT*>(symbol);
         if(symbol_casted == nullptr) {
@@ -22,7 +21,7 @@ namespace IR
             )->gen_asm(o); 
         }else if(symbol_casted->type == ::IR::Char){
             paste_properties(
-                (new IRInstrMovb)
+                (new IRInstrMov)
                     ->set_src((new IR::IRRegA)->set_size(IR::Byte))
                     ->set_dest(symbol)
             )->gen_asm(o);

@@ -13,7 +13,7 @@ namespace IR
         }
     }
 
-    IR::Symbol * IR::SymbolTable::declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx, int tableSize)
+    Symbol * SymbolTable::declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx, int personalized_offset)
     {
         if (symbols.find(id) != symbols.end())
         {
@@ -21,31 +21,17 @@ namespace IR
             exit(1);
         }
 
-        symbol_offset -= type.size;
-
-        IR::Symbol * symbol = new IR::Symbol();
+        symbol_offset -= type.size / 8;
+        
+        Symbol * symbol = new Symbol;
 
         symbol->set_parent(parent);
         symbol->set_ctx(ctx);
         symbol->id = id;
-        symbol->offset = symbol_offset;
         symbol->type = type;
-
+        symbol_offset -= type.size;
+        symbol->offset = symbol_offset;
         symbols[id] = symbol;
-
-        if(type == IR::Int){
-            if(tableSize == -1){
-                symbol_offset -= INT_SIZE;
-            } else {
-                symbol_offset -= INT_SIZE * tableSize;
-            }
-        } else if (type == IR::Char){
-            if(tableSize == -1){
-                symbol_offset -= CHAR_SIZE;
-            } else {
-                symbol_offset -= CHAR_SIZE * tableSize;
-            }
-        }
 
         return symbol;
     }

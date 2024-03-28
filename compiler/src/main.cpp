@@ -8,8 +8,6 @@
 #include "../generated/ifccParser.h"
 #include "../generated/ifccBaseVisitor.h"
 
-// #include "CodeGenVisitor.h"
-// #include "SymbolTableVisitor.h"
 #include "ir/ir-cfg.h"
 #include "ir-visitor.h"
 #include "error-reporter/error-reporter.h"
@@ -59,18 +57,19 @@ int main(int argn, const char **argv)
       exit(1);
   }
 
-  IR::CFG * cfg = static_cast<IR::CFG *>(
-    (new IR::CFG())
-      ->set_error_reporter(error_reporter)
-      ->set_arch(IR::X86)
+
+  IR::CfgSet * cfg_set = static_cast<IR::CfgSet *>(
+    (new IR::CfgSet())
+      ->set_error_reporter(new ErrorReporter::ErrorReporter())
+      ->set_arch(IR::IRArch::X86)
   );
-  IRVisitor visitor(cfg);
+  IRVisitor visitor(cfg_set);
 
   visitor.visit(tree);
 
-  cfg->gen_asm(cout);
+  cfg_set->gen_asm(cout);
 
-  delete cfg;
+  delete cfg_set;
   delete error_reporter;
 
   return 0;

@@ -2,18 +2,12 @@
 
 namespace IR
 {
-    IRReg * IRReg::set_size(Size size)
-    {
-        this->size = size;
-        return this;
-    }
-
     Size IRReg::get_size()
     {
         return size;
     }
 
-    void IRRegA::gen_asm(ostream& o)
+    void IRRegA::gen_asm_x86(ostream& o)
     {
         switch (get_size())
         {
@@ -34,7 +28,12 @@ namespace IR
         }
     }
 
-    void IRRegB::gen_asm(ostream& o)
+    void IRRegA::gen_asm_arm(ostream& o)
+    {
+        
+    }
+
+    void IRRegB::gen_asm_x86(ostream& o)
     {
         switch (get_size())
         {
@@ -55,7 +54,12 @@ namespace IR
         }
     }
 
-    void IRRegC::gen_asm(ostream& o)
+    void IRRegB::gen_asm_arm(ostream& o)
+    {
+        
+    }
+
+    void IRRegC::gen_asm_x86(ostream& o)
     {
         switch (get_size())
         {
@@ -76,7 +80,12 @@ namespace IR
         }
     }
 
-    void IRRegD::gen_asm(ostream& o)
+    void IRRegC::gen_asm_arm(ostream& o)
+    {
+        
+    }
+
+    void IRRegD::gen_asm_x86(ostream& o)
     {
         switch (get_size())
         {
@@ -97,8 +106,131 @@ namespace IR
         }
     }
 
-    void IRRegStack::gen_asm(ostream& o)
+    void IRRegD::gen_asm_arm(ostream& o)
     {
+        
+    }
+
+    void IRRegStack::gen_asm_x86(ostream& o)
+    {
+        if (offset != 0) {
+           o << offset; 
+        }
         o << "(%rbp)";
+    }
+
+    void IRRegStack::gen_asm_arm(ostream& o)
+    {
+        
+    }
+
+    IRRegStack* IRRegStack::set_offset(int offset)
+    {
+        this->offset = offset;
+        return this;
+    }
+
+    void IRRegDest::gen_asm_x86(ostream& o)
+    {
+        switch (get_size())
+        {
+        case Byte:
+            o << "%dil";
+            break;
+        case Word:
+            o << "%di";
+            break;
+        case DWord:
+            o << "%edi";
+            break;
+        case QWord:
+            o << "%rdi";
+            break;
+        default:
+            break;
+        }
+    }
+
+    void IRRegDest::gen_asm_arm(ostream& o)
+    {
+        
+    }
+
+    void IRRegSrc::gen_asm_x86(ostream& o)
+    {
+        switch (get_size())
+        {
+        case Byte:
+            o << "%sil";
+            break;
+        case Word:
+            o << "%si";
+            break;
+        case DWord:
+            o << "%esi";
+            break;
+        case QWord:
+            o << "%rsi";
+            break;
+        default:
+            break;
+        }
+    }
+
+    void IRRegSrc::gen_asm_arm(ostream& o)
+    {
+        
+    }
+
+    void IRReg8::gen_asm_x86(ostream& o)
+    {
+        switch (get_size())
+        {
+        case Byte:
+            o << "%r8b";
+            break;
+        case Word:
+            o << "%r8w";
+            break;
+        case DWord:
+            o << "%r8d";
+            break;
+        case QWord:
+            o << "%r8";
+            break;
+        default:
+            break;
+        }
+    }
+
+    void IRReg8::gen_asm_arm(ostream& o)
+    {
+        
+    }
+
+    void IRReg9::gen_asm_x86(ostream& o)
+    {
+        switch (get_size())
+        {
+        case Byte:
+            o << "%r9b";
+            break;
+        case Word:
+            o << "%r9w";
+            break;
+        case DWord:
+            o << "%r9d";
+            break;
+        case QWord:
+            o << "%r9";
+            break;
+        default:
+            break;
+        }
+    }
+
+    void IRReg9::gen_asm_arm(ostream& o)
+    {
+        
     }
 }

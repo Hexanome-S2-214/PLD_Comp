@@ -6,20 +6,13 @@
 
 namespace IR
 {
-    void IRInstrExprDiv::gen_asm(ostream& o)
+    void IRInstrExprDiv::gen_asm_x86(ostream& o)
     {
-        paste_properties(
-            (new IRInstrMov)
-                ->set_src(new IRRegA)
-                ->set_dest(new IRRegB)
-        )->gen_asm(o);
-        paste_properties(
-            (new IRInstrMov)
-                ->set_src(src)
-                ->set_dest(new IRRegA)
-        )->gen_asm(o);
-
         o << "\tcltd" << endl;
         o << "\tidivl " << (new IRRegB)->get_asm_str() << endl;
+    }
+    void IRInstrExprDiv::gen_asm_arm(ostream& o)
+    {
+        
     }
 }

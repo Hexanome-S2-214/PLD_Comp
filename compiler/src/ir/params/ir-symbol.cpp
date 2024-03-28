@@ -3,9 +3,18 @@
 
 namespace IR
 {
-    void IR::Symbol::gen_asm(ostream& o)
+    Size IR::Symbol::get_size()
     {
-        o << offset << (new IRRegStack)->get_asm_str();
+        return type.size;
+    }
+
+    void IR::Symbol::gen_asm_x86(ostream& o)
+    {
+        o << offset << (new IRRegStack)->set_size(type.size)->get_asm_str();
+    }
+    
+    void IR::Symbol::gen_asm_arm(ostream& o)
+    {
     }
 
     SymbolT::SymbolT(int index, Symbol *symbol)
@@ -17,7 +26,7 @@ namespace IR
         used = symbol->used;
     }
 
-    void SymbolT::gen_asm(ostream &o)
+    void SymbolT::gen_asm_x86(ostream &o)
     {
         o << offset + index * type.size << (new IRRegStack)->get_asm_str();
     }

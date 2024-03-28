@@ -9,6 +9,7 @@ namespace IR
 #include "ir-base.h"
 #include "ir-symbol-table.h"
 #include "../error-reporter/error-reporter.h"
+#include "ir-instr-comp.h"
 
 using namespace std;
 
@@ -17,20 +18,26 @@ namespace IR
     class CFG : public IRBase
     {
     public:
-        CFG();
+        CFG(string name);
         ~CFG();
 
-        void gen_asm(ostream& o) override;
-        void gen_asm_prologue(ostream& o);
-        void gen_asm_epilogue(ostream& o);
+        void gen_asm_x86(ostream& o) override;
+        void gen_asm_x86_prologue(ostream& o);
+        void gen_asm_x86_epilogue(ostream& o);
+
+        void gen_asm_arm(ostream& o) override;
+        void gen_asm_arm_prologue(ostream& o);
+        void gen_asm_arm_epilogue(ostream& o);
+
+        int calc_st_size();
 
         void add_instr(IRBase * instr);
 
         IRBase * set_error_reporter(ErrorReporter::ErrorReporter * error_reporter);
 
         SymbolTable * get_symbol_table();
-
         BasicBlock * get_current_bb();
+        vector<BasicBlock *> get_blocks();
         void set_current_bb(BasicBlock * bb);
         string get_next_bb_label();
         void add_bb(BasicBlock * bb);
@@ -41,5 +48,6 @@ namespace IR
         SymbolTable * symbol_table;
 
         static int bb_count;
+        string fname;
     };
 };

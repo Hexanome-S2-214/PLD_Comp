@@ -6,15 +6,15 @@ namespace IR
 }
 
 #include "../ir-instr.h"
-#include "base-instr.h"
+#include "../ir-attr.h"
 
 namespace IR
 {
-    class IRInstrAssignTable : public IRInstr, public IRInstrBaseSymbol<IRInstrAssignTable>
+    class IRInstrAssignTable : public IRInstr, public IRAttrSymbol<IRInstrAssignTable>
     {
     public:
         IRInstrAssignTable(int index) : index(index){};
-        void gen_asm(ostream& o) override;
+        void gen_asm_x86(ostream& o) override;
     protected:
         int index;
     };
