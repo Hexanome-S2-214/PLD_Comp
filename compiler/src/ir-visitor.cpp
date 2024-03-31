@@ -440,7 +440,7 @@ antlrcpp::Any IRVisitor::visitExprEqComparaison(ifccParser::ExprEqComparaisonCon
 antlrcpp::Any IRVisitor::visitExprComparaison(ifccParser::ExprComparaisonContext *ctx) {
     IR::Size res = IR::Int.size;
     // évaluation à gauche
-    IR::Size leftSize = any_cast<IR::Size>(this->visit(ctx->expr(0)));
+    IR::Size leftSize = this->visit(ctx->expr(0)).as<IR::Size>();
 
     //on stocke dans ECX
     cfg->add_instr(
@@ -457,7 +457,7 @@ antlrcpp::Any IRVisitor::visitExprComparaison(ifccParser::ExprComparaisonContext
     );
 
     //évaluation à droite
-    IR::Size rightSize = any_cast<IR::Size>(this->visit(ctx->expr(1)));
+    IR::Size rightSize = this->visit(ctx->expr(1)).as<IR::Size>();
     res = min(leftSize, rightSize);
 
     cfg->add_instr(
