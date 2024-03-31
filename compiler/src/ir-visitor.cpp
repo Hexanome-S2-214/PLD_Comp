@@ -22,7 +22,7 @@
 #include "ir/instr/intr-cheat.h"
 #include "ir/instr/jump.h"
 #include "ir/instr/call.h"
-#include "ir/instr/pushq.h"
+#include "ir/instr/push.h"
 #include "error-reporter/compiler-error-token.h"
 #include "./error-reporter/error-reporter.h"
 
@@ -828,14 +828,15 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
         cpt_bytes=0;  //bytes to substract from %rsp after the call
         for(int i = (nb_params-1); i > 5; i--) {
             cfg->add_instr(
-                (new IR::IRInstrPushq)
-                    ->set_src((new IR::IRConst)
+                (new IR::IRInstrPush)
+                    ->set_src(
+                        (new IR::IRConst)
                             ->set_literal(ctx->fparam_call()->fparam_call2(i)->NUM()->getText())
+                            ->set_size(IR::Size::QWord)
                     )
                     ->set_ctx(ctx)
             );
-            //TODO : check if always 8 -> btw, why 8 ?
-            cpt_bytes += 8;
+            cpt_bytes += to_bytes(IR::Size::QWord);
         }
     }
 
@@ -888,7 +889,7 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
     //if more than 6 parameters -> move up %rsp
     if (more_6_params) {
         cfg->add_instr(
-            (new IR::IRInstrPushq)
+            (new IR::IRInstrPush)
                 ->set_src((new IR::IRConst)
                         ->set_literal(to_string(cpt_bytes))
                 )

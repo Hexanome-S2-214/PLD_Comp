@@ -12,6 +12,11 @@ namespace IR
         QWord = 64,
     };
 
+    int to_bytes(Size size)
+    {
+        return size / 8;
+    }
+
     struct Type
     {
         std::string name;
