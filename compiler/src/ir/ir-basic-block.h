@@ -30,6 +30,7 @@ namespace IR
         void set_exit_true(BasicBlock * exit_true);
         void set_exit_false(BasicBlock * exit_false);
         void set_exit(string exit);
+        void set_write_mode(bool wm);
 
         string get_label();
         CFG * get_cfg();
@@ -40,5 +41,6 @@ namespace IR
         vector<IRInstr *> instrs;
         string label;
         string test_var;
+        bool write_mode = true;
     };
 };
