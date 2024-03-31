@@ -56,13 +56,24 @@ antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *
 
 antlrcpp::Any IRVisitor::visitDeclStdRule(ifccParser::DeclStdRuleContext *ctx)
 {
-    if(ctx->getTokens(ifccParser::INT).size() >= 1)
+    IR::Type type;
+
+    if (ctx->getTokens(ifccParser::INT).size() >= 1)
     {
-        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, ctx);
-    }else if(ctx->getTokens(ifccParser::CHAR).size() >= 1)
-    {
-        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Char, ctx);
+        type = IR::Int;
     }
+    else if (ctx->getTokens(ifccParser::CHAR).size() >= 1)
+    {
+        type = IR::Char;
+    }
+    else
+    {
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Unrecognized type", ctx)
+        );
+    }
+
+    cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx);
 
     return IR::Int.size;
 }
