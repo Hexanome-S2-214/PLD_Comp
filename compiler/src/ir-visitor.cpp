@@ -39,7 +39,7 @@ antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *
     string epilogue_label_cfg = cfg->get_epilogue_label();
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("jmp")
+            ->set_jump(IR::JumpType::Jump)
             ->set_label(epilogue_label_cfg)
             ->set_ctx(ctx)
     );
@@ -569,7 +569,7 @@ antlrcpp::Any IRVisitor::visitExprAnd(ifccParser::ExprAndContext *ctx) {
     //if false -> jump to the block which moves $0 into %eax
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("jne")
+            ->set_jump(IR::JumpType::IfNotEqual)
             ->set_label(first_expr_false_label)
             ->set_ctx(ctx)
     );
@@ -614,7 +614,7 @@ antlrcpp::Any IRVisitor::visitExprOr(ifccParser::ExprOrContext *ctx) {
     //if true -> jump to the block which moves $1 into %eax
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("je")
+            ->set_jump(IR::JumpType::IfEqual)
             ->set_label(first_expr_true_label)
             ->set_ctx(ctx)
     );
@@ -678,7 +678,7 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
     //Jump after condition evaluation
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("jne")
+            ->set_jump(IR::JumpType::IfNotEqual)
             ->set_label(jump_after_eval_cond)
             ->set_ctx(ctx)
     );
@@ -689,7 +689,7 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
     // Jump to endif block when if complete
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("jmp")
+            ->set_jump(IR::JumpType::Jump)
             ->set_label(exit_label)
             ->set_ctx(ctx)
     );
@@ -733,7 +733,7 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
     //Jump to condition/end-while block
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("jmp")
+            ->set_jump(IR::JumpType::Jump)
             ->set_label(end_while_label)
             ->set_ctx(ctx)
     );
@@ -762,7 +762,7 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
     //if condition is evaluated to "true" -> jump to body of the while
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("je")
+            ->set_jump(IR::JumpType::IfEqual)
             ->set_label(body_label)
             ->set_ctx(ctx)
     );

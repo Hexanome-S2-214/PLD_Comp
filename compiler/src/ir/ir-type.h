@@ -29,4 +29,11 @@ namespace IR
 
     int type_to_bytes(Type * type);
     int size_to_bytes(Size size);
+
+    enum class JumpType
+    {
+        Jump,
+        IfEqual,
+        IfNotEqual,
+    };
 };

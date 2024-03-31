@@ -10,7 +10,7 @@ namespace IR
 
 namespace IR
 {
-    class IRInstrJump : public IRInstr, public IRAttrOp<IRInstrJump>, public IRAttrLabel<IRInstrJump>
+    class IRInstrJump : public IRInstr, public IRAttrJump<IRInstrJump>, public IRAttrLabel<IRInstrJump>
     {
     public:
         void gen_asm_x86(ostream& o) override;
