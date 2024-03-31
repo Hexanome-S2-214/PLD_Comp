@@ -27,6 +27,30 @@
 #include "error-reporter/compiler-error-token.h"
 #include "./error-reporter/error-reporter.h"
 
+
+////////////////////////////////////////////
+// RETURN
+////////////////////////////////////////////
+
+antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *ctx) {
+    
+    this->visit(ctx->rvalue());
+
+    //Jump to epilogue block in any case
+    string epilogue_label_cfg = cfg->get_epilogue_label();
+    cfg->add_instr(
+        (new IR::IRInstrJump)
+            ->set_op("jmp")
+            ->set_label(epilogue_label_cfg)
+            ->set_ctx(ctx)
+    );
+
+    //Disable writing in the block AFTER adding jmp instruction
+    this->cfg->get_current_bb()->set_write_mode(false);
+
+    return 0;
+}
+
 ////////////////////////////////////////////
 // DECLARATION/AFFECTATION
 ////////////////////////////////////////////
@@ -551,6 +575,107 @@ antlrcpp::Any IRVisitor::visitExprOrBAB(ifccParser::ExprOrBABContext *ctx) {
 }
 
 ////////////////////////////////////////////
+// OPERATEURS PARESSEUX
+////////////////////////////////////////////
+
+antlrcpp::Any IRVisitor::visitExprAnd(ifccParser::ExprAndContext *ctx) {
+
+    //equivalent to : if first expr is false then return false, else return value of second expr
+
+    string first_expr_false_label = cfg->get_next_bb_label();
+    string end_label = cfg->get_next_bb_label();
+
+    cerr << first_expr_false_label << endl;
+    cerr << end_label << endl;
+
+    //setup of block to reach if first expr is false
+    IR::BasicBlock * first_expr_false_bb = new IR::BasicBlock(cfg, first_expr_false_label, nullptr, nullptr);
+    first_expr_false_bb->set_exit(end_label);
+    first_expr_false_bb->add_instr(
+        (new IR::IRInstrMov)
+            ->set_src(
+                (new IR::IRConst)
+                    ->set_literal("0")
+            )
+            ->set_dest(
+                (new IR::IRRegA)
+                    ->set_size(IR::DWord))
+            ->set_ctx(ctx)
+    );
+
+    this->visit(ctx->expr(0));
+
+    //if false -> jump to the block which moves $0 into %eax
+    cfg->add_instr(
+        (new IR::IRInstrJump)
+            ->set_op("jne")
+            ->set_label(first_expr_false_label)
+            ->set_ctx(ctx)
+    );
+
+    //if true -> visit second expression
+    this->visit(ctx->expr(1));
+
+    //in the end, jump to block which continues the program
+    cfg->get_current_bb()->set_exit(end_label);
+
+    IR::BasicBlock * end_bb = new IR::BasicBlock(cfg, end_label, nullptr, nullptr);
+
+    cfg->add_bb(first_expr_false_bb);
+    cfg->add_bb(end_bb);
+
+    return 0;
+}
+
+antlrcpp::Any IRVisitor::visitExprOr(ifccParser::ExprOrContext *ctx) {
+
+    //equivalent to : if first expr is true then return true, else return value of second expr
+    string first_expr_true_label = cfg->get_next_bb_label();
+    string end_label = cfg->get_next_bb_label();
+
+    cerr << first_expr_true_label << endl;
+    cerr << end_label << endl;
+
+    //setup of block to reach if first expr is false
+    IR::BasicBlock * first_expr_true_bb = new IR::BasicBlock(cfg, first_expr_true_label, nullptr, nullptr);
+    first_expr_true_bb->set_exit(end_label);
+    first_expr_true_bb->add_instr(
+        (new IR::IRInstrMov)
+            ->set_src(
+                (new IR::IRConst)
+                    ->set_literal("1")
+            )
+            ->set_dest(
+                (new IR::IRRegA)
+                    ->set_size(IR::DWord))
+            ->set_ctx(ctx)
+    );
+
+    this->visit(ctx->expr(0));
+
+    //if true -> jump to the block which moves $1 into %eax
+    cfg->add_instr(
+        (new IR::IRInstrJump)
+            ->set_op("je")
+            ->set_label(first_expr_true_label)
+            ->set_ctx(ctx)
+    );
+
+    //if true -> visit second expression
+    this->visit(ctx->expr(1));
+
+    //in the end, jump to block which continues the program
+    cfg->get_current_bb()->set_exit(end_label);
+
+    IR::BasicBlock * end_bb = new IR::BasicBlock(cfg, end_label, nullptr, nullptr);
+
+    cfg->add_bb(first_expr_true_bb);
+    cfg->add_bb(end_bb);
+
+    return 0;
+}
+
+////////////////////////////////////////////
 // STRUCTURES DE CONTROLE
 ////////////////////////////////////////////
 
@@ -705,13 +830,13 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
     cfg_set->add_cfg(cfg);
     this->cfg = cfg;
 
-    int nb_params = ctx->decla_fparam().size();
+    int nb_params = ctx->fparam_decla()->fparam_decla2().size();
 
     //Get parameters from registers into temporary variables
     int stop = nb_params > 6 ? 6 : nb_params;
     int i=0;
     while(i < stop) {
-        IR::Symbol *symbol = this->cfg->get_symbol_table()->declare_symbol(cfg, ctx->decla_fparam(i)->VAR()->getText(), IR::Int, ctx);
+        IR::Symbol *symbol = this->cfg->get_symbol_table()->declare_symbol(cfg, ctx->fparam_decla()->fparam_decla2(i)->VAR()->getText(), IR::Int, ctx);
         cfg->add_instr(
             (new IR::IRInstrAssign)
                 ->set_src(reg_function_params[i])
@@ -725,7 +850,7 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
     //Careful : we declare variables with personnalized offset
     int offset = 16;
     for (int i=6 ; i < nb_params ; i++) {
-        IR::Symbol *symbol = this->cfg->get_symbol_table()->declare_symbol(cfg, ctx->decla_fparam(i)->VAR()->getText(), IR::Int, ctx);
+        IR::Symbol *symbol = this->cfg->get_symbol_table()->declare_symbol(cfg, ctx->fparam_decla()->fparam_decla2(i)->VAR()->getText(), IR::Int, ctx);
         cfg->add_instr(
             (new IR::IRInstrMov)
                 ->set_src((new IR::IRRegStack)->set_offset(offset))
@@ -750,7 +875,7 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
 
 antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleContext *ctx) {
 
-    int nb_params = ctx->fparam().size();
+    int nb_params = ctx->fparam_call()->fparam_call2().size();
     bool more_6_params = false;
     int cpt_bytes;
 
@@ -762,7 +887,7 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
             cfg->add_instr(
                 (new IR::IRInstrPushq)
                     ->set_src((new IR::IRConst)
-                            ->set_literal(ctx->fparam(i)->NUM()->getText())
+                            ->set_literal(ctx->fparam_call()->fparam_call2(i)->NUM()->getText())
                     )
                     ->set_ctx(ctx)
             );
@@ -775,20 +900,20 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
     int i = more_6_params ? 5 : (nb_params-1);
     while(i >= 0) {
         //If param is a cst
-        if (ctx->fparam(i)->NUM()) {
+        if (ctx->fparam_call()->fparam_call2(i)->NUM()) {
             cfg->add_instr(
                 (new IR::IRInstrMov)
                     ->set_src(
                         (new IR::IRConst)
-                            ->set_literal(ctx->fparam(i)->NUM()->getText())
+                            ->set_literal(ctx->fparam_call()->fparam_call2(i)->NUM()->getText())
                     )
                     ->set_dest(new IR::IRRegA)
                     ->set_ctx(ctx)
             );
         }
         //If it's a variable
-        else if (ctx->fparam(i)->VAR()) {
-            IR::Symbol* src = cfg->get_symbol_table()->get_symbol(ctx->fparam(i)->VAR()->getText());
+        else if (ctx->fparam_call()->fparam_call2(i)->VAR()) {
+            IR::Symbol* src = cfg->get_symbol_table()->get_symbol(ctx->fparam_call()->fparam_call2(i)->VAR()->getText());
             cfg->add_instr(
                 (new IR::IRInstrMov)
                     ->set_src(src)
@@ -798,7 +923,7 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
         }
         //If it's an expression
         else {
-            this->visit(ctx->fparam(i));
+            this->visit(ctx->fparam_call()->fparam_call2(i));
         }
         //%eax to available register
         cfg->add_instr(

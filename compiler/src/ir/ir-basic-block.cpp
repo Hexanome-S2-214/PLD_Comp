@@ -21,6 +21,11 @@ void IR::BasicBlock::add_instr(IR::IRBase * instr)
 {
     IRInstrComposition * instr_comp_cast = dynamic_cast<IRInstrComposition *>(instr);
 
+    if (!write_mode) {
+        return;
+    }
+
+    //write_mode : to handle returns anywhere
     if (instr_comp_cast != nullptr)
     {
         for (IR::IRInstr * instr : instr_comp_cast->get_instrs())
@@ -83,6 +88,10 @@ void IR::BasicBlock::set_exit_false(IR::BasicBlock * exit_false)
 void IR::BasicBlock::set_exit(string exit_label)
 {
     this->exit_label = exit_label;
+}
+
+void IR::BasicBlock::set_write_mode(bool wm) {
+    this->write_mode = wm;
 }
 
 string IR::BasicBlock::get_label()

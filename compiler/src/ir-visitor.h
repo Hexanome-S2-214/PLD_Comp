@@ -21,6 +21,7 @@ public:
     virtual antlrcpp::Any visitAffectationRule2(ifccParser::AffectationRule2Context *ctx) override;
 
     virtual antlrcpp::Any visitExprTable(ifccParser::ExprTableContext *ctx) override;
+    virtual antlrcpp::Any visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *ctx) override;
 
     virtual antlrcpp::Any visitExprCharacter(ifccParser::ExprCharacterContext *ctx) override;
     virtual antlrcpp::Any visitExprNum(ifccParser::ExprNumContext *ctx) override;
@@ -33,6 +34,9 @@ public:
 
     virtual antlrcpp::Any visitExprEqComparaison(ifccParser::ExprEqComparaisonContext *ctx) override;
     virtual antlrcpp::Any visitExprComparaison(ifccParser::ExprComparaisonContext *ctx) override;
+
+    virtual antlrcpp::Any visitExprAnd(ifccParser::ExprAndContext *ctx) override;
+    virtual antlrcpp::Any visitExprOr(ifccParser::ExprOrContext *ctx) override;
 
     virtual antlrcpp::Any visitExprAndBAB(ifccParser::ExprAndBABContext *ctx) override;
     virtual antlrcpp::Any visitExprXorBAB(ifccParser::ExprXorBABContext *ctx) override;
