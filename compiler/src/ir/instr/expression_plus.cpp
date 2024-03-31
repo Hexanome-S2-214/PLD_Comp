@@ -4,7 +4,30 @@ namespace IR
 {
     void IRInstrExprPlus::gen_asm_x86(ostream& o)
     {
-        o << "\taddl "<< src->get_asm_str() << ", " << dest->get_asm_str() << endl;
+        if (src->get_size() != dest->get_size())
+        {
+            cerr << "Error: addition between different sizes" << endl;
+        }
+        
+        string op;
+
+        switch (src->get_size())
+        {
+            case Size::Byte:
+                op = "addb";
+                break;
+            case Size::Word:
+                op = "addw";
+                break;
+            case Size::DWord:
+                op = "addl";
+                break;
+            case Size::QWord:
+                op = "addq";
+                break;
+        }
+
+        o << "\t" << op << " "<< src->get_asm_str() << ", " << dest->get_asm_str() << endl;
     }
     
     void IRInstrExprPlus::gen_asm_arm(ostream& o)
