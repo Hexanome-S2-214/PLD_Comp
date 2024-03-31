@@ -22,7 +22,6 @@ void IR::BasicBlock::add_instr(IR::IRBase * instr)
     IRInstrComposition * instr_comp_cast = dynamic_cast<IRInstrComposition *>(instr);
 
     if (!write_mode) {
-        cerr << "write_mode=false, should not add instr" << endl;
         return;
     }
 
@@ -31,7 +30,6 @@ void IR::BasicBlock::add_instr(IR::IRBase * instr)
     {
         for (IR::IRInstr * instr : instr_comp_cast->get_instrs())
         {
-            cerr << "instr added" << endl;
             add_instr(instr);
         }
         
@@ -42,7 +40,6 @@ void IR::BasicBlock::add_instr(IR::IRBase * instr)
 
     if (instr_cast != nullptr)
     {
-        cerr << "instr added" << endl;
         instr->set_parent(this);
         instrs.push_back(static_cast<IR::IRInstr*>(instr));
 
@@ -94,7 +91,6 @@ void IR::BasicBlock::set_exit(string exit_label)
 }
 
 void IR::BasicBlock::set_write_mode(bool wm) {
-    cerr << "write mode for bb set to " << wm << endl;
     this->write_mode = wm;
 }
 

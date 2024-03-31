@@ -33,13 +33,10 @@
 
 antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *ctx) {
     
-    cerr << "passage return" << endl;
-
     this->visit(ctx->rvalue());
 
     //Jump to epilogue block in any case
     string epilogue_label_cfg = cfg->get_epilogue_label();
-    cerr << epilogue_label_cfg << endl;
     cfg->add_instr(
         (new IR::IRInstrJump)
             ->set_op("jmp")
@@ -518,6 +515,107 @@ antlrcpp::Any IRVisitor::visitExprOrBAB(ifccParser::ExprOrBABContext *ctx) {
     );
 
     return IR::Int.size;
+}
+
+////////////////////////////////////////////
+// OPERATEURS PARESSEUX
+////////////////////////////////////////////
+
+antlrcpp::Any IRVisitor::visitExprAnd(ifccParser::ExprAndContext *ctx) {
+
+    //equivalent to : if first expr is false then return false, else return value of second expr
+
+    string first_expr_false_label = cfg->get_next_bb_label();
+    string end_label = cfg->get_next_bb_label();
+
+    cerr << first_expr_false_label << endl;
+    cerr << end_label << endl;
+
+    //setup of block to reach if first expr is false
+    IR::BasicBlock * first_expr_false_bb = new IR::BasicBlock(cfg, first_expr_false_label, nullptr, nullptr);
+    first_expr_false_bb->set_exit(end_label);
+    first_expr_false_bb->add_instr(
+        (new IR::IRInstrMov)
+            ->set_src(
+                (new IR::IRConst)
+                    ->set_literal("0")
+            )
+            ->set_dest(
+                (new IR::IRRegA)
+                    ->set_size(IR::DWord))
+            ->set_ctx(ctx)
+    );
+
+    this->visit(ctx->expr(0));
+
+    //if false -> jump to the block which moves $0 into %eax
+    cfg->add_instr(
+        (new IR::IRInstrJump)
+            ->set_op("jne")
+            ->set_label(first_expr_false_label)
+            ->set_ctx(ctx)
+    );
+
+    //if true -> visit second expression
+    this->visit(ctx->expr(1));
+
+    //in the end, jump to block which continues the program
+    cfg->get_current_bb()->set_exit(end_label);
+
+    IR::BasicBlock * end_bb = new IR::BasicBlock(cfg, end_label, nullptr, nullptr);
+
+    cfg->add_bb(first_expr_false_bb);
+    cfg->add_bb(end_bb);
+
+    return 0;
+}
+
+antlrcpp::Any IRVisitor::visitExprOr(ifccParser::ExprOrContext *ctx) {
+
+    //equivalent to : if first expr is true then return true, else return value of second expr
+    string first_expr_true_label = cfg->get_next_bb_label();
+    string end_label = cfg->get_next_bb_label();
+
+    cerr << first_expr_true_label << endl;
+    cerr << end_label << endl;
+
+    //setup of block to reach if first expr is false
+    IR::BasicBlock * first_expr_true_bb = new IR::BasicBlock(cfg, first_expr_true_label, nullptr, nullptr);
+    first_expr_true_bb->set_exit(end_label);
+    first_expr_true_bb->add_instr(
+        (new IR::IRInstrMov)
+            ->set_src(
+                (new IR::IRConst)
+                    ->set_literal("1")
+            )
+            ->set_dest(
+                (new IR::IRRegA)
+                    ->set_size(IR::DWord))
+            ->set_ctx(ctx)
+    );
+
+    this->visit(ctx->expr(0));
+
+    //if true -> jump to the block which moves $1 into %eax
+    cfg->add_instr(
+        (new IR::IRInstrJump)
+            ->set_op("je")
+            ->set_label(first_expr_true_label)
+            ->set_ctx(ctx)
+    );
+
+    //if true -> visit second expression
+    this->visit(ctx->expr(1));
+
+    //in the end, jump to block which continues the program
+    cfg->get_current_bb()->set_exit(end_label);
+
+    IR::BasicBlock * end_bb = new IR::BasicBlock(cfg, end_label, nullptr, nullptr);
+
+    cfg->add_bb(first_expr_true_bb);
+    cfg->add_bb(end_bb);
+
+    return 0;
 }
 
 ////////////////////////////////////////////

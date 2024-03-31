@@ -22,7 +22,6 @@ namespace IR
         }
 
         symbol_offset -= type.size / 8;
-        cerr << type.size/8  << endl;
         
         Symbol * symbol = new Symbol;
 
