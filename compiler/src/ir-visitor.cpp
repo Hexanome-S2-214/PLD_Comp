@@ -836,7 +836,7 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
                     )
                     ->set_ctx(ctx)
             );
-            cpt_bytes += to_bytes(IR::Size::QWord);
+            cpt_bytes += size_to_bytes(IR::Size::QWord);
         }
     }
 

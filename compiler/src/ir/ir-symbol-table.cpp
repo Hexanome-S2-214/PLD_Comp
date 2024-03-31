@@ -21,7 +21,7 @@ namespace IR
             exit(1);
         }
 
-        symbol_offset -= type.size / 8;
+        symbol_offset -= size_to_bytes(type.size);
         
         Symbol * symbol = new Symbol;
 
