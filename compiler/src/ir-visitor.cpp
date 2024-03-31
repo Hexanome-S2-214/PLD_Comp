@@ -594,9 +594,6 @@ antlrcpp::Any IRVisitor::visitExprOr(ifccParser::ExprOrContext *ctx) {
     string first_expr_true_label = cfg->get_next_bb_label();
     string end_label = cfg->get_next_bb_label();
 
-    cerr << first_expr_true_label << endl;
-    cerr << end_label << endl;
-
     //setup of block to reach if first expr is false
     IR::BasicBlock * first_expr_true_bb = new IR::BasicBlock(cfg, first_expr_true_label, nullptr, nullptr);
     first_expr_true_bb->set_exit(end_label);

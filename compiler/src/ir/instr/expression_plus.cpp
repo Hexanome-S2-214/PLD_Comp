@@ -1,4 +1,5 @@
 #include "expression_plus.h"
+#include "../../error-reporter/compiler-error-token.h"
 
 namespace IR
 {
@@ -6,7 +7,9 @@ namespace IR
     {
         if (src->get_size() != dest->get_size())
         {
-            cerr << "Error: addition between different sizes" << endl;
+            get_error_reporter()->reportError(
+                new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Addition between different sizes", get_ctx())
+            );
         }
         
         string op;
