@@ -22,6 +22,7 @@ namespace IR
         }
 
         symbol_offset -= type.size / 8;
+        cerr << type.size/8  << endl;
         
         Symbol * symbol = new Symbol;
 
@@ -29,7 +30,6 @@ namespace IR
         symbol->set_ctx(ctx);
         symbol->id = id;
         symbol->type = type;
-        symbol_offset -= type.size;
         symbol->offset = symbol_offset;
         symbols[id] = symbol;
 

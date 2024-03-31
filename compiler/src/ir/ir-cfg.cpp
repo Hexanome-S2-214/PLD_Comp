@@ -1,6 +1,7 @@
 #include "ir-cfg.h"
 #include "ir-basic-block.h"
 #include "ir-symbol-table.h"
+#include "instr/epilogue.h"
 
 int IR::CFG::bb_count = 2;
 
@@ -10,6 +11,12 @@ IR::CFG::CFG(string name)
 
     symbol_table = new SymbolTable();
 
+    //Create epilogue BB -> we store it apart from the other because we need to write it at the end
+    epilogue_label = get_next_bb_label();
+    this->epilogue_bb = new BasicBlock(this, epilogue_label, nullptr, nullptr);
+    this->epilogue_bb->add_instr((new IR::IRInstrEpilogue));
+
+    //Create BB to write beginning of the function in -> the order of the blocks doesn't matter since we store epilogue_label
     BasicBlock * new_bb = new BasicBlock(this, get_next_bb_label(), nullptr, nullptr);
     add_bb(new_bb);
 }
@@ -53,7 +60,7 @@ void IR::CFG::gen_asm_arm(ostream& o)
         block->gen_asm_arm(o);
     }
 
-    gen_asm_arm_epilogue(o);
+    // gen_asm_arm_epilogue(o);
 }
 
 void IR::CFG::gen_asm_arm_prologue(ostream& o){
@@ -63,9 +70,9 @@ void IR::CFG::gen_asm_arm_prologue(ostream& o){
     o << "    add fp, sp, #4\n";
 }
 
-void IR::CFG::gen_asm_arm_epilogue(ostream& o){
-    o << "    pop {fp, pc}\n";
-}
+// void IR::CFG::gen_asm_arm_epilogue(ostream& o){
+//     o << "    pop {fp, pc}\n";
+// }
 
 void IR::CFG::gen_asm_x86_prologue(ostream& o)
 {
@@ -78,12 +85,9 @@ void IR::CFG::gen_asm_x86_prologue(ostream& o)
     o << "\tsubq $" << calc_st_size() << ", %rsp" << endl;
 }
 
-
 void IR::CFG::gen_asm_x86_epilogue(ostream& o)
 {
-    o << "\n";
-    o << "\tleave\n";
-    o << "\tret\n";
+    this->epilogue_bb->gen_asm_x86(o);
 }
 
 int IR::CFG::calc_st_size() {
@@ -126,6 +130,10 @@ string IR::CFG::get_next_bb_label()
     string label = ".L" + to_string(IR::CFG::bb_count);
     IR::CFG::bb_count++;
     return label;
+}
+
+string IR::CFG::get_epilogue_label() {
+    return epilogue_label;
 }
 
 void IR::CFG::add_bb(IR::BasicBlock * bb)

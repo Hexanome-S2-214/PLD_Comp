@@ -26,6 +26,33 @@
 #include "error-reporter/compiler-error-token.h"
 #include "./error-reporter/error-reporter.h"
 
+
+////////////////////////////////////////////
+// RETURN
+////////////////////////////////////////////
+
+antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *ctx) {
+    
+    cerr << "passage return" << endl;
+
+    this->visit(ctx->rvalue());
+
+    //Jump to epilogue block in any case
+    string epilogue_label_cfg = cfg->get_epilogue_label();
+    cerr << epilogue_label_cfg << endl;
+    cfg->add_instr(
+        (new IR::IRInstrJump)
+            ->set_op("jmp")
+            ->set_label(epilogue_label_cfg)
+            ->set_ctx(ctx)
+    );
+
+    //Disable writing in the block AFTER adding jmp instruction
+    this->cfg->get_current_bb()->set_write_mode(false);
+
+    return 0;
+}
+
 ////////////////////////////////////////////
 // DECLARATION/AFFECTATION
 ////////////////////////////////////////////
