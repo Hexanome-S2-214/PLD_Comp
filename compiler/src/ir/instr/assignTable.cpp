@@ -8,8 +8,10 @@ namespace IR
 {
     void IRInstrAssignTable::gen_asm_x86(ostream& o)
     {
-        IR::SymbolT* symbol_casted = dynamic_cast<IR::SymbolT*>(symbol);
+        // o << ">>AssignTable" << std::endl;
+        IR::Symbol* symbol_casted = dynamic_cast<IR::Symbol*>(symbol);
         if(symbol_casted == nullptr) {
+            // o << "<<AssignTable" << std::endl;
             return;
         }
 
@@ -26,6 +28,11 @@ namespace IR
                     ->set_dest(symbol)
             )->gen_asm(o);
         }
+        // o << "<<AssignTable" << std::endl;
         return;
+    }
+
+    void IRInstrAssignTable::gen_asm_arm(ostream &o)
+    {
     }
 }

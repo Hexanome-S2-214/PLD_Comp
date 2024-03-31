@@ -129,24 +129,28 @@ antlrcpp::Any IRVisitor::visitExprTable(ifccParser::ExprTableContext *ctx)
     cfg->add_instr(
     (new IR::IRInstrMov)
         ->set_src(new IR::SymbolT(offset, symbol))
-        ->set_dest(new IR::IRRegB)
+        ->set_dest(new IR::IRRegA)
         ->set_ctx(ctx)
     );
 
     return 0;
 }
 
-// antlrcpp::Any IRVisitor::visitTableAff(ifccParser::TableAffContext *ctx)
-// {
-//     this->visit(ctx->rvalue());
-//     cfg->add_instr(
-//         (new IR::IRInstrAssignTable(stoi(ctx->NUM()->getText())))
-//             ->set_id(ctx->VAR()->getText())
-//             ->set_ctx(ctx)
-//     );
+antlrcpp::Any IRVisitor::visitTableAff(ifccParser::TableAffContext *ctx)
+{
+    this->visit(ctx->rvalue());
+    IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
+    int index = stoi(ctx->NUM()->getText());
+    //TODO: Do we really need to allocate memory here ?
+    IR::SymbolT* symbolT = new IR::SymbolT(index, symbol);
+    cfg->add_instr(
+        (new IR::IRInstrAssignTable(stoi(ctx->NUM()->getText())))
+            ->set_symbol(symbolT)
+            ->set_ctx(ctx)
+    );
 
-//     return 0;
-// }
+    return 0;
+}
 
 ////////////////////////////////////////////
 // EXPRESSIONS TERMINALES

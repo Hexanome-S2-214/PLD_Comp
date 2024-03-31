@@ -17,6 +17,7 @@ public:
     virtual antlrcpp::Any visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx) override;
     virtual antlrcpp::Any visitTableDecl(ifccParser::TableDeclContext *ctx) override;
     virtual antlrcpp::Any visitSimpleAff(ifccParser::SimpleAffContext *ctx) override;
+    virtual antlrcpp::Any visitTableAff(ifccParser::TableAffContext * ctx) override;
     virtual antlrcpp::Any visitAffectationRule2(ifccParser::AffectationRule2Context *ctx) override;
 
     virtual antlrcpp::Any visitExprTable(ifccParser::ExprTableContext *ctx) override;
