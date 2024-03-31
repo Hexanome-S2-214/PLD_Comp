@@ -82,14 +82,24 @@ antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
 {
     this->visit(ctx->rvalue());
 
-    IR::Symbol *symbol;
+    IR::Type type;
+
     if (ctx->getTokens(ifccParser::INT).size() >= 1)
     {
-        symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, ctx);
-    }else if(ctx->getTokens(ifccParser::CHAR).size() >= 1)
-    {
-        symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Char, ctx);
+        type = IR::Int;
     }
+    else if (ctx->getTokens(ifccParser::CHAR).size() >= 1)
+    {
+        type = IR::Char;
+    }
+    else
+    {
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Unrecognized type", ctx)
+        );
+    }
+
+    IR::Symbol * symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx);
 
     cfg->add_instr(
         (new IR::IRInstrAssign)
@@ -538,9 +548,6 @@ antlrcpp::Any IRVisitor::visitExprAnd(ifccParser::ExprAndContext *ctx) {
 
     string first_expr_false_label = cfg->get_next_bb_label();
     string end_label = cfg->get_next_bb_label();
-
-    cerr << first_expr_false_label << endl;
-    cerr << end_label << endl;
 
     //setup of block to reach if first expr is false
     IR::BasicBlock * first_expr_false_bb = new IR::BasicBlock(cfg, first_expr_false_label, nullptr, nullptr);
