@@ -15,9 +15,11 @@ namespace IR
 
 #define BB_IF 10
 #define BB_WHILE 20
+#define BB_SWITCH 30
 
 #define BB_END_IF 1
 #define BB_END_WHILE 2
+#define BB_END_SWITCH 3
 
 using namespace std;
 
@@ -40,7 +42,8 @@ namespace IR
         void add_instr(IRBase * instr);
         void add_bb(BasicBlock * bb);
 
-        BasicBlock * get_loop_parent(string label);
+        BasicBlock * get_break_parent(string label);
+        BasicBlock * get_continue_parent(string label);
 
         IRBase * set_error_reporter(ErrorReporter::ErrorReporter * error_reporter);
         void set_current_bb(BasicBlock * bb);

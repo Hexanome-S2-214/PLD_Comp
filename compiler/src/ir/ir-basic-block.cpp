@@ -4,12 +4,10 @@
 #include "ir-instr-comp.h"
 
 IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label) : BasicBlock(cfg, label, nullptr, nullptr) {
-    cerr << "block created, bb_id=" << bb_id << endl;
 }
 
 IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label, IR::BasicBlock * exit_true, IR::BasicBlock * exit_false) : label(label), exit_true(exit_true), exit_false(exit_false) {
     set_parent(cfg);
-    cerr << "block created, bb_id=" << bb_id << endl;
 }
 
 IR::BasicBlock::~BasicBlock()
@@ -48,8 +46,6 @@ void IR::BasicBlock::add_instr(IR::IRBase * instr)
 
         return;
     }
-
-    cerr << "ERROR: Invalid instruction type" << endl;
 }
 
 vector<IR::IRInstr *> * IR::BasicBlock::get_instrs()
@@ -98,7 +94,6 @@ void IR::BasicBlock::set_write_mode(bool wm) {
 }
 
 void IR::BasicBlock::set_bb_id(int bb_id) {
-    cerr << "block id changed, bb_id=" << bb_id << endl;
     this->bb_id = bb_id;
 }
 

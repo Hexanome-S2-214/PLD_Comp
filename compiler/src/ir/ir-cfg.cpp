@@ -126,7 +126,6 @@ int IR::CFG::get_nb_param() {
 
 void IR::CFG::incr_nb_param() {
     this->nb_param++;
-    cerr << "nb param func : " << this->nb_param << endl;
 }
 
 IR::BasicBlock * IR::CFG::get_current_bb()
@@ -135,31 +134,53 @@ IR::BasicBlock * IR::CFG::get_current_bb()
 }
 
 /**
- * Retourne la boucle la plus proche dans laquelle est le bloc passé en paramètre
- * Retourne une erreur sinon -> appelé lors des break/continue
+ * Retourne le parent-"break" (switch ou boucle) du bloc passé en paramètre
+ * Retourne une erreur si pas de bloc parent
  * @param label : label du block dont on veut l'indentation par rapport à une boucle
  * @return bloc "boucle"
 */
-IR::BasicBlock * IR::CFG::get_loop_parent(string label) {
+IR::BasicBlock * IR::CFG::get_break_parent(string label) {
     std::stack<IR::BasicBlock *> ret_label;
-    cerr << "entrée get_loop_parent" << endl;
 
     for (auto bb : blocks) {
-        cerr << bb->get_bb_id() << endl;
-        cerr << "1" << endl; 
+        switch(bb->get_bb_id()) {
+            case BB_SWITCH:
+            case BB_WHILE:
+                ret_label.push(bb);
+                break;
+            
+            case BB_END_SWITCH:
+            case BB_END_WHILE:
+                ret_label.pop();
+                break;
+        }
+    }
+
+    if (ret_label.empty()){
+        throw runtime_error("break/continue must be used inside a loop");
+    }
+
+    return ret_label.top();
+}
+
+/**
+ * Retourne le parent-"continue" (boucle) du bloc passé en paramètre
+ * Retourne une erreur si pas de bloc parent
+ * @param label : label du block dont on veut l'indentation par rapport à une boucle
+ * @return bloc "boucle"
+*/
+IR::BasicBlock * IR::CFG::get_continue_parent(string label) {
+    std::stack<IR::BasicBlock *> ret_label;
+
+    for (auto bb : blocks) {
         switch(bb->get_bb_id()) {
             case BB_WHILE:
-                cerr << "psg while" << endl;
                 ret_label.push(bb);
                 break;
             
             case BB_END_WHILE:
-                cerr << "psg end while" << endl;
                 ret_label.pop();
                 break;
-            
-            case 0:
-                cerr << "instruction block" << endl;
         }
     }
 
