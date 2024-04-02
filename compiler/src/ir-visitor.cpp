@@ -75,7 +75,8 @@ antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
     if (ctx->getTokens(ifccParser::INT).size() >= 1)
     {
         symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, ctx);
-    }else if(ctx->getTokens(ifccParser::CHAR).size() >= 1)
+    }
+    else if(ctx->getTokens(ifccParser::CHAR).size() >= 1)
     {
         symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Char, ctx);
     }
@@ -528,9 +529,6 @@ antlrcpp::Any IRVisitor::visitExprAnd(ifccParser::ExprAndContext *ctx) {
     string first_expr_false_label = cfg->get_next_bb_label();
     string end_label = cfg->get_next_bb_label();
 
-    cerr << first_expr_false_label << endl;
-    cerr << end_label << endl;
-
     //setup of block to reach if first expr is false
     IR::BasicBlock * first_expr_false_bb = new IR::BasicBlock(cfg, first_expr_false_label, nullptr, nullptr);
     first_expr_false_bb->set_exit(end_label);
@@ -575,9 +573,6 @@ antlrcpp::Any IRVisitor::visitExprOr(ifccParser::ExprOrContext *ctx) {
     //equivalent to : if first expr is true then return true, else return value of second expr
     string first_expr_true_label = cfg->get_next_bb_label();
     string end_label = cfg->get_next_bb_label();
-
-    cerr << first_expr_true_label << endl;
-    cerr << end_label << endl;
 
     //setup of block to reach if first expr is false
     IR::BasicBlock * first_expr_true_bb = new IR::BasicBlock(cfg, first_expr_true_label, nullptr, nullptr);
@@ -709,8 +704,6 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
 
 antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx) {
 
-    IR::BasicBlock * expr_bb = cfg->get_current_bb();
-
     //Labels for new blocks
     string condition_label = cfg->get_next_bb_label();
     string body_label = cfg->get_next_bb_label();
@@ -776,6 +769,64 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
     }
 
     return IR::Int.size;
+}
+
+antlrcpp::Any IRVisitor::visitStruct_switch_case(ifccParser::Struct_switch_caseContext *ctx) {
+    
+    int nb_case = ctx->case_opt().size();
+    bool default_opt = ctx->default_opt() ? true : false;
+
+    vector<IR::BasicBlock *> cases;
+
+    //Works because while_bb are identified via the condition block (a switch will be in the body block)
+    cfg->get_current_bb()->set_bb_id(BB_SWITCH);
+
+    //Labels
+    string end_switch_label = cfg->get_next_bb_label();
+
+    cfg->get_current_bb()->set_exit(end_switch_label);    
+
+    //evaluate expression
+    this->visit(ctx->expr());
+
+    //evaluate all conditions and prepare corresponding blocks
+    for (int i=0; i < nb_case ; ++i) {
+        //create bb
+        string case_bb_label = cfg->get_next_bb_label();
+        IR::BasicBlock * case_bb = new IR::BasicBlock(cfg, case_bb_label, nullptr, nullptr);
+        cases.push_back(case_bb);
+
+        //evaluate case condition
+        cfg->add_instr(
+            (new IR::IRInstrComp)
+                ->set_src(
+                    (new IR::IRConst)->set_literal(ctx->case_opt(i)->case_val()->getText())
+                )
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
+        cfg->add_instr(
+        (new IR::IRInstrJump)
+            ->set_op("je")
+            ->set_label(case_bb_label)
+            ->set_ctx(ctx)
+        );
+    }
+
+    //first : visit default (reached if no previous condition is matched)
+    if (default_opt) {
+        this->visit(ctx->default_opt()->case_block());
+    }
+
+    for(int i=0 ; i < nb_case ; ++i) {
+        cfg->add_bb(cases.at(i));
+        this->visit(ctx->case_opt(i)->case_block());
+    }
+
+    IR::BasicBlock * end_switch_bb = new IR::BasicBlock(cfg, end_switch_label, nullptr, nullptr);
+    cfg->add_bb(end_switch_bb);
+
+    return 0;
 }
 
 ////////////////////////////////////////////
@@ -941,8 +992,7 @@ antlrcpp::Any IRVisitor::visitBreakStmt(ifccParser::BreakStmtContext *ctx) {
     //check if break can be used
     IR::BasicBlock * bb_loop;
     try {
-        bb_loop = cfg->get_loop_parent(cfg->get_current_bb()->get_label());
-        cerr << bb_loop->get_exit_label() << endl;
+        bb_loop = cfg->get_break_parent(cfg->get_current_bb()->get_label());
     } catch (exception &e) {
         throw e;
     }
@@ -964,8 +1014,7 @@ antlrcpp::Any IRVisitor::visitContinueStmt(ifccParser::ContinueStmtContext *ctx)
     //check if continue can be used
     IR::BasicBlock * bb_loop;
     try {
-        bb_loop = cfg->get_loop_parent(cfg->get_current_bb()->get_label());
-        cerr << bb_loop->get_label() << endl;
+        bb_loop = cfg->get_continue_parent(cfg->get_current_bb()->get_label());
     } catch (exception &e) {
         throw e;
     }
