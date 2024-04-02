@@ -3,10 +3,13 @@
 #include "ir-instr.h"
 #include "ir-instr-comp.h"
 
-IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label) : BasicBlock(cfg, label, nullptr, nullptr) {}
+IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label) : BasicBlock(cfg, label, nullptr, nullptr) {
+    cerr << "block created, bb_id=" << bb_id << endl;
+}
 
 IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label, IR::BasicBlock * exit_true, IR::BasicBlock * exit_false) : label(label), exit_true(exit_true), exit_false(exit_false) {
     set_parent(cfg);
+    cerr << "block created, bb_id=" << bb_id << endl;
 }
 
 IR::BasicBlock::~BasicBlock()
@@ -92,6 +95,19 @@ void IR::BasicBlock::set_exit(string exit_label)
 
 void IR::BasicBlock::set_write_mode(bool wm) {
     this->write_mode = wm;
+}
+
+void IR::BasicBlock::set_bb_id(int bb_id) {
+    cerr << "block id changed, bb_id=" << bb_id << endl;
+    this->bb_id = bb_id;
+}
+
+int IR::BasicBlock::get_bb_id() {
+    return bb_id;
+}
+
+string IR::BasicBlock::get_exit_label() {
+    return this->exit_label;
 }
 
 string IR::BasicBlock::get_label()

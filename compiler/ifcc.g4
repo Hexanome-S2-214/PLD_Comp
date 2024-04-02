@@ -87,6 +87,8 @@ instructionRule
      : returnStmtRule         # returnStmt
      | affectationRule        # affectation
      | functionCallRule ';'   # functionCall
+     | 'break' ';'            # breakStmt
+     | 'continue' ';'         # continueStmt
      ;
 
 declStdRule
@@ -113,14 +115,6 @@ rvalue
 
 returnStmtRule
      : RETURN rvalue ';'
-     ;
-
-breakStmt
-     : 'break' ';'
-     ;
-
-continueStmt
-     : 'continue' ';'
      ;
 
 //=============================================
