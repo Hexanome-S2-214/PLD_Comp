@@ -68,8 +68,8 @@ content
      ;
 
 statement
-     : declarationRule        # declaration
-     | instructionRule        # instruction
+     : declarationRule
+     | instructionRule
      ;
 
 struct_element
@@ -77,10 +77,6 @@ struct_element
      | struct_if_else
      | struct_while
      ;
-
-//=============================================
-// Rules
-//=============================================
 
 declarationRule
      : declStdRule       # declStd
@@ -91,6 +87,8 @@ instructionRule
      : returnStmtRule         # returnStmt
      | affectationRule        # affectation
      | functionCallRule ';'   # functionCall
+     | 'break' ';'            # breakStmt
+     | 'continue' ';'         # continueStmt
      ;
 
 declStdRule
@@ -119,6 +117,37 @@ returnStmtRule
      : RETURN rvalue ';'
      ;
 
+//=============================================
+// Règles adaptées aux boucles
+//=============================================
+
+/*
+content_loop
+     : statement_loop
+     | struct_element_loop
+     ;
+
+statement_loop
+     : declarationRule
+     | instructionRule
+     | continueStmt
+     | breakStmt
+     ;
+
+struct_element_loop
+     : struct_bloc_loop
+     | struct_if_else_loop
+     | struct_while
+     ;
+
+struct_bloc_loop
+     : '{' content_loop* '}'
+     ;
+
+struct_if_else_loop
+     : 'if' '(' expr ')' struct_bloc_loop ('else' struct_bloc_loop)?
+     ;
+*/
 //=============================================
 // Expressions
 //=============================================

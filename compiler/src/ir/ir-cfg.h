@@ -11,6 +11,14 @@ namespace IR
 #include "../error-reporter/error-reporter.h"
 #include "ir-instr-comp.h"
 
+#define BB_INSTR 0
+
+#define BB_IF 10
+#define BB_WHILE 20
+
+#define BB_END_IF 1
+#define BB_END_WHILE 2
+
 using namespace std;
 
 namespace IR
@@ -29,29 +37,37 @@ namespace IR
         void gen_asm_arm_prologue(ostream& o);
         void gen_asm_arm_epilogue(ostream& o);
 
-        int calc_st_size();
-
         void add_instr(IRBase * instr);
+        void add_bb(BasicBlock * bb);
+
+        BasicBlock * get_loop_parent(string label);
 
         IRBase * set_error_reporter(ErrorReporter::ErrorReporter * error_reporter);
         void set_current_bb(BasicBlock * bb);
+        void incr_nb_param();
 
         SymbolTable * get_symbol_table();
         BasicBlock * get_current_bb();
         vector<BasicBlock *> get_blocks();
         string get_next_bb_label();
         string get_epilogue_label();
+        string get_fname();
+        int get_nb_param();
 
-        void add_bb(BasicBlock * bb);
+        int calc_st_size();
+        
         vector<string> stack; // TODO: Make private and add push/pop methods (also maybe rename to something that means something)
     private:
         vector<BasicBlock *> blocks;
-        BasicBlock * current_bb;
-        BasicBlock * epilogue_bb;
         SymbolTable * symbol_table;
 
+        BasicBlock * current_bb;
         static int bb_count;
-        string fname;
+        BasicBlock * epilogue_bb;
         string epilogue_label;
+
+        string fname;
+        int nb_param;
+        
     };
 };
