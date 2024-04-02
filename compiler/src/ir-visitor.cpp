@@ -758,7 +758,7 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
 ////////////////////////////////////////////
 // FONCTIONS
 //
-// WARNING : ONLY INT SUPPORTED FOR NOW / MAX 6 PARAMETERS
+// WARNING : ONLY INT SUPPORTED FOR NOW
 ////////////////////////////////////////////
 
 antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *ctx) {
@@ -786,6 +786,7 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
                 ->set_symbol(symbol)
                 ->set_ctx(ctx)
         );
+        cfg->incr_nb_param();
         i++;
     }
 
@@ -806,7 +807,7 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
                 ->set_dest(symbol)
                 ->set_ctx(ctx)
         );
-
+        cfg->incr_nb_param();
         offset += 8;
     }
 
@@ -821,6 +822,16 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
     int nb_params = ctx->fparam_call()->fparam_call2().size();
     bool more_6_params = false;
     int cpt_bytes;
+
+    //first : check if correct number of parameters
+    try {
+        int correct_nb_param = cfg_set->get_cfg_by_fname(ctx->fname->getText())->get_nb_param();
+        if (correct_nb_param != nb_params) {
+            throw runtime_error("Function called with wrong number of parameters");
+        }
+    } catch (exception &e) {
+        throw e;
+    }    
 
     //If there is more than 6 parameters, we place the remaining parameters on top of the stack
     if (nb_params > 6) {
