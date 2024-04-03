@@ -58,6 +58,30 @@ struct_while
      : 'while' '(' expr ')' struct_bloc
      ;
 
+struct_switch_case
+     : 'switch' '(' expr ')' '{' 
+          case_opt*
+          default_opt?
+      '}'
+     ;
+     
+case_opt
+     : 'case' case_val ':' case_block     //important : no '*' here 
+     ;
+
+default_opt
+     : 'default' ':' case_block
+     ;
+
+case_val
+     : NUM
+     | CHARACTER
+     ;
+
+case_block
+     : content*
+     ;
+
 //=============================================
 // Règles de base
 //=============================================
@@ -68,19 +92,16 @@ content
      ;
 
 statement
-     : declarationRule        # declaration
-     | instructionRule        # instruction
+     : declarationRule
+     | instructionRule
      ;
 
 struct_element
      : struct_bloc
      | struct_if_else
      | struct_while
+     | struct_switch_case
      ;
-
-//=============================================
-// Rules
-//=============================================
 
 declarationRule
      : declStdRule       # declStd
@@ -91,6 +112,8 @@ instructionRule
      : returnStmtRule         # returnStmt
      | affectationRule        # affectation
      | functionCallRule ';'   # functionCall
+     | 'break' ';'            # breakStmt
+     | 'continue' ';'         # continueStmt
      ;
 
 declStdRule
@@ -139,52 +162,6 @@ expr
      | CHARACTER                        #exprCharacter
      | VAR                              #exprVar
      | NUM                              #exprNum
-     ;
-
-//=============================================
-// Terminaux
-//=============================================
-
-RETURN
-     : 'return'
-     ;
-
-CONST
-     : 'const'
-     ;
-
-CHAR
-     : 'char'
-     ;
-
-INT
-     : 'int'
-     ;
-
-NUM
-     : [0-9]+
-     ;
-
-VAR
-     : [a-zA-Z][a-zA-Z0-9_]*
-     ;
-
-
-CHARACTER
-     : '"' [a-zA-Z0-9_ ] '"'
-     | '\'' [a-zA-Z0-9_ ] '\''
-     ;
-
-COMMENT
-     : '/*' .*? '*/' -> skip
-     ;
-
-DIRECTIVE
-     : '#' .*? '\n' -> skip
-     ;
-
-WS
-     : [ \t\r\n] -> channel(HIDDEN)
      ;
 
 //=============================================
@@ -237,3 +214,50 @@ B_OR
 B_XOR
      : '^'
      ;
+
+//=============================================
+// Terminaux
+//=============================================
+
+RETURN
+     : 'return'
+     ;
+
+CONST
+     : 'const'
+     ;
+
+CHAR
+     : 'char'
+     ;
+
+INT
+     : 'int'
+     ;
+
+NUM
+     : [0-9]+
+     ;
+
+VAR
+     : [a-zA-Z][a-zA-Z0-9_]*
+     ;
+
+
+CHARACTER
+     : '"' [a-zA-Z0-9_ ] '"'
+     | '\'' [a-zA-Z0-9_ ] '\''
+     ;
+
+COMMENT
+     : '/*' .*? '*/' -> skip
+     ;
+
+DIRECTIVE
+     : '#' .*? '\n' -> skip
+     ;
+
+WS
+     : [ \t\r\n] -> channel(HIDDEN)
+     ;
+

@@ -27,6 +27,7 @@ namespace IR
         void add_cfg(CFG * cfg);
 
         CFG * get_current_cfg();
+        CFG * get_cfg_by_fname(string fname);
         void set_current_cfg(CFG * cfg);
         vector<string> stack; // TODO: Make private and add push/pop methods (also maybe rename to something that means something)
     private:

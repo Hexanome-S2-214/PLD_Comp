@@ -31,16 +31,23 @@ namespace IR
         void set_exit_false(BasicBlock * exit_false);
         void set_exit(string exit);
         void set_write_mode(bool wm);
+        void set_bb_id(int bb_id);
 
         string get_label();
+        string get_exit_label();
+        int get_bb_id();
         CFG * get_cfg();
     private:
+        vector<IRInstr *> instrs;
+        string label;
+        
         BasicBlock * exit_true;
         BasicBlock * exit_false;
         string exit_label;
-        vector<IRInstr *> instrs;
-        string label;
-        string test_var;
+        
+        string test_var; //TODO : ça sert à quoi ça ?
+        int bb_id = 0;
+
         bool write_mode = true;
     };
 };

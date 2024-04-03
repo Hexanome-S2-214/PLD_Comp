@@ -22,6 +22,16 @@ IR::CFG * IR::CfgSet::get_current_cfg()
     return current_cfg;
 }
 
+IR::CFG * IR::CfgSet::get_cfg_by_fname(string fname) {
+    for (auto cfg : cfgs) {
+        if (cfg->get_fname() == fname) {
+            return cfg;
+        }
+    }
+
+    throw runtime_error("Function " + fname + " called but not declared");
+}
+
 /** 
  * Adds CFG to the list of cfgs AND sets current_cfg to CFG passed as parameter
 */
