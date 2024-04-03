@@ -14,7 +14,12 @@ namespace IR
     
     void IRInstrSetFlagComp::gen_asm_arm(ostream& o)
     {
-        
+        if      (op == "==" or op == "!")    { o << "\tcset " << dest->get_asm_str() << ", EQ\n"; } 
+        else if (op == "!=")    { o << "\tcset " << dest->get_asm_str() << ", NE\n"; }
+        else if (op == ">")     { o << "\tcset " << dest->get_asm_str() << ", GT\n"; }
+        else if (op == "<")     { o << "\tcset " << dest->get_asm_str() << ", LT\n"; }
+        else if (op == ">=")    { o << "\tcset " << dest->get_asm_str() << ", GE\n"; }
+        else if (op == "<=")    { o << "\tcset " << dest->get_asm_str() << ", LE\n"; }
     }
 }
 

@@ -19,7 +19,7 @@ namespace IR
         } else {
             cerr << "Error: unsupported operator" << endl;
         }
-        }
+    }
 }
 
 

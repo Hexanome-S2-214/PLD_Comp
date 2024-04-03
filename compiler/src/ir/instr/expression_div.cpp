@@ -13,6 +13,6 @@ namespace IR
     }
     void IRInstrExprDiv::gen_asm_arm(ostream& o)
     {
-        
+        o << "\tsdiv " << (new IRRegA)->get_asm_str() << ", " << (new IRRegA)->get_asm_str() << ", " << (new IRRegB)->get_asm_str() << "\n";
     }
 }

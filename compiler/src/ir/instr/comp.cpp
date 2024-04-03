@@ -36,8 +36,8 @@ namespace IR
             return;
         }
 
-        string comp_op = get_op(src->get_size());
-        o << "\t\t" << comp_op << " " << src->get_asm_str() << ", " << dest->get_asm_str() << "\n";
+        //string comp_op = get_op(src->get_size());
+        o << "\t\t cmp " << " " << src->get_asm_str() << ", " << dest->get_asm_str() << "\n";
         
     }
 }

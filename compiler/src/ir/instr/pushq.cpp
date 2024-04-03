@@ -9,7 +9,7 @@ namespace IR
 
     void IRInstrPushq::gen_asm_arm(ostream& o)
     {
-        
+        o << "\tstr " << src->get_asm_str() << ", [sp, #-8]!\n";
     }
 }
 

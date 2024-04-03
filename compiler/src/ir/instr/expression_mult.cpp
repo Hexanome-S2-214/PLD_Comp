@@ -1,4 +1,5 @@
 #include "expression_mult.h"
+#include "../params/ir-reg.h"
 
 namespace IR
 {
@@ -9,5 +10,6 @@ namespace IR
     
     void IRInstrExprMult::gen_asm_arm(ostream& o)
     {
+        o << "\tmul " << (new IRRegA)->get_asm_str() << ", " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
     }
 }

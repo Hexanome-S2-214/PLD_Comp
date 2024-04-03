@@ -13,8 +13,8 @@ namespace IR
     {
         o << "\tpop {fp, pc}\n";
 
-        // o << "\t\tldp fp, lr, [sp], #16\n"; 
-        // o << "\t\tret\n";                       //c'est plutot comme ca pour arm-v8 non ?
+        //o << "\t\tldp x29, x30, [sp], #16\n"; 
+        //o << "\t\tret\n";
     }
 }
 
