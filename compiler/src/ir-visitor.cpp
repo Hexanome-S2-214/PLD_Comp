@@ -112,9 +112,14 @@ antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
 
 antlrcpp::Any IRVisitor::visitAffectationRule(ifccParser::AffectationRuleContext *ctx)
 {
-    this->visit(ctx->rvalue());
 
     IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
+
+    if (symbol->const_var) {
+        throw runtime_error("Const value cannot be used as left-value");
+    }
+
+    this->visit(ctx->rvalue());
 
     cfg->add_instr(
         (new IR::IRInstrAssign)
@@ -827,7 +832,7 @@ antlrcpp::Any IRVisitor::visitStruct_switch_case(ifccParser::Struct_switch_caseC
         );
         cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("je")
+            ->set_label("je")
             ->set_label(case_bb_label)
             ->set_ctx(ctx)
         );
@@ -1023,7 +1028,7 @@ antlrcpp::Any IRVisitor::visitBreakStmt(ifccParser::BreakStmtContext *ctx) {
 
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("jmp")
+            ->set_label("jmp")
             ->set_label(end_loop_label)
             ->set_ctx(ctx)
     );
@@ -1045,7 +1050,7 @@ antlrcpp::Any IRVisitor::visitContinueStmt(ifccParser::ContinueStmtContext *ctx)
 
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("jmp")
+            ->set_label("jmp")
             ->set_label(condition_loop_label)
             ->set_ctx(ctx)
     );
