@@ -184,4 +184,20 @@ namespace IR
     protected:
         string label;
     };
+
+    template<class Ref>
+    class IRAttrJump
+    {
+    public:
+        Ref * set_jump(JumpType jump) {
+            this->jump = jump;
+            return static_cast<Ref*>(this);
+        }
+
+        JumpType get_jump() {
+            return jump;
+        }
+    protected:
+        JumpType jump;
+    };
 }

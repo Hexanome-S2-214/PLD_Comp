@@ -22,7 +22,7 @@
 #include "ir/instr/intr-cheat.h"
 #include "ir/instr/jump.h"
 #include "ir/instr/call.h"
-#include "ir/instr/pushq.h"
+#include "ir/instr/push.h"
 #include "error-reporter/compiler-error-token.h"
 #include "./error-reporter/error-reporter.h"
 
@@ -39,7 +39,7 @@ antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *
     string epilogue_label_cfg = cfg->get_epilogue_label();
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("jmp")
+            ->set_jump(IR::JumpType::Jump)
             ->set_label(epilogue_label_cfg)
             ->set_ctx(ctx)
     );
@@ -56,13 +56,24 @@ antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *
 
 antlrcpp::Any IRVisitor::visitDeclStdRule(ifccParser::DeclStdRuleContext *ctx)
 {
-    if(ctx->getTokens(ifccParser::INT).size() >= 1)
+    IR::Type type;
+
+    if (ctx->getTokens(ifccParser::INT).size() >= 1)
     {
-        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, ctx);
-    }else if(ctx->getTokens(ifccParser::CHAR).size() >= 1)
-    {
-        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Char, ctx);
+        type = IR::Int;
     }
+    else if (ctx->getTokens(ifccParser::CHAR).size() >= 1)
+    {
+        type = IR::Char;
+    }
+    else
+    {
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Unrecognized type", ctx)
+        );
+    }
+
+    cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx);
 
     return IR::Int.size;
 }
@@ -71,15 +82,24 @@ antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
 {
     this->visit(ctx->rvalue());
 
-    IR::Symbol *symbol;
+    IR::Type type;
+
     if (ctx->getTokens(ifccParser::INT).size() >= 1)
     {
-        symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, ctx);
+        type = IR::Int;
     }
-    else if(ctx->getTokens(ifccParser::CHAR).size() >= 1)
+    else if (ctx->getTokens(ifccParser::CHAR).size() >= 1)
     {
-        symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Char, ctx);
+        type = IR::Char;
     }
+    else
+    {
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Unrecognized type", ctx)
+        );
+    }
+
+    IR::Symbol * symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx);
 
     cfg->add_instr(
         (new IR::IRInstrAssign)
@@ -549,7 +569,7 @@ antlrcpp::Any IRVisitor::visitExprAnd(ifccParser::ExprAndContext *ctx) {
     //if false -> jump to the block which moves $0 into %eax
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("jne")
+            ->set_jump(IR::JumpType::IfNotEqual)
             ->set_label(first_expr_false_label)
             ->set_ctx(ctx)
     );
@@ -594,7 +614,7 @@ antlrcpp::Any IRVisitor::visitExprOr(ifccParser::ExprOrContext *ctx) {
     //if true -> jump to the block which moves $1 into %eax
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("je")
+            ->set_jump(IR::JumpType::IfEqual)
             ->set_label(first_expr_true_label)
             ->set_ctx(ctx)
     );
@@ -658,7 +678,7 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
     //Jump after condition evaluation
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("jne")
+            ->set_jump(IR::JumpType::IfNotEqual)
             ->set_label(jump_after_eval_cond)
             ->set_ctx(ctx)
     );
@@ -669,7 +689,7 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
     // Jump to endif block when if complete
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("jmp")
+            ->set_jump(IR::JumpType::Jump)
             ->set_label(exit_label)
             ->set_ctx(ctx)
     );
@@ -715,7 +735,7 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
     //Jump to condition block
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("jmp")
+            ->set_jump(IR::JumpType::Jump)
             ->set_label(condition_label)
             ->set_ctx(ctx)
     );
@@ -739,7 +759,7 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
     //if condition is evaluated to "true" -> jump to body of the while
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("je")
+            ->set_jump(IR::JumpType::IfEqual)
             ->set_label(body_label)
             ->set_ctx(ctx)
     );
@@ -913,14 +933,15 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
         cpt_bytes=0;  //bytes to substract from %rsp after the call
         for(int i = (nb_params-1); i > 5; i--) {
             cfg->add_instr(
-                (new IR::IRInstrPushq)
-                    ->set_src((new IR::IRConst)
+                (new IR::IRInstrPush)
+                    ->set_src(
+                        (new IR::IRConst)
                             ->set_literal(ctx->fparam_call()->fparam_call2(i)->NUM()->getText())
+                            ->set_size(IR::Size::QWord)
                     )
                     ->set_ctx(ctx)
             );
-            //TODO : check if always 8 -> btw, why 8 ?
-            cpt_bytes += 8;
+            cpt_bytes += size_to_bytes(IR::Size::QWord);
         }
     }
 
@@ -973,7 +994,7 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
     //if more than 6 parameters -> move up %rsp
     if (more_6_params) {
         cfg->add_instr(
-            (new IR::IRInstrPushq)
+            (new IR::IRInstrPush)
                 ->set_src((new IR::IRConst)
                         ->set_literal(to_string(cpt_bytes))
                 )
