@@ -30,6 +30,14 @@ namespace IR
 
     void IRInstrComp::gen_asm_arm(ostream& o)
     {
+        if (src->get_size() != dest->get_size())
+        {
+            cerr << "Error: comparison between different sizes" << endl;
+            return;
+        }
+
+        string comp_op = get_op(src->get_size());
+        o << "\t\t" << comp_op << " " << src->get_asm_str() << ", " << dest->get_asm_str() << "\n";
         
     }
 }

@@ -10,8 +10,16 @@ namespace IR
     }
     void IRInstrExprBitABit::gen_asm_arm(ostream& o)
     {
-        
-    }
+        if (op == "&") {
+            o << "\t\tand " << dest->get_asm_str() << ", " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
+        } else if (op == "^") {
+            o << "\t\teor " << dest->get_asm_str() << ", " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
+        } else if (op == "|") {
+            o << "\t\torr " << dest->get_asm_str() << ", " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
+        } else {
+            cerr << "Error: unsupported operator" << endl;
+        }
+        }
 }
 
 

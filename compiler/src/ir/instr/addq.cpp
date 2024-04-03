@@ -9,6 +9,6 @@ namespace IR
 
     void IRInstrAddq::gen_asm_arm(ostream& o)
     {
-        
+       o << "\t\taddq" << dst->get_asm_str() << ", " << dst->get_asm_str() << ", " << src->get_asm_str() << "\n"; 
     }
 }
