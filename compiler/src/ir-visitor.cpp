@@ -57,6 +57,8 @@ antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *
 antlrcpp::Any IRVisitor::visitDeclStdRule(ifccParser::DeclStdRuleContext *ctx)
 {
     IR::Type type;
+    bool const_var = ctx->CONST() ? true : false;
+    cerr << const_var << endl;
 
     if (ctx->getTokens(ifccParser::INT).size() >= 1)
     {
@@ -73,13 +75,16 @@ antlrcpp::Any IRVisitor::visitDeclStdRule(ifccParser::DeclStdRuleContext *ctx)
         );
     }
 
-    cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx);
+    cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, const_var, ctx);
 
     return IR::Int.size;
 }
 
 antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
 {
+    bool const_var = ctx->CONST() ? true : false;
+    cerr << const_var << endl;
+
     this->visit(ctx->rvalue());
 
     IR::Type type;
@@ -99,7 +104,7 @@ antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
         );
     }
 
-    IR::Symbol * symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx);
+    IR::Symbol * symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, const_var, ctx);
 
     cfg->add_instr(
         (new IR::IRInstrAssign)
@@ -832,7 +837,7 @@ antlrcpp::Any IRVisitor::visitStruct_switch_case(ifccParser::Struct_switch_caseC
         );
         cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_label("je")
+            ->set_jump(IR::JumpType::IfEqual)
             ->set_label(case_bb_label)
             ->set_ctx(ctx)
         );
@@ -999,9 +1004,13 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
     //if more than 6 parameters -> move up %rsp
     if (more_6_params) {
         cfg->add_instr(
-            (new IR::IRInstrPush)
+            (new IR::IRInstrExprPlus)
                 ->set_src((new IR::IRConst)
                         ->set_literal(to_string(cpt_bytes))
+                        ->set_size(IR::Size::QWord)
+                )
+                ->set_dest((new IR::IRRegStackPointer)
+                            ->set_size(IR::Size::QWord)
                 )
                 ->set_ctx(ctx)
         );
@@ -1028,7 +1037,7 @@ antlrcpp::Any IRVisitor::visitBreakStmt(ifccParser::BreakStmtContext *ctx) {
 
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_label("jmp")
+            ->set_jump(IR::JumpType::Jump)
             ->set_label(end_loop_label)
             ->set_ctx(ctx)
     );
@@ -1050,7 +1059,7 @@ antlrcpp::Any IRVisitor::visitContinueStmt(ifccParser::ContinueStmtContext *ctx)
 
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_label("jmp")
+            ->set_jump(IR::JumpType::Jump)
             ->set_label(condition_loop_label)
             ->set_ctx(ctx)
     );
