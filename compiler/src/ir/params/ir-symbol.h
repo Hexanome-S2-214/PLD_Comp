@@ -17,6 +17,7 @@ namespace IR
 
         string id;
         int offset;
+        bool const_var;
         bool used = false;
         Type type;
     };
