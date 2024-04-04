@@ -69,7 +69,7 @@ void IR::CFG::gen_asm_arm(ostream& o)
 void IR::CFG::gen_asm_arm_prologue(ostream& o){
     o << ".globl main\n";
     o << "main:\n";
-    o << "sub	sp, sp, #16\n";
+    o << "sub	sp, sp, 16\n";
     //o << "    push {fp, lr}\n";
     //o << "    add fp, sp, #4\n";
 }

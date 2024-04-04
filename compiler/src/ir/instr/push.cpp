@@ -39,7 +39,7 @@ namespace IR
         // ARM only supports 32-bit and 64-bit push
         if (src->get_size() == Size::DWord || src->get_size() == Size::QWord)
         {
-            o << "\tstr " << (new IRRegArmTemp1)->get_asm_str() << ", [sp, #-4]!" << endl;
+            o << "\tstr " << (new IRRegArmTemp1)->get_asm_str() << ", [sp, 4]!" << endl;
         }
         else
         {

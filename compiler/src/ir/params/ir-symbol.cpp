@@ -15,7 +15,7 @@ namespace IR
     
     void IR::Symbol::gen_asm_arm(ostream& o)
     {
-        o << (new IRRegStack)->set_offset(offset)->get_asm_str();
+        o << (new IRRegStack)->set_offset(-offset)->get_asm_str();
     }
 
     SymbolT::SymbolT(int index, Symbol *symbol)
