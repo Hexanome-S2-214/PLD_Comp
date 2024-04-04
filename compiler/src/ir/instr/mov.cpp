@@ -16,7 +16,7 @@ namespace IR
         } else if (dynamic_cast<IRReg*>(dest)) {
             o << "\tstr " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
         }else {
-            o << "\tldr " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
+            o << "\tldr " << src->get_asm_str() << ", " << dest->get_asm_str() << "\n";
         }
     }
 
