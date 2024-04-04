@@ -11,6 +11,7 @@ namespace IR
     }
     void IRInstrExprBitABit::gen_asm_arm(ostream& o)
     {
+        
         if (op == "&") {
             o << "\t\tand " << (new IRRegA)->get_asm_str() << ", " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
         } else if (op == "^") {

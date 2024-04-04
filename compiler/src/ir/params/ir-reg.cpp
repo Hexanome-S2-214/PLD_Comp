@@ -170,7 +170,7 @@ namespace IR
     void IRRegStack::gen_asm_arm(ostream& o)
     {
         if (offset != 0) {
-            o << "[sp, #" << offset << "]";
+            o << "[sp, " << -offset << "]";
         } else {
             o << "[sp]";
         }
@@ -338,6 +338,48 @@ namespace IR
         case DWord:
         case QWord:
             o << "x7";
+            break;
+        default:
+            break;
+        }
+    }
+
+    void IRRegArmTemp1::gen_asm_x86(ostream& o)
+    {
+    }
+
+    void IRRegArmTemp1::gen_asm_arm(ostream& o)
+    {
+        switch (get_size())
+        {
+        case Byte:
+        case Word:
+            o << "w8";
+            break;
+        case DWord:
+        case QWord:
+            o << "x8";
+            break;
+        default:
+            break;
+        }
+    }
+
+    void IRRegArmTemp2::gen_asm_x86(ostream& o)
+    {
+    }
+
+    void IRRegArmTemp2::gen_asm_arm(ostream& o)
+    {
+        switch (get_size())
+        {
+        case Byte:
+        case Word:
+            o << "w9";
+            break;
+        case DWord:
+        case QWord:
+            o << "x9";
             break;
         default:
             break;

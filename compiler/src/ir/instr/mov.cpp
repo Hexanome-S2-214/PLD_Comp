@@ -9,7 +9,13 @@ namespace IR
     
     void IRInstrMov::gen_asm_arm(ostream& o)
     {
-        o << "\tmov " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
+        if (dynamic_cast<IRReg*>(dest) && dynamic_cast<IRReg*>(src)) {
+            o << "\tmov " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
+        } else if (dynamic_cast<IRReg*>(dest)) {
+            o << "\tstr " << src->get_asm_str() << ", [" << dest->get_asm_str() << "]\n";
+        }else {
+            o << "\tldr " << dest->get_asm_str() << ", [" << src->get_asm_str() << "]\n";
+        }
     }
 
     string IRInstrMov::get_op()
