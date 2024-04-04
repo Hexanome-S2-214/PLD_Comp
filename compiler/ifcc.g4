@@ -152,6 +152,7 @@ returnStmtRule
 
 expr
      : '(' expr ')'                     #exprParExpr
+     | VAR '[' VAR ']'                  #exprTableVar
      | VAR '[' NUM ']'                  #exprTable
      | op_unary=('-' | '!') expr        #exprUnary
      | expr OP_MULT expr                #exprMultDivMod

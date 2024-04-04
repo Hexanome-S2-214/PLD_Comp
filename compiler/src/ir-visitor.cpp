@@ -260,6 +260,21 @@ antlrcpp::Any IRVisitor::visitExprTable(ifccParser::ExprTableContext *ctx)
     return 0;
 }
 
+antlrcpp::Any IRVisitor::visitExprTableVar(ifccParser::ExprTableVarContext *ctx)
+{
+    int offset = vf.value;
+    std::cerr << "offset : " << offset  << std::endl;
+    IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR(0)->getText(), ctx);
+
+    cfg->add_instr(
+    (new IR::IRInstrMov)
+        ->set_src(new IR::SymbolT(offset, symbol))
+        ->set_dest(new IR::IRRegA)
+        ->set_ctx(ctx)
+    );
+    return 0;
+}
+
 antlrcpp::Any IRVisitor::visitTableAff(ifccParser::TableAffContext *ctx)
 {
     this->visit(ctx->rvalue());
@@ -277,8 +292,9 @@ antlrcpp::Any IRVisitor::visitTableAff(ifccParser::TableAffContext *ctx)
 
 antlrcpp::Any IRVisitor::visitTableAff2(ifccParser::TableAff2Context *ctx)
 {
-    this->visit(ctx->VAR(1));
     int index = vf.value;
+    bool tmp_bool = vf.f_const;
+    IR::Size size = vf.type_size;
     std::cerr << "index : " << index << std::endl;
     this->visit(ctx->rvalue());
     IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR(0)->getText(), ctx);
@@ -289,8 +305,11 @@ antlrcpp::Any IRVisitor::visitTableAff2(ifccParser::TableAff2Context *ctx)
             ->set_ctx(ctx)
     );
 
+    vf.value = index;
+    vf.f_const = tmp_bool;
+    vf.type_size = size;
+
     return 0;
-    
 }
 
 ////////////////////////////////////////////
@@ -299,7 +318,6 @@ antlrcpp::Any IRVisitor::visitTableAff2(ifccParser::TableAff2Context *ctx)
 
 antlrcpp::Any IRVisitor::visitExprCharacter(ifccParser::ExprCharacterContext *ctx){
     std::string text = ctx->CHARACTER()->getText();
-    std::cerr << "visitExprCharacter" << std::endl;
     if (!text.empty())
     {
         int ascii_value;
