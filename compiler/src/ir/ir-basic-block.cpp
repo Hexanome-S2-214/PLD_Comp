@@ -8,6 +8,7 @@ IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label) : BasicBlock(cfg, label,
 
 IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label, IR::BasicBlock * exit_true, IR::BasicBlock * exit_false) : label(label), exit_true(exit_true), exit_false(exit_false) {
     set_parent(cfg);
+    ref = "BB<" + label + ">";
 }
 
 IR::BasicBlock::~BasicBlock()
@@ -76,11 +77,13 @@ void IR::BasicBlock::gen_asm_arm(ostream &o){
 
 void IR::BasicBlock::set_exit_true(IR::BasicBlock * exit_true)
 {
+    exit_true->set_parent_scope(this);
     this->exit_true = exit_true;
 }
 
 void IR::BasicBlock::set_exit_false(IR::BasicBlock * exit_false)
 {
+    exit_false->set_parent_scope(this);
     this->exit_false = exit_false;
 }
 

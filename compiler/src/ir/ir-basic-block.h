@@ -9,12 +9,13 @@ namespace IR
 
 #include <vector>
 #include "ir-base.h"
+#include "ir-scoped-block.h"
 
 using namespace std;
 
 namespace IR
 {
-    class BasicBlock : public IRBase
+    class BasicBlock : public IRBase, public IRScopedBlock
     {
     public:
         BasicBlock(CFG * cfg, string label);

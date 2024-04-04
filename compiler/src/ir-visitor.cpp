@@ -73,7 +73,7 @@ antlrcpp::Any IRVisitor::visitDeclStdRule(ifccParser::DeclStdRuleContext *ctx)
         );
     }
 
-    cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx);
+    cfg->get_current_bb()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx);
 
     return IR::Int.size;
 }
@@ -99,7 +99,7 @@ antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
         );
     }
 
-    IR::Symbol * symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx);
+    IR::Symbol * symbol = cfg->get_current_bb()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx);
 
     cfg->add_instr(
         (new IR::IRInstrAssign)
@@ -114,7 +114,7 @@ antlrcpp::Any IRVisitor::visitAffectationRule(ifccParser::AffectationRuleContext
 {
     this->visit(ctx->rvalue());
 
-    IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
+    IR::Symbol * symbol = cfg->get_current_bb()->get_symbol(ctx->VAR()->getText(), ctx);
 
     cfg->add_instr(
         (new IR::IRInstrAssign)
@@ -129,7 +129,7 @@ antlrcpp::Any IRVisitor::visitAffectationRule2(ifccParser::AffectationRule2Conte
 {
     this->visit(ctx->rvalue());
 
-    IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
+    IR::Symbol * symbol = cfg->get_current_bb()->get_symbol(ctx->VAR()->getText(), ctx);
 
     cfg->add_instr(
         (new IR::IRInstrAssign)
@@ -179,7 +179,7 @@ antlrcpp::Any IRVisitor::visitExprNum(ifccParser::ExprNumContext *ctx){
 
 antlrcpp::Any IRVisitor::visitExprVar(ifccParser::ExprVarContext *ctx)
 {
-    IR::Symbol *var = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
+    IR::Symbol *var = cfg->get_current_bb()->get_symbol(ctx->VAR()->getText(), ctx);
     cfg->add_instr(
         (new IR::IRInstrExprVar)
             ->set_symbol(
@@ -196,7 +196,7 @@ antlrcpp::Any IRVisitor::visitExprVar(ifccParser::ExprVarContext *ctx)
 antlrcpp::Any IRVisitor::visitExprSumSous(ifccParser::ExprSumSousContext *ctx) {
     this->visit(ctx->expr(0));
 
-    IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    IR::Symbol *varTemp = this->cfg->get_current_bb()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
         (new IR::IRInstrAssign)
             ->set_symbol(varTemp)
@@ -249,7 +249,7 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
 {
     this->visit(ctx->expr(0));
 
-    IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    IR::Symbol *varTemp = this->cfg->get_current_bb()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
         (new IR::IRInstrAssign)
             ->set_symbol(varTemp)
@@ -470,7 +470,7 @@ antlrcpp::Any IRVisitor::visitExprAndBAB(ifccParser::ExprAndBABContext *ctx) {
 
     this->visit(ctx->expr(0));
 
-    IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    IR::Symbol *varTemp = this->cfg->get_current_bb()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
         (new IR::IRInstrAssign)
             ->set_symbol(varTemp)
@@ -494,7 +494,7 @@ antlrcpp::Any IRVisitor::visitExprXorBAB(ifccParser::ExprXorBABContext *ctx) {
     
     this->visit(ctx->expr(0));
 
-    IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    IR::Symbol *varTemp = this->cfg->get_current_bb()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
         (new IR::IRInstrAssign)
             ->set_symbol(varTemp)
@@ -518,7 +518,7 @@ antlrcpp::Any IRVisitor::visitExprOrBAB(ifccParser::ExprOrBABContext *ctx) {
 
     this->visit(ctx->expr(0));
 
-    IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    IR::Symbol *varTemp = this->cfg->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
         (new IR::IRInstrAssign)
             ->set_symbol(varTemp)
@@ -684,15 +684,10 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
     );
 
     // Visit if true : always
+    IR::BasicBlock * if_true = new IR::BasicBlock(cfg, cfg->get_next_bb_label(), nullptr, nullptr);
+    cfg->add_bb(if_true);
     this->visit(ctx->struct_bloc(0)); // Add if true
-
-    // Jump to endif block when if complete
-    cfg->add_instr(
-        (new IR::IRInstrJump)
-            ->set_jump(IR::JumpType::Jump)
-            ->set_label(exit_label)
-            ->set_ctx(ctx)
-    );
+    if_true->set_exit(exit_label);
 
     // Add if false
     if (if_then_else) {
@@ -704,6 +699,7 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
 
     // Pop exit from stack
     cfg->stack.pop_back();
+    cfg->set_current_bb(expr_bb);
 
     // Add exit
     IR::BasicBlock * exit_bb = new IR::BasicBlock(cfg, exit_label, nullptr, nullptr);
@@ -827,7 +823,7 @@ antlrcpp::Any IRVisitor::visitStruct_switch_case(ifccParser::Struct_switch_caseC
         );
         cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("je")
+            ->set_jump(IR::JumpType::IfEqual)
             ->set_label(case_bb_label)
             ->set_ctx(ctx)
         );
@@ -873,7 +869,7 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
     int stop = nb_params > 6 ? 6 : nb_params;
     int i=0;
     while(i < stop) {
-        IR::Symbol *symbol = this->cfg->get_symbol_table()->declare_symbol(cfg, ctx->fparam_decla()->fparam_decla2(i)->VAR()->getText(), IR::Int, ctx);
+        IR::Symbol *symbol = this->cfg->get_current_bb()->declare_symbol(cfg, ctx->fparam_decla()->fparam_decla2(i)->VAR()->getText(), IR::Int, ctx);
         cfg->add_instr(
             (new IR::IRInstrAssign)
                 ->set_src(reg_function_params[i])
@@ -888,7 +884,7 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
     //Careful : we declare variables with personnalized offset
     int offset = 16;
     for (int i=6 ; i < nb_params ; i++) {
-        IR::Symbol *symbol = this->cfg->get_symbol_table()->declare_symbol(cfg, ctx->fparam_decla()->fparam_decla2(i)->VAR()->getText(), IR::Int, ctx);
+        IR::Symbol *symbol = this->cfg->get_current_bb()->declare_symbol(cfg, ctx->fparam_decla()->fparam_decla2(i)->VAR()->getText(), IR::Int, ctx);
         cfg->add_instr(
             (new IR::IRInstrMov)
                 ->set_src((new IR::IRRegStack)->set_offset(offset))
@@ -962,7 +958,7 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
         }
         //If it's a variable
         else if (ctx->fparam_call()->fparam_call2(i)->VAR()) {
-            IR::Symbol* src = cfg->get_symbol_table()->get_symbol(ctx->fparam_call()->fparam_call2(i)->VAR()->getText());
+            IR::Symbol* src = cfg->get_symbol(ctx->fparam_call()->fparam_call2(i)->VAR()->getText());
             cfg->add_instr(
                 (new IR::IRInstrMov)
                     ->set_src(src)
@@ -1023,7 +1019,7 @@ antlrcpp::Any IRVisitor::visitBreakStmt(ifccParser::BreakStmtContext *ctx) {
 
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("jmp")
+            ->set_jump(IR::JumpType::Jump)
             ->set_label(end_loop_label)
             ->set_ctx(ctx)
     );
@@ -1045,7 +1041,7 @@ antlrcpp::Any IRVisitor::visitContinueStmt(ifccParser::ContinueStmtContext *ctx)
 
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("jmp")
+            ->set_jump(IR::JumpType::Jump)
             ->set_label(condition_loop_label)
             ->set_ctx(ctx)
     );

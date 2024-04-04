@@ -28,8 +28,6 @@ namespace IR
 
         string get_next_tmp();
         int get_symbol_offset() { return symbol_offset; }
-
-        ErrorReporter::ErrorReporter * error_reporter;
     private:
         map<string, Symbol *> symbols;
         int symbol_offset = 0;
