@@ -66,7 +66,7 @@ int main(int argn, const char **argv)
 
   visitor.visit(tree);
 
-  IR::asm_arch = IR::ARM;
+  IR::asm_arch = IR::X86;
   cfg_set->gen_asm(cout);
 
   delete cfg_set;
