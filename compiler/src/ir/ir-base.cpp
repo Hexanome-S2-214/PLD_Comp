@@ -8,7 +8,7 @@ using namespace std;
 
 namespace IR
 {
-    IRBase::IRBase() : parent(nullptr), arch(DEFAULT_ARCH), ctx(nullptr), error_reporter(nullptr) {}
+    IRBase::IRBase() : parent(nullptr), arch(ARM), ctx(nullptr), error_reporter(nullptr) {}
 
     void IRBase::gen_asm(ostream& o){
         switch(arch){

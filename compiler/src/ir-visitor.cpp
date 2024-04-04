@@ -20,7 +20,6 @@
 #include "ir/instr/comp.h"
 #include "ir/instr/set_flag_comp.h"
 #include "ir/instr/expression_bit_a_bit.h"
-#include "ir/instr/intr-cheat.h"
 #include "ir/instr/jump.h"
 #include "ir/instr/call.h"
 #include "ir/instr/push.h"
