@@ -63,7 +63,7 @@ void IR::CFG::gen_asm_arm(ostream& o)
         block->gen_asm_arm(o);
     }
 
-    // gen_asm_arm_epilogue(o);
+    gen_asm_arm_epilogue(o);
 }
 
 void IR::CFG::gen_asm_arm_prologue(ostream& o){
@@ -74,9 +74,10 @@ void IR::CFG::gen_asm_arm_prologue(ostream& o){
     //o << "    add fp, sp, #4\n";
 }
 
-// void IR::CFG::gen_asm_arm_epilogue(ostream& o){
-//     o << "    pop {fp, pc}\n";
-// }
+void IR::CFG::gen_asm_arm_epilogue(ostream& o){
+    // o << "    pop {fp, pc}\n";
+    this->epilogue_bb->gen_asm_arm(o);
+}
 
 void IR::CFG::gen_asm_x86_prologue(ostream& o)
 {
