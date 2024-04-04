@@ -38,6 +38,13 @@ namespace IR
     
     void IRInstrExprPlus::gen_asm_arm(ostream& o)
     {
+        if (src->get_size() != dest->get_size())
+        {
+            get_error_reporter()->reportError(
+                new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Addition between different sizes", get_ctx())
+            );
+        }
+        
         o << "\tadd " << (new IRRegA)->get_asm_str() << ", " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
     }
 }
