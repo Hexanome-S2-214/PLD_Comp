@@ -1,4 +1,5 @@
 #include "expression_bit_a_bit.h"
+#include "../params/ir-reg.h"
 
 namespace IR
 {
@@ -11,11 +12,11 @@ namespace IR
     void IRInstrExprBitABit::gen_asm_arm(ostream& o)
     {
         if (op == "&") {
-            o << "\t\tand " << dest->get_asm_str() << ", " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
+            o << "\t\tand " << (new IRRegA)->get_asm_str() << ", " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
         } else if (op == "^") {
-            o << "\t\teor " << dest->get_asm_str() << ", " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
+            o << "\t\teor " << (new IRRegA)->get_asm_str() << ", " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
         } else if (op == "|") {
-            o << "\t\torr " << dest->get_asm_str() << ", " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
+            o << "\t\torr " << (new IRRegA)->get_asm_str() << ", " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
         } else {
             cerr << "Error: unsupported operator" << endl;
         }

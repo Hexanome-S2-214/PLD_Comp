@@ -10,6 +10,6 @@ namespace IR
 
     void IRInstrExprMinus::gen_asm_arm(ostream& o)
     {
-        o << "\tsub " << (new IRRegB)->get_asm_str() << ", " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
+        o << "\tsub " << (new IRRegA)->get_asm_str() << ", " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
     }
 }

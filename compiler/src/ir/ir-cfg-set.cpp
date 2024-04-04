@@ -9,7 +9,9 @@ void IR::CfgSet::gen_asm_x86(ostream& o)
 
 void IR::CfgSet::gen_asm_arm(ostream& o)
 {
-    
+    for (auto cfg : cfgs) {
+        cfg->gen_asm(o);
+    }
 }
 
 void IR::CfgSet::set_current_cfg(IR::CFG * cfg)

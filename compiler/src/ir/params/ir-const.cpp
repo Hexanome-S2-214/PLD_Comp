@@ -7,6 +7,7 @@ namespace IR
     }
     
     void IRConst::gen_asm_arm(ostream& o) {
+        o << "#" << literal;
     }
     
     Size IRConst::get_size() {
