@@ -12,10 +12,7 @@ namespace IR
     void IRInstrEpilogue::gen_asm_arm(ostream& o)
     {
         o << "\tadd	sp, sp, 16\n";
-        //o << "\tpop {fp, pc}\n";
-
-        //o << "\t\tldp x29, x30, [sp], #16\n"; 
-        //o << "\t\tret\n";
+        o << "\tret\n";
     }
 }
 
