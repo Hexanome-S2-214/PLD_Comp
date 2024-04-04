@@ -32,7 +32,7 @@ namespace IR
         string op = "str";
         paste_properties(
                 (new IRInstrMov)
-                    ->set_src(new IRRegArmTemp1)
+                    ->set_src((new IRRegArmTemp1)->set_size(deest->get_size()))
                     ->set_dest(src)
             )->gen_asm(o); 
 

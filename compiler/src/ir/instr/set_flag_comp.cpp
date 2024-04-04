@@ -17,10 +17,10 @@ namespace IR
     void IRInstrSetFlagComp::gen_asm_arm(ostream& o)
     {
         paste_properties(
-            (new IRInstrMov)
-                ->set_src(new IRRegArmTemp2)
-                ->set_dest(dest)
-        )->gen_asm(o);
+                (new IRInstrMov)
+                    ->set_src((new IRRegArmTemp2)->set_size(deest->get_size()))
+                    ->set_dest(dest)
+            )->gen_asm(o); 
 
         if      (op == "==" or op == "!")    { o << "\tcset " << (new IRRegArmTemp2)->get_asm_str() << ", EQ\n"; } 
         else if (op == "!=")    { o << "\tcset " << (new IRRegArmTemp2)->get_asm_str() << ", NE\n"; }
