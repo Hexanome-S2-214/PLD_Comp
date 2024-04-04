@@ -285,7 +285,67 @@ main:
 	movb $10, %al
 	movl %eax, %edi
 	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $48, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $49, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $50, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $10, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
 	movb $43, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
 	movl %eax, %edi
 	call putchar@PLT
 	movb $45, %al
@@ -307,6 +367,9 @@ main:
 	movl %eax, %edi
 	call putchar@PLT
 	movb $10, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $48, %al
 	movl %eax, %edi
 	call putchar@PLT
 	movb $124, %al
@@ -351,7 +414,28 @@ main:
 	movb $10, %al
 	movl %eax, %edi
 	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
 	movb $43, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
 	movl %eax, %edi
 	call putchar@PLT
 	movb $45, %al
@@ -373,6 +457,9 @@ main:
 	movl %eax, %edi
 	call putchar@PLT
 	movb $10, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $49, %al
 	movl %eax, %edi
 	call putchar@PLT
 	movb $124, %al
@@ -417,7 +504,28 @@ main:
 	movb $10, %al
 	movl %eax, %edi
 	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
 	movb $43, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
 	movl %eax, %edi
 	call putchar@PLT
 	movb $45, %al
@@ -439,6 +547,9 @@ main:
 	movl %eax, %edi
 	call putchar@PLT
 	movb $10, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $50, %al
 	movl %eax, %edi
 	call putchar@PLT
 	movb $124, %al
@@ -483,7 +594,28 @@ main:
 	movb $10, %al
 	movl %eax, %edi
 	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
 	movb $43, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
 	movl %eax, %edi
 	call putchar@PLT
 	movb $45, %al
@@ -1467,6 +1599,30 @@ main:
 	jmp .L121
 .L121:
 .L122:
+	movzbl -56(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L123
+	movzbl -60(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L125
+	movb -54(%rbp), %al
+	movb %al, -52(%rbp)
+	jmp .L125
+	jmp .L124
+.L123:
+	movl $0, %eax
+	jmp .L124
+.L124:
+.L125:
 	jmp .L114
 	jmp .L114
 .L114:
@@ -1480,7 +1636,7 @@ main:
 	setne %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L123
+	jne .L126
 	movl $0, %eax
 	movl %eax, -47(%rbp)
 	movb -52(%rbp), %al
@@ -1491,16 +1647,16 @@ main:
 	subl %ebx, %eax
 	movl %eax, %edi
 	call print_game_won
-	jmp .L123
+	jmp .L126
 	jmp .L23
-.L123:
+.L126:
 	movl -28(%rbp), %eax
 	movl %eax, %ecx
 	movl $0, %eax
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
-	jne .L124
+	jne .L127
 	movb -52(%rbp), %al
 	movl %eax, %ecx
 	movl $0, %eax
@@ -1508,17 +1664,17 @@ main:
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L126
+	jne .L129
 	movl $0, %eax
 	movl %eax, -47(%rbp)
 	call print_full_board
-	jmp .L126
-	jmp .L125
-.L124:
+	jmp .L129
+	jmp .L128
+.L127:
 	movl $0, %eax
-	jmp .L125
-.L125:
-.L126:
+	jmp .L128
+.L128:
+.L129:
 	movl -20(%rbp), %eax
 	movl %eax, -133(%rbp)
 	movl $1, %eax
@@ -1536,6 +1692,348 @@ main:
 .L23:
 	jmp .L14
 .L16:
+	movb $10, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $10, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $10, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $70, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $73, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $78, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $65, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $76, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $66, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $79, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $65, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $82, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $68, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $58, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $10, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $43, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $43, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $10, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $124, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movzbl -56(%rbp), %eax
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $124, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movzbl -57(%rbp), %eax
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $124, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movzbl -58(%rbp), %eax
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $124, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $10, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $43, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $43, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $10, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $124, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movzbl -59(%rbp), %eax
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $124, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movzbl -60(%rbp), %eax
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $124, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movzbl -61(%rbp), %eax
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $124, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $10, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $43, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $43, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $10, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $124, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movzbl -62(%rbp), %eax
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $124, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movzbl -63(%rbp), %eax
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $124, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movzbl -64(%rbp), %eax
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $124, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $10, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $43, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $43, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $10, %al
+	movl %eax, %edi
+	call putchar@PLT
 	movl $0, %eax
 	jmp .L12
 .L12:
