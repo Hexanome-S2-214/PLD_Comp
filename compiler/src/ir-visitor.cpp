@@ -352,6 +352,7 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
 {
     bool const_left; bool const_right;
     int val_left; int val_right;
+    int final_value;
 
     this->visit(ctx->expr(0));
     const_left = vf.f_const;
@@ -368,7 +369,11 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
     const_right = vf.f_const;
     val_right = vf.value;
 
-    int final_value;
+    if (val_right == 0 && (ctx->OP_MULT()->getText() == "/" || ctx->OP_MULT()->getText() == "%")) {
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::WARNING, "division by 0", ctx)
+        );
+    }
 
     if (const_left && const_right) {
 
