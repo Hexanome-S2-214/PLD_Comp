@@ -1,4 +1,5 @@
 #include "addq.h"
+#include "ir-reg.h"
 
 namespace IR
 {
@@ -9,6 +10,6 @@ namespace IR
 
     void IRInstrAddq::gen_asm_arm(ostream& o)
     {
-       o << "\t\tadd" << dst->get_asm_str() << ", " << dst->get_asm_str() << ", " << src->get_asm_str() << "\n"; 
+       o << "\t\tadd" << (new IRRegA)->get_asm_str() << ", " << dst->get_asm_str() << ", " << src->get_asm_str() << "\n"; 
     }
 }
