@@ -35,9 +35,9 @@ namespace IR
 
             o << "\tmov " << dest_reg->get_asm_str() << ", " << src->get_asm_str() << "\n";
         } else if (dynamic_cast<IRReg*>(dest)) {
-            o << "\tstr " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
+            o << "\tldr " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
         }else {
-            o << "\tldr " << src->get_asm_str() << ", " << dest->get_asm_str() << "\n";
+            o << "\tstr " << src->get_asm_str() << ", " << dest->get_asm_str() << "\n";
         }
     }
 

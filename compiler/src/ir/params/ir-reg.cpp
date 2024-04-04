@@ -34,11 +34,11 @@ namespace IR
         {
         case Byte:
         case Word:
-            o << "w0";
-            break;
+            // o << "w0";
+            // break;
         case DWord:
         case QWord:
-            o << "x0";
+            o << "w0";
             break;
         default:
             break;
@@ -72,11 +72,11 @@ namespace IR
         {
         case Byte:
         case Word:
-            o << "w1";
-            break;
+            // o << "w1";
+            // break;
         case DWord:
         case QWord:
-            o << "x1";
+            o << "w1";
             break;
         default:
             break;
@@ -110,11 +110,11 @@ namespace IR
         {
         case Byte:
         case Word:
-            o << "w2";
-            break;
+            // o << "w2";
+            // break;
         case DWord:
         case QWord:
-            o << "x2";
+            o << "w2";
             break;
         default:
             break;
@@ -148,11 +148,11 @@ namespace IR
         {
         case Byte:
         case Word:
-            o << "w3";
-            break;
+            // o << "w3";
+            // break;
         case DWord:
         case QWord:
-            o << "x3";
+            o << "w3";
             break;
         default:
             break;
@@ -219,11 +219,11 @@ namespace IR
         {
         case Byte:
         case Word:
-            o << "w4";
-            break;
+            // o << "w4";
+            // break;
         case DWord:
         case QWord:
-            o << "x4";
+            o << "w4";
             break;
         default:
             break;
@@ -257,11 +257,11 @@ namespace IR
         {
         case Byte:
         case Word:
-            o << "w5";
-            break;
+            // o << "w5";
+            // break;
         case DWord:
         case QWord:
-            o << "x5";
+            o << "w5";
             break;
         default:
             break;
@@ -295,11 +295,11 @@ namespace IR
         {
         case Byte:
         case Word:
-            o << "w6";
-            break;
+            // o << "w6";
+            // break;
         case DWord:
         case QWord:
-            o << "x6";
+            o << "w6";
             break;
         default:
             break;
@@ -333,11 +333,11 @@ namespace IR
         {
         case Byte:
         case Word:
-            o << "w7";
-            break;
+            // o << "w7";
+            // break;
         case DWord:
         case QWord:
-            o << "x7";
+            o << "w7";
             break;
         default:
             break;
@@ -354,11 +354,11 @@ namespace IR
         {
         case Byte:
         case Word:
-            o << "w8";
-            break;
+            // o << "w8";
+            // break;
         case DWord:
         case QWord:
-            o << "x8";
+            o << "w8";
             break;
         default:
             break;
@@ -375,11 +375,11 @@ namespace IR
         {
         case Byte:
         case Word:
-            o << "w9";
-            break;
+            // o << "w9";
+            // break;
         case DWord:
         case QWord:
-            o << "x9";
+            o << "w9";
             break;
         default:
             break;

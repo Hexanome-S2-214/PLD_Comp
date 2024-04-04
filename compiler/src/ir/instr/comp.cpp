@@ -54,7 +54,7 @@ namespace IR
             )->gen_asm(o); 
 
         //string comp_op = get_op(src->get_size());
-        o << "\tcmp " << " " << (new IRRegArmTemp1)->get_asm_str() << ", " << (new IRRegArmTemp2)->get_asm_str() << "\n";
+        o << "\tcmp " << " " << (new IRRegArmTemp2)->get_asm_str() << ", " << (new IRRegArmTemp1)->get_asm_str() << "\n";
         
     }
 }
