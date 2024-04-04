@@ -11,7 +11,9 @@ namespace IR
     
     void IRInstrMov::gen_asm_arm(ostream& o)
     {
-        if (dynamic_cast<IRReg*>(dest) && (dynamic_cast<IRReg*>(src) || dynamic_cast<IRConst*>(src))) {
+        IRRegStack * src_stack = dynamic_cast<IRRegStack*>(src);
+
+        if (dynamic_cast<IRReg*>(dest) && (dynamic_cast<IRReg*>(src) || dynamic_cast<IRConst*>(src)) && src_stack == nullptr) {
             IRReg * dest_reg = dynamic_cast<IRReg*>(dest);
             IRReg * src_reg = dynamic_cast<IRReg*>(src);
             IRConst * src_const = dynamic_cast<IRConst*>(src);
