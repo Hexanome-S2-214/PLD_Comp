@@ -22,7 +22,7 @@ namespace IR
         SymbolTable() {};
         ~SymbolTable();
 
-        Symbol * declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx = nullptr, int tableSize = 1);
+        Symbol * declare_symbol(IRBase * parent, string id, Type type, bool const_var = false, antlr4::ParserRuleContext * ctx = nullptr, int tableSize = 1);
         Symbol * get_symbol(string id, antlr4::ParserRuleContext * ctx = nullptr);
 
         Symbol * declare_tmp(IRBase * parent, Type type, antlr4::ParserRuleContext * ctx = nullptr);

@@ -13,7 +13,7 @@ namespace IR
         }
     }
 
-    Symbol * SymbolTable::declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx, int tableSize)
+    Symbol * SymbolTable::declare_symbol(IRBase * parent, string id, Type type, bool const_var, antlr4::ParserRuleContext * ctx, int tableSize)
     {
         if (symbols.find(id) != symbols.end())
         {
@@ -21,7 +21,7 @@ namespace IR
             exit(1);
         }
 
-        symbol_offset -= type.size / 8;
+        symbol_offset -= size_to_bytes(type.size);
         
         
         Symbol * symbol = new Symbol;
@@ -30,6 +30,7 @@ namespace IR
         symbol->set_ctx(ctx);
         symbol->id = id;
         symbol->type = type;
+        symbol->const_var = const_var;
         symbol->offset = symbol_offset;
         symbol_offset -= type.size / 8 * tableSize;
         symbols[id] = symbol;

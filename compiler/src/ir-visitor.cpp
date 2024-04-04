@@ -23,7 +23,7 @@
 #include "ir/instr/intr-cheat.h"
 #include "ir/instr/jump.h"
 #include "ir/instr/call.h"
-#include "ir/instr/pushq.h"
+#include "ir/instr/push.h"
 #include "error-reporter/compiler-error-token.h"
 #include "./error-reporter/error-reporter.h"
 
@@ -40,7 +40,7 @@ antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *
     string epilogue_label_cfg = cfg->get_epilogue_label();
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("jmp")
+            ->set_jump(IR::JumpType::Jump)
             ->set_label(epilogue_label_cfg)
             ->set_ctx(ctx)
     );
@@ -72,29 +72,55 @@ antlrcpp::Any IRVisitor::visitSimpleAff(ifccParser::SimpleAffContext *ctx)
 
 antlrcpp::Any IRVisitor::visitSimpleDecl(ifccParser::SimpleDeclContext *ctx)
 {
-    if(ctx->getTokens(ifccParser::INT).size() >= 1)
+    IR::Type type;
+    bool const_var = ctx->CONST() ? true : false;
+    cerr << const_var << endl;
+
+    if (ctx->getTokens(ifccParser::INT).size() >= 1)
     {
-        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, ctx);
-    }else if(ctx->getTokens(ifccParser::CHAR).size() >= 1)
-    {
-        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Char, ctx);
+        type = IR::Int;
     }
+    else if (ctx->getTokens(ifccParser::CHAR).size() >= 1)
+    {
+        type = IR::Char;
+    }
+    else
+    {
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Unrecognized type", ctx)
+        );
+    }
+
+    cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, const_var, ctx);
 
     return IR::Int.size;
 }
 
 antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
 {
+    bool const_var = ctx->CONST() ? true : false;
+    cerr << const_var << endl;
+
     this->visit(ctx->rvalue());
 
-    IR::Symbol *symbol;
+    IR::Type type;
+
     if (ctx->getTokens(ifccParser::INT).size() >= 1)
     {
-        symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, ctx);
-    }else if(ctx->getTokens(ifccParser::CHAR).size() >= 1)
-    {
-        symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Char, ctx);
+        type = IR::Int;
     }
+    else if (ctx->getTokens(ifccParser::CHAR).size() >= 1)
+    {
+        type = IR::Char;
+    }
+    else
+    {
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Unrecognized type", ctx)
+        );
+    }
+
+    IR::Symbol * symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, const_var, ctx);
 
     cfg->add_instr(
         (new IR::IRInstrAssign)
@@ -108,9 +134,9 @@ antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
 antlrcpp::Any IRVisitor::visitTableDecl(ifccParser::TableDeclContext *ctx)
 {
     if(ctx->CHAR()){
-        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Char,ctx, stoi(ctx->NUM()->getText()));
+        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Char, false, ctx,  stoi(ctx->NUM()->getText()));
     } else if (ctx->INT()) {
-        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int,ctx, stoi(ctx->NUM()->getText()));
+        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, false, ctx,  stoi(ctx->NUM()->getText()));
     }
     return 0;
 }
@@ -585,9 +611,6 @@ antlrcpp::Any IRVisitor::visitExprAnd(ifccParser::ExprAndContext *ctx) {
     string first_expr_false_label = cfg->get_next_bb_label();
     string end_label = cfg->get_next_bb_label();
 
-    cerr << first_expr_false_label << endl;
-    cerr << end_label << endl;
-
     //setup of block to reach if first expr is false
     IR::BasicBlock * first_expr_false_bb = new IR::BasicBlock(cfg, first_expr_false_label, nullptr, nullptr);
     first_expr_false_bb->set_exit(end_label);
@@ -608,7 +631,7 @@ antlrcpp::Any IRVisitor::visitExprAnd(ifccParser::ExprAndContext *ctx) {
     //if false -> jump to the block which moves $0 into %eax
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("jne")
+            ->set_jump(IR::JumpType::IfNotEqual)
             ->set_label(first_expr_false_label)
             ->set_ctx(ctx)
     );
@@ -633,9 +656,6 @@ antlrcpp::Any IRVisitor::visitExprOr(ifccParser::ExprOrContext *ctx) {
     string first_expr_true_label = cfg->get_next_bb_label();
     string end_label = cfg->get_next_bb_label();
 
-    cerr << first_expr_true_label << endl;
-    cerr << end_label << endl;
-
     //setup of block to reach if first expr is false
     IR::BasicBlock * first_expr_true_bb = new IR::BasicBlock(cfg, first_expr_true_label, nullptr, nullptr);
     first_expr_true_bb->set_exit(end_label);
@@ -656,7 +676,7 @@ antlrcpp::Any IRVisitor::visitExprOr(ifccParser::ExprOrContext *ctx) {
     //if true -> jump to the block which moves $1 into %eax
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("je")
+            ->set_jump(IR::JumpType::IfEqual)
             ->set_label(first_expr_true_label)
             ->set_ctx(ctx)
     );
@@ -720,7 +740,7 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
     //Jump after condition evaluation
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("jne")
+            ->set_jump(IR::JumpType::IfNotEqual)
             ->set_label(jump_after_eval_cond)
             ->set_ctx(ctx)
     );
@@ -731,7 +751,7 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
     // Jump to endif block when if complete
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("jmp")
+            ->set_jump(IR::JumpType::Jump)
             ->set_label(exit_label)
             ->set_ctx(ctx)
     );
@@ -766,31 +786,29 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
 
 antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx) {
 
-    IR::BasicBlock * expr_bb = cfg->get_current_bb();
-
     //Labels for new blocks
-    string end_while_label = cfg->get_next_bb_label();
+    string condition_label = cfg->get_next_bb_label();
     string body_label = cfg->get_next_bb_label();
+    string end_while_label = cfg->get_next_bb_label();
 
-    //Jump to condition/end-while block
+    // Push condition (!!!!) jump label to stack for children
+    cfg->stack.push_back(condition_label); // Push own exit
+
+    //Jump to condition block
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("jmp")
-            ->set_label(end_while_label)
+            ->set_jump(IR::JumpType::Jump)
+            ->set_label(condition_label)
             ->set_ctx(ctx)
     );
 
-    //Parsing of body block
-    IR::BasicBlock * body_bb = new IR::BasicBlock(cfg, body_label, nullptr, nullptr);
-    cfg->add_bb(body_bb);
-    this->visit(ctx->struct_bloc());
-    body_bb->set_exit(end_while_label);
-
-    //Parsing of condition/end-while block
-    IR::BasicBlock * end_while_bb = new IR::BasicBlock(cfg, end_while_label, nullptr, nullptr);
-    cfg->add_bb(end_while_bb);
+    //Parsing of condition block
+    IR::BasicBlock * condition_bb = new IR::BasicBlock(cfg, condition_label, nullptr, nullptr);
+    condition_bb->set_bb_id(BB_WHILE); //for break/continue
+    cfg->add_bb(condition_bb);
     this->visit(ctx->expr());
-
+    condition_bb->set_exit(end_while_label); //jumps to end if condition false
+    
     //test result
     cfg->add_instr(
         (new IR::IRInstrComp)
@@ -800,22 +818,103 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
             ->set_dest(new IR::IRRegA)
             ->set_ctx(ctx)
     );
-
     //if condition is evaluated to "true" -> jump to body of the while
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_op("je")
+            ->set_jump(IR::JumpType::IfEqual)
             ->set_label(body_label)
             ->set_ctx(ctx)
     );
 
+    //Parsing of body block
+    IR::BasicBlock * body_bb = new IR::BasicBlock(cfg, body_label, nullptr, nullptr);
+    cfg->add_bb(body_bb);
+    this->visit(ctx->struct_bloc());
+    body_bb->set_exit(condition_label);
+
+    //Adding the end-while block
+    IR::BasicBlock * end_while_bb = new IR::BasicBlock(cfg, end_while_label, nullptr, nullptr);
+    body_bb->set_bb_id(BB_END_WHILE);
+    cfg->add_bb(end_while_bb);
+
+    // Pop exit from stack
+    cfg->stack.pop_back();
+
+    // Set exit from parent
+    if (cfg->stack.size() > 0)
+    {
+        string parent_exit = cfg->stack.back();
+        if (parent_exit != "")
+        {
+            end_while_bb->set_exit(parent_exit);
+        }
+    }
+
     return IR::Int.size;
+}
+
+antlrcpp::Any IRVisitor::visitStruct_switch_case(ifccParser::Struct_switch_caseContext *ctx) {
+    
+    int nb_case = ctx->case_opt().size();
+    bool default_opt = ctx->default_opt() ? true : false;
+
+    vector<IR::BasicBlock *> cases;
+
+    //Works because while_bb are identified via the condition block (a switch will be in the body block)
+    cfg->get_current_bb()->set_bb_id(BB_SWITCH);
+
+    //Labels
+    string end_switch_label = cfg->get_next_bb_label();
+
+    cfg->get_current_bb()->set_exit(end_switch_label);    
+
+    //evaluate expression
+    this->visit(ctx->expr());
+
+    //evaluate all conditions and prepare corresponding blocks
+    for (int i=0; i < nb_case ; ++i) {
+        //create bb
+        string case_bb_label = cfg->get_next_bb_label();
+        IR::BasicBlock * case_bb = new IR::BasicBlock(cfg, case_bb_label, nullptr, nullptr);
+        cases.push_back(case_bb);
+
+        //evaluate case condition
+        cfg->add_instr(
+            (new IR::IRInstrComp)
+                ->set_src(
+                    (new IR::IRConst)->set_literal(ctx->case_opt(i)->case_val()->getText())
+                )
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
+        cfg->add_instr(
+        (new IR::IRInstrJump)
+            ->set_jump(IR::JumpType::IfEqual)
+            ->set_label(case_bb_label)
+            ->set_ctx(ctx)
+        );
+    }
+
+    //first : visit default (reached if no previous condition is matched)
+    if (default_opt) {
+        this->visit(ctx->default_opt()->case_block());
+    }
+
+    for(int i=0 ; i < nb_case ; ++i) {
+        cfg->add_bb(cases.at(i));
+        this->visit(ctx->case_opt(i)->case_block());
+    }
+
+    IR::BasicBlock * end_switch_bb = new IR::BasicBlock(cfg, end_switch_label, nullptr, nullptr);
+    cfg->add_bb(end_switch_bb);
+
+    return 0;
 }
 
 ////////////////////////////////////////////
 // FONCTIONS
 //
-// WARNING : ONLY INT SUPPORTED FOR NOW / MAX 6 PARAMETERS
+// WARNING : ONLY INT SUPPORTED FOR NOW
 ////////////////////////////////////////////
 
 antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *ctx) {
@@ -843,6 +942,7 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
                 ->set_symbol(symbol)
                 ->set_ctx(ctx)
         );
+        cfg->incr_nb_param();
         i++;
     }
 
@@ -863,7 +963,7 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
                 ->set_dest(symbol)
                 ->set_ctx(ctx)
         );
-
+        cfg->incr_nb_param();
         offset += 8;
     }
 
@@ -879,20 +979,31 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
     bool more_6_params = false;
     int cpt_bytes;
 
+    //first : check if correct number of parameters
+    try {
+        int correct_nb_param = cfg_set->get_cfg_by_fname(ctx->fname->getText())->get_nb_param();
+        if (correct_nb_param != nb_params) {
+            throw runtime_error("Function called with wrong number of parameters");
+        }
+    } catch (exception &e) {
+        throw e;
+    }    
+
     //If there is more than 6 parameters, we place the remaining parameters on top of the stack
     if (nb_params > 6) {
         more_6_params = true;
         cpt_bytes=0;  //bytes to substract from %rsp after the call
         for(int i = (nb_params-1); i > 5; i--) {
             cfg->add_instr(
-                (new IR::IRInstrPushq)
-                    ->set_src((new IR::IRConst)
+                (new IR::IRInstrPush)
+                    ->set_src(
+                        (new IR::IRConst)
                             ->set_literal(ctx->fparam_call()->fparam_call2(i)->NUM()->getText())
+                            ->set_size(IR::Size::QWord)
                     )
                     ->set_ctx(ctx)
             );
-            //TODO : check if always 8 -> btw, why 8 ?
-            cpt_bytes += 8;
+            cpt_bytes += size_to_bytes(IR::Size::QWord);
         }
     }
 
@@ -945,13 +1056,65 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
     //if more than 6 parameters -> move up %rsp
     if (more_6_params) {
         cfg->add_instr(
-            (new IR::IRInstrPushq)
+            (new IR::IRInstrExprPlus)
                 ->set_src((new IR::IRConst)
                         ->set_literal(to_string(cpt_bytes))
+                        ->set_size(IR::Size::QWord)
+                )
+                ->set_dest((new IR::IRRegStackPointer)
+                            ->set_size(IR::Size::QWord)
                 )
                 ->set_ctx(ctx)
         );
     }
+
+    return 0;
+}
+
+////////////////////////////////////////////
+// BREAK/CONTINUE
+////////////////////////////////////////////
+
+antlrcpp::Any IRVisitor::visitBreakStmt(ifccParser::BreakStmtContext *ctx) {
+    //check if break can be used
+    IR::BasicBlock * bb_loop;
+    try {
+        bb_loop = cfg->get_break_parent(cfg->get_current_bb()->get_label());
+    } catch (exception &e) {
+        throw e;
+    }
+
+    //we need to jump to end_while block
+    string end_loop_label = bb_loop->get_exit_label();
+
+    cfg->add_instr(
+        (new IR::IRInstrJump)
+            ->set_jump(IR::JumpType::Jump)
+            ->set_label(end_loop_label)
+            ->set_ctx(ctx)
+    );
+
+    return 0;
+}
+
+antlrcpp::Any IRVisitor::visitContinueStmt(ifccParser::ContinueStmtContext *ctx) {
+    //check if continue can be used
+    IR::BasicBlock * bb_loop;
+    try {
+        bb_loop = cfg->get_continue_parent(cfg->get_current_bb()->get_label());
+    } catch (exception &e) {
+        throw e;
+    }
+
+    //we need to jump to condition
+    string condition_loop_label = bb_loop->get_label();
+
+    cfg->add_instr(
+        (new IR::IRInstrJump)
+            ->set_jump(IR::JumpType::Jump)
+            ->set_label(condition_loop_label)
+            ->set_ctx(ctx)
+    );
 
     return 0;
 }
