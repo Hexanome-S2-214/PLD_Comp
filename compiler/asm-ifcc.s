@@ -623,14 +623,90 @@ main:
 	cmpl $1, %eax
 	jne .L48
 	movb $88, %al
+	movb %al, -54(%rbp)
+	movb -54(%rbp), %al
 	movb %al, -58(%rbp)
 	jmp .L47
 	jmp .L24
 .L48:
 	movb $89, %al
+	movb %al, -54(%rbp)
+	movb -54(%rbp), %al
 	movb %al, -58(%rbp)
 	jmp .L47
 .L47:
+	movzbl -56(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L49
+	movzbl -57(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L51
+	movb -54(%rbp), %al
+	movb %al, -52(%rbp)
+	jmp .L51
+	jmp .L50
+.L49:
+	movl $0, %eax
+	jmp .L50
+.L50:
+.L51:
+	movzbl -61(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L52
+	movzbl -64(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L54
+	movb -54(%rbp), %al
+	movb %al, -52(%rbp)
+	jmp .L54
+	jmp .L53
+.L52:
+	movl $0, %eax
+	jmp .L53
+.L53:
+.L54:
+	movzbl -60(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L55
+	movzbl -62(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L57
+	movb -54(%rbp), %al
+	movb %al, -52(%rbp)
+	jmp .L57
+	jmp .L56
+.L55:
+	movl $0, %eax
+	jmp .L56
+.L56:
+.L57:
 	jmp .L46
 	jmp .L46
 .L46:
@@ -644,7 +720,7 @@ main:
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L49
+	jne .L58
 	movl -77(%rbp), %eax
 	movl %eax, %ecx
 	movb $48, %al
@@ -652,7 +728,7 @@ main:
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L50
+	jne .L59
 	movl -20(%rbp), %eax
 	movl %eax, %ecx
 	movl $0, %eax
@@ -660,19 +736,71 @@ main:
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L52
+	jne .L61
 	movb $88, %al
+	movb %al, -54(%rbp)
+	movb -54(%rbp), %al
 	movb %al, -59(%rbp)
-	jmp .L51
+	jmp .L60
 	jmp .L23
-.L52:
+.L61:
 	movb $89, %al
+	movb %al, -54(%rbp)
+	movb -54(%rbp), %al
 	movb %al, -59(%rbp)
-	jmp .L51
-.L51:
-	jmp .L50
-	jmp .L50
-.L50:
+	jmp .L60
+.L60:
+	movzbl -60(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L62
+	movzbl -61(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L64
+	movb -54(%rbp), %al
+	movb %al, -52(%rbp)
+	jmp .L64
+	jmp .L63
+.L62:
+	movl $0, %eax
+	jmp .L63
+.L63:
+.L64:
+	movzbl -56(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L65
+	movzbl -62(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L67
+	movb -54(%rbp), %al
+	movb %al, -52(%rbp)
+	jmp .L67
+	jmp .L66
+.L65:
+	movl $0, %eax
+	jmp .L66
+.L66:
+.L67:
+	jmp .L59
+	jmp .L59
+.L59:
 	movl -77(%rbp), %eax
 	movl %eax, %ecx
 	movb $49, %al
@@ -680,7 +808,7 @@ main:
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L53
+	jne .L68
 	movl -20(%rbp), %eax
 	movl %eax, %ecx
 	movl $0, %eax
@@ -688,19 +816,119 @@ main:
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L55
+	jne .L70
 	movb $88, %al
+	movb %al, -54(%rbp)
+	movb -54(%rbp), %al
 	movb %al, -60(%rbp)
-	jmp .L54
-	jmp .L49
-.L55:
+	jmp .L69
+	jmp .L58
+.L70:
 	movb $89, %al
+	movb %al, -54(%rbp)
+	movb -54(%rbp), %al
 	movb %al, -60(%rbp)
-	jmp .L54
-.L54:
-	jmp .L53
-	jmp .L53
-.L53:
+	jmp .L69
+.L69:
+	movzbl -59(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L71
+	movzbl -61(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L73
+	movb -54(%rbp), %al
+	movb %al, -52(%rbp)
+	jmp .L73
+	jmp .L72
+.L71:
+	movl $0, %eax
+	jmp .L72
+.L72:
+.L73:
+	movzbl -57(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L74
+	movzbl -63(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L76
+	movb -54(%rbp), %al
+	movb %al, -52(%rbp)
+	jmp .L76
+	jmp .L75
+.L74:
+	movl $0, %eax
+	jmp .L75
+.L75:
+.L76:
+	movzbl -56(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L77
+	movzbl -64(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L79
+	movb -54(%rbp), %al
+	movb %al, -52(%rbp)
+	jmp .L79
+	jmp .L78
+.L77:
+	movl $0, %eax
+	jmp .L78
+.L78:
+.L79:
+	movzbl -58(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L80
+	movzbl -62(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L82
+	movb -54(%rbp), %al
+	movb %al, -52(%rbp)
+	jmp .L82
+	jmp .L81
+.L80:
+	movl $0, %eax
+	jmp .L81
+.L81:
+.L82:
+	jmp .L68
+	jmp .L68
+.L68:
 	movl -77(%rbp), %eax
 	movl %eax, %ecx
 	movb $50, %al
@@ -708,7 +936,7 @@ main:
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L56
+	jne .L83
 	movl -20(%rbp), %eax
 	movl %eax, %ecx
 	movl $0, %eax
@@ -716,22 +944,74 @@ main:
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L58
+	jne .L85
 	movb $88, %al
+	movb %al, -54(%rbp)
+	movb -54(%rbp), %al
 	movb %al, -61(%rbp)
-	jmp .L57
-	jmp .L49
-.L58:
+	jmp .L84
+	jmp .L58
+.L85:
 	movb $89, %al
+	movb %al, -54(%rbp)
+	movb -54(%rbp), %al
 	movb %al, -61(%rbp)
-	jmp .L57
-.L57:
-	jmp .L56
-	jmp .L56
-.L56:
-	jmp .L49
-	jmp .L49
-.L49:
+	jmp .L84
+.L84:
+	movzbl -59(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L86
+	movzbl -60(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L88
+	movb -54(%rbp), %al
+	movb %al, -52(%rbp)
+	jmp .L88
+	jmp .L87
+.L86:
+	movl $0, %eax
+	jmp .L87
+.L87:
+.L88:
+	movzbl -58(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L89
+	movzbl -64(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L91
+	movb -54(%rbp), %al
+	movb %al, -52(%rbp)
+	jmp .L91
+	jmp .L90
+.L89:
+	movl $0, %eax
+	jmp .L90
+.L90:
+.L91:
+	jmp .L83
+	jmp .L83
+.L83:
+	jmp .L58
+	jmp .L58
+.L58:
 	movl -69(%rbp), %eax
 	movl %eax, %ecx
 	movb $50, %al
@@ -739,7 +1019,7 @@ main:
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L59
+	jne .L92
 	movl -77(%rbp), %eax
 	movl %eax, %ecx
 	movb $48, %al
@@ -747,7 +1027,7 @@ main:
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L60
+	jne .L93
 	movl -20(%rbp), %eax
 	movl %eax, %ecx
 	movl $0, %eax
@@ -755,19 +1035,95 @@ main:
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L62
+	jne .L95
 	movb $88, %al
+	movb %al, -54(%rbp)
+	movb -54(%rbp), %al
 	movb %al, -62(%rbp)
-	jmp .L61
+	jmp .L94
 	jmp .L23
-.L62:
+.L95:
 	movb $89, %al
+	movb %al, -54(%rbp)
+	movb -54(%rbp), %al
 	movb %al, -62(%rbp)
-	jmp .L61
-.L61:
-	jmp .L60
-	jmp .L60
-.L60:
+	jmp .L94
+.L94:
+	movzbl -63(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L96
+	movzbl -64(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L98
+	movb -54(%rbp), %al
+	movb %al, -52(%rbp)
+	jmp .L98
+	jmp .L97
+.L96:
+	movl $0, %eax
+	jmp .L97
+.L97:
+.L98:
+	movzbl -56(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L99
+	movzbl -59(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L101
+	movb -54(%rbp), %al
+	movb %al, -52(%rbp)
+	jmp .L101
+	jmp .L100
+.L99:
+	movl $0, %eax
+	jmp .L100
+.L100:
+.L101:
+	movzbl -60(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L102
+	movzbl -58(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L104
+	movb -54(%rbp), %al
+	movb %al, -52(%rbp)
+	jmp .L104
+	jmp .L103
+.L102:
+	movl $0, %eax
+	jmp .L103
+.L103:
+.L104:
+	jmp .L93
+	jmp .L93
+.L93:
 	movl -77(%rbp), %eax
 	movl %eax, %ecx
 	movb $49, %al
@@ -775,7 +1131,7 @@ main:
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L63
+	jne .L105
 	movl -20(%rbp), %eax
 	movl %eax, %ecx
 	movl $0, %eax
@@ -783,19 +1139,71 @@ main:
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L65
+	jne .L107
 	movb $88, %al
+	movb %al, -54(%rbp)
+	movb -54(%rbp), %al
 	movb %al, -63(%rbp)
-	jmp .L64
-	jmp .L59
-.L65:
+	jmp .L106
+	jmp .L92
+.L107:
 	movb $89, %al
+	movb %al, -54(%rbp)
+	movb -54(%rbp), %al
 	movb %al, -63(%rbp)
-	jmp .L64
-.L64:
-	jmp .L63
-	jmp .L63
-.L63:
+	jmp .L106
+.L106:
+	movzbl -62(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L108
+	movzbl -64(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L110
+	movb -54(%rbp), %al
+	movb %al, -52(%rbp)
+	jmp .L110
+	jmp .L109
+.L108:
+	movl $0, %eax
+	jmp .L109
+.L109:
+.L110:
+	movzbl -57(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L111
+	movzbl -60(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L113
+	movb -54(%rbp), %al
+	movb %al, -52(%rbp)
+	jmp .L113
+	jmp .L112
+.L111:
+	movl $0, %eax
+	jmp .L112
+.L112:
+.L113:
+	jmp .L105
+	jmp .L105
+.L105:
 	movl -77(%rbp), %eax
 	movl %eax, %ecx
 	movb $50, %al
@@ -803,7 +1211,7 @@ main:
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L66
+	jne .L114
 	movl -20(%rbp), %eax
 	movl %eax, %ecx
 	movl $0, %eax
@@ -811,19 +1219,74 @@ main:
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L68
+	jne .L116
 	movb $88, %al
+	movb %al, -54(%rbp)
+	movb -54(%rbp), %al
 	movb %al, -64(%rbp)
-	jmp .L67
-	jmp .L59
-.L68:
+	jmp .L115
+	jmp .L92
+.L116:
 	movb $89, %al
+	movb %al, -54(%rbp)
+	movb -54(%rbp), %al
 	movb %al, -64(%rbp)
-	jmp .L67
-.L67:
-	jmp .L66
-	jmp .L66
-.L66:
+	jmp .L115
+.L115:
+	movzbl -62(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L117
+	movzbl -63(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L119
+	movb -54(%rbp), %al
+	movb %al, -52(%rbp)
+	jmp .L119
+	jmp .L118
+.L117:
+	movl $0, %eax
+	jmp .L118
+.L118:
+.L119:
+	movzbl -58(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L120
+	movzbl -61(%rbp), %eax
+	movl %eax, %ecx
+	movb -54(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L122
+	movb -54(%rbp), %al
+	movb %al, -52(%rbp)
+	jmp .L122
+	jmp .L121
+.L120:
+	movl $0, %eax
+	jmp .L121
+.L121:
+.L122:
+	jmp .L114
+	jmp .L114
+.L114:
+	jmp .L92
+	jmp .L92
+.L92:
 	movb -52(%rbp), %al
 	movl %eax, %ecx
 	movl $0, %eax
@@ -831,7 +1294,7 @@ main:
 	setne %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L69
+	jne .L123
 	movl $0, %eax
 	movl %eax, -47(%rbp)
 	movb -52(%rbp), %al
@@ -842,16 +1305,16 @@ main:
 	subl %ebx, %eax
 	movl %eax, %edi
 	call print_game_won
-	jmp .L69
-	jmp .L59
-.L69:
+	jmp .L123
+	jmp .L23
+.L123:
 	movl -28(%rbp), %eax
 	movl %eax, %ecx
 	movl $0, %eax
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
-	jne .L70
+	jne .L124
 	movb -52(%rbp), %al
 	movl %eax, %ecx
 	movl $0, %eax
@@ -859,20 +1322,17 @@ main:
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L72
+	jne .L126
 	movl $0, %eax
 	movl %eax, -47(%rbp)
 	call print_full_board
-	jmp .L72
-	jmp .L71
-.L70:
+	jmp .L126
+	jmp .L125
+.L124:
 	movl $0, %eax
-	jmp .L71
-.L71:
-.L72:
-	jmp .L59
-	jmp .L59
-.L59:
+	jmp .L125
+.L125:
+.L126:
 	movl -20(%rbp), %eax
 	movl %eax, -133(%rbp)
 	movl $1, %eax

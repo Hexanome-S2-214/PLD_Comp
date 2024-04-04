@@ -164,67 +164,136 @@ int main(){
                         game_won = symbol;
                     }
                 }
-            if (y == '2'){
+                if (y == '2'){
                     if(player == 0){
-                        board[2] = 'X';
+                        symbol = 'X';
+                        board[2] = symbol;
                     } else {
-                        board[2] = 'Y';
+                        symbol = 'Y';
+                        board[2] = symbol;
                     }
-            }
+                    if(board[0] == symbol && board[1] == symbol){
+                        game_won = symbol;
+                    }
+                    if(board[5] == symbol && board[8] == symbol){
+                        game_won = symbol;
+                    }
+                    if(board[4] == symbol && board[6] == symbol){
+                        game_won = symbol;
+                    }
+                }
             }  
             if(x == '1'){
                 if(y == '0'){
                     if(player == 0){
-                        board[3] = 'X';
+                        symbol = 'X';
+                        board[3] = symbol;
                     } else {
-                        board[3] = 'Y';
+                        symbol = 'Y';
+                        board[3] = symbol;
+                    } 
+                    if(board[4] == symbol && board[5] == symbol){
+                        game_won = symbol;
                     }
-                }  
+                    if(board[0] == symbol && board[6] == symbol){
+                        game_won = symbol;
+                    }
+                }
                 if(y == '1'){
                     if(player == 0){
-                        board[4] = 'X';
+                        symbol = 'X';
+                        board[4] = symbol;
                     } else {
-                        board[4] = 'Y';
+                        symbol = 'Y';
+                        board[4] = symbol;
                     }
-            }
+                    if(board[3] == symbol && board[5] == symbol){
+                        game_won = symbol;
+                    }
+                    if(board[1] == symbol && board[7] == symbol){
+                        game_won = symbol;
+                    }
+                    if(board[0] == symbol && board[8] == symbol){
+                        game_won = symbol;
+                    }
+                    if(board[2] == symbol && board[6] == symbol){
+                        game_won = symbol;
+                    }
+                }
                 if (y == '2'){
                     if(player == 0){
-                        board[5] = 'X';
+                        symbol = 'X';
+                        board[5] = symbol;
                     } else {
-                        board[5] = 'Y';
+                        symbol = 'Y';
+                        board[5] = symbol;
+                    } 
+                    if(board[3] == symbol && board[4] == symbol){
+                        game_won = symbol;
                     }
-            }
+                    if(board[2] == symbol && board[8] == symbol){
+                        game_won = symbol;
+                    }
+               }
             }
             if(x == '2'){
                 if(y == '0'){
                     if(player == 0){
-                        board[6] = 'X';
+                        symbol = 'X';
+                        board[6] = symbol;
                     } else {
-                        board[6] = 'Y';
+                        symbol = 'Y';
+                        board[6] = symbol;
+                    } 
+                    if(board[7] == symbol && board[8] == symbol){
+                        game_won = symbol;
+                    }
+                    if(board[0] == symbol && board[3] == symbol){
+                        game_won = symbol;
+                    }
+                    if(board[4] == symbol && board[2] == symbol){
+                        game_won = symbol;
                     }
                 } 
                 if(y == '1'){
                     if(player == 0){
-                        board[7] = 'X';
+                        symbol = 'X';
+                        board[7] = symbol;
                     } else {
-                        board[7] = 'Y';
+                        symbol = 'Y';
+                        board[7] = symbol;
+                    } 
+                    if(board[6] == symbol && board[8] == symbol){
+                        game_won = symbol;
+                    }
+                    if(board[1] == symbol && board[4] == symbol){
+                        game_won = symbol;
                     }
                 } 
                 if (y == '2'){
                     if(player == 0){
-                        board[8] = 'X';
+                        symbol = 'X';
+                        board[8] = symbol;
                     } else {
-                        board[8] = 'Y';
+                        symbol = 'Y';
+                        board[8] = symbol;
+                    } 
+                    if(board[6] == symbol && board[7] == symbol){
+                        game_won = symbol;
+                    }
+                    if(board[2] == symbol && board[5] == symbol){
+                        game_won = symbol;
                     }
                 }
-                if(game_won != 0){
-                    keep_going = 0;
-                    print_game_won(game_won - 'A');
-                }
-                if(empty_slots == 0 && game_won == 0){
-                    keep_going = 0;
-                    print_full_board();
-                }
+
+            }
+            if(game_won != 0){
+                keep_going = 0;
+                print_game_won(game_won - 'A');
+            }
+            if(empty_slots == 0 && game_won == 0){
+                keep_going = 0;
+                print_full_board();
             }
             player = (player + 1) % 2;
         }
