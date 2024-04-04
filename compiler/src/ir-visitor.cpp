@@ -647,6 +647,7 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
 
     // Create labels for jumps -> now because the child needs to jump to the parent when finished
     string exit_label = cfg->get_next_bb_label();
+    string if_true_label = cfg->get_next_bb_label();
     string if_false_label;
 
     // Push end jump label to stack for children
@@ -677,13 +678,19 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
     //Jump after condition evaluation
     cfg->add_instr(
         (new IR::IRInstrJump)
+            ->set_jump(IR::JumpType::IfEqual)
+            ->set_label(if_true_label)
+            ->set_ctx(ctx)
+    );
+    cfg->add_instr(
+        (new IR::IRInstrJump)
             ->set_jump(IR::JumpType::IfNotEqual)
             ->set_label(jump_after_eval_cond)
             ->set_ctx(ctx)
     );
 
     // Visit if true : always
-    IR::BasicBlock * if_true = new IR::BasicBlock(cfg, cfg->get_next_bb_label(), nullptr, nullptr);
+    IR::BasicBlock * if_true = new IR::BasicBlock(cfg, if_true_label, nullptr, nullptr);
     cfg->add_bb(if_true);
     this->visit(ctx->struct_bloc(0)); // Add if true
     if_true->set_exit(exit_label);
