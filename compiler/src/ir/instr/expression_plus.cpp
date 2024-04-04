@@ -48,15 +48,15 @@ namespace IR
 
         paste_properties(
                 (new IRInstrMov)
-                    ->set_src((new IRRegArmTemp1)->set_size(deest->get_size()))
+                    ->set_src((new IRRegArmTemp1)->set_size(src->get_size()))
                     ->set_dest(src)
             )->gen_asm(o); 
 
         paste_properties(
                 (new IRInstrMov)
-                    ->set_src((new IRRegArmTemp2)->set_size(deest->get_size()))
+                    ->set_src((new IRRegArmTemp2)->set_size(dest->get_size()))
                     ->set_dest(dest)
-            )->gen_asm(o); 
+            )->gen_asm(o);  
 
         o << "\tadd " << (new IRRegA)->get_asm_str() << ", " << (new IRRegArmTemp2)->get_asm_str() << ", " << (new IRRegArmTemp1)->get_asm_str() << "\n";
     }
