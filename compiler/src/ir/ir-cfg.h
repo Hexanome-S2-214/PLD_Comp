@@ -46,7 +46,6 @@ namespace IR
         BasicBlock * get_break_parent(string label);
         BasicBlock * get_continue_parent(string label);
 
-        IRBase * set_error_reporter(ErrorReporter::ErrorReporter * error_reporter);
         void set_current_bb(BasicBlock * bb);
         void incr_nb_param();
 

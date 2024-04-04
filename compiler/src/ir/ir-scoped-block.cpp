@@ -1,19 +1,32 @@
 #include "ir-scoped-block.h"
 #include "ir-errors.h"
+#include "ir-basic-block.h"
+#include "../error-reporter/compiler-error.h"
 
 namespace IR
 {
+    IRScopedBlock::IRScopedBlock() {
+        cerr << "IRScopedBlock(parent=" << parentScope << ")" << endl;
+    }
+
     Symbol * IRScopedBlock::declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx, int personalized_offset)
     {
         cerr << "Declare symbol " << id << " in :" << endl;
         log();
-        return symbolTable.declare_symbol(parent, id, type, ctx, personalized_offset);
+        try {
+            return symbolTable.declare_symbol(parent, id, type, ctx, personalized_offset);
+        } catch (IRSymbolError e) {
+            ErrorReporter::ErrorReporter::getInstance()->reportError(
+                new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, e.what(), ctx)
+            );
+            return new Symbol; // Return a dummy symbol to continue compilation (we do this in case we find other errors)
+        }
     }
 
     Symbol * IRScopedBlock::get_symbol(string id, antlr4::ParserRuleContext * ctx)
     {
         cerr << "Get symbol " << id << " in :" << endl;
-        log();
+        log(); 
         try
         {
             return symbolTable.get_symbol(id, ctx);
@@ -25,7 +38,11 @@ namespace IR
                 return parentScope->get_symbol(id, ctx);
             }
             
-            throw e;
+            ErrorReporter::ErrorReporter::getInstance()->reportError(
+                new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, e.what(), ctx)
+            );
+
+            return new Symbol; // Return a dummy symbol to continue compilation (we do this in case we find other errors)
         }
     }
 
@@ -43,11 +60,19 @@ namespace IR
             : ((-offset / 16)+1)*16;
     }
 
+    void IRScopedBlock::set_parent_scope(IRScopedBlock * parent)
+    {
+        cerr << "set_parent_scope(" << parent << ")" << endl; 
+        parentScope = parent;
+    }
+
     int IRScopedBlock::log()
     {
         int depth = 1;
         if (parentScope != nullptr)
         {
+            // BasicBlock * bb = dynamic_cast<BasicBlock *>(bb);
+            cerr << "this=" << this << " parent=" << parentScope << endl;
             depth += parentScope->log();
         }
 
@@ -55,7 +80,7 @@ namespace IR
         {
             cerr << "  ";
         }
-        cerr << this << " (" << ref << ")" << endl;
+        cerr << this << endl;
 
         return depth;
     }

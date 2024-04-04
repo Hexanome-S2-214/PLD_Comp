@@ -13,13 +13,14 @@ IR::CFG::CFG(string name)
     //Create epilogue BB -> we store it apart from the other because we need to write it at the end
     epilogue_label = get_next_bb_label();
     this->epilogue_bb = new BasicBlock(this, epilogue_label, nullptr, nullptr);
-    this->epilogue_bb->set_parent_scope(this);
+    // this->epilogue_bb->set_parent_scope(this);
     this->epilogue_bb->add_instr(new IR::IRInstrEpilogue);
 
     //Create BB to write beginning of the function in -> the order of the blocks doesn't matter since we store epilogue_label
     BasicBlock * bb = new BasicBlock(this, get_next_bb_label(), nullptr, nullptr);
-    bb->set_parent_scope(this);
-    ref = "CFG<" + name + ">";
+    // cerr << "Set parent scope to default bb " << this << endl;
+    // bb->set_parent_scope(this);
+    // ref = "CFG<" + name + ">";
     add_bb(bb);
 }
 
@@ -29,14 +30,6 @@ IR::CFG::~CFG()
     {
         delete block;
     }
-}
-
-IR::IRBase * IR::CFG::set_error_reporter(ErrorReporter::ErrorReporter * error_reporter)
-{
-    IRBase::set_error_reporter(error_reporter);
-    IRScopedBlock::set_error_reporter(error_reporter);
-
-    return this;
 }
 
 void IR::CFG::gen_asm_x86(ostream& o)
@@ -195,12 +188,12 @@ void IR::CFG::add_bb(IR::BasicBlock * bb)
 {
     if (bb->get_parent_scope() == nullptr)
     {
+        cerr << "Set parent to bb " << get_current_bb() << endl;
         bb->set_parent_scope(get_current_bb());
     }
 
     blocks.push_back(bb);
     set_current_bb(bb);
-    cerr << "Set current bb to " << bb << endl;
 }
 
 // IR::BasicBlock * IR::CFG::create_bb(IR::BasicBlock * exit_true, IR::BasicBlock * exit_false)

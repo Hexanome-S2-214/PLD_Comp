@@ -32,7 +32,6 @@
 ////////////////////////////////////////////
 
 antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *ctx) {
-    
     this->visit(ctx->rvalue());
 
     //Jump to epilogue block in any case
@@ -68,7 +67,7 @@ antlrcpp::Any IRVisitor::visitDeclStdRule(ifccParser::DeclStdRuleContext *ctx)
     }
     else
     {
-        this->cfg->get_error_reporter()->reportError(
+        ErrorReporter::ErrorReporter::getInstance()->reportError(
             new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Unrecognized type", ctx)
         );
     }
@@ -94,7 +93,7 @@ antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
     }
     else
     {
-        this->cfg->get_error_reporter()->reportError(
+        ErrorReporter::ErrorReporter::getInstance()->reportError(
             new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Unrecognized type", ctx)
         );
     }
@@ -237,7 +236,7 @@ antlrcpp::Any IRVisitor::visitExprSumSous(ifccParser::ExprSumSousContext *ctx) {
     }
     else
     {
-        this->cfg->get_error_reporter()->reportError(
+        ErrorReporter::ErrorReporter::getInstance()->reportError(
             new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Unrecognized operator", ctx)
         );
     }
@@ -691,6 +690,7 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
 
     // Add if false
     if (if_then_else) {
+        cfg->set_current_bb(expr_bb);
         IR::BasicBlock * if_false = new IR::BasicBlock(cfg, if_false_label, nullptr, nullptr);
         cfg->add_bb(if_false);
         this->visit(ctx->struct_bloc(1));
@@ -852,7 +852,6 @@ antlrcpp::Any IRVisitor::visitStruct_switch_case(ifccParser::Struct_switch_caseC
 ////////////////////////////////////////////
 
 antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *ctx) {
-   
     //One CFG and one Symbol Table per fonction (careful : CFG contains the ST in our model)
     IR::CFG * cfg = static_cast<IR::CFG *>(
         (new IR::CFG(ctx->fname->getText()))

@@ -29,8 +29,8 @@ namespace IR
         string get_next_tmp();
         int get_symbol_offset() { return symbol_offset; }
     private:
+        static int symbol_offset;
         map<string, Symbol *> symbols;
-        int symbol_offset = 0;
         int tmp_offset = 0;
     };
 }

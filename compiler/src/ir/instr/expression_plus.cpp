@@ -7,7 +7,7 @@ namespace IR
     {
         if (src->get_size() != dest->get_size())
         {
-            get_error_reporter()->reportError(
+            ErrorReporter::ErrorReporter::getInstance()->reportError(
                 new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Addition between different sizes", get_ctx())
             );
         }

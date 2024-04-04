@@ -6,6 +6,8 @@
 
 namespace IR
 {
+    int SymbolTable::symbol_offset = 0;
+
     SymbolTable::~SymbolTable()
     {
         for (pair<const string, Symbol *> symbol : symbols)
@@ -18,7 +20,7 @@ namespace IR
     {
         if (symbols.find(id) != symbols.end())
         {
-            throw IRSymbolError("symbol " + id + " already declared");
+            throw IRSymbolError("symbol '" + id + "' already declared");
         }
 
         symbol_offset -= size_to_bytes(type.size);
@@ -45,7 +47,7 @@ namespace IR
     {
         if (symbols.find(id) == symbols.end() || symbols[id]->offset == 0)
         {
-            throw IRSymbolError("symbol " + id + " not declared");
+            throw IRSymbolError("symbol '" + id + "' not declared");
         }
 
         symbols[id]->used = true;
