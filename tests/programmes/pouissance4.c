@@ -1,6 +1,21 @@
 #include <stdio.h>
 
 
+int print_wrong_input(){
+    putchar('W');
+    putchar('r');
+    putchar('o');
+    putchar('n');
+    putchar('g');
+    putchar(' ');
+    putchar('I');
+    putchar('n');
+    putchar('p');
+    putchar('u');
+    putchar('t');
+    putchar('\n');
+}
+
 int print_player_turn(int player_turn){
     putchar('P');
     putchar('l');
@@ -19,57 +34,66 @@ int print_player_turn(int player_turn){
     return 0;
 }
 
+int print_game_won(int player){
+    char p = 'A' + player;
+    putchar('P');
+    putchar('l');
+    putchar('a');
+    putchar('y');
+    putchar('e');
+    putchar('r');
+    putchar(' ');
+    putchar(p);
+    putchar(' ');
+    putchar('W');
+    putchar('o');
+    putchar('n');
+    putchar('\n');
+}
+
+int print_full_board(){
+    putchar('B');
+    putchar('o');
+    putchar('a');
+    putchar('r');
+    putchar('d');
+    putchar(' ');
+    putchar('i');
+    putchar('s');
+    putchar(' ');
+    putchar('f');
+    putchar('u');
+    putchar('l');
+    putchar('l');
+    putchar('\n');
+}
+
 int main(){
     int number_rows = 6;
     int number_columns = 7;
-    int player_turn = 0;
+    int player = 0;
+    int empty_slots = 9;
+    char player_symbol[2];
+    int correct_input;
+    int keep_going = 1;
+    char game_won = 0;
+    char symbol;
 
-    char board[42];
-    board[0] = '-1';
-    board[1] = '-1';
-    board[3] = '-1';
-    board[2] = '-1';
-    board[4] = '-1';
-    board[5] = '-1';
-    board[6] = '-1';
-    board[7] = '-1';
-    board[8] = '-1';
-    board[9] = '-1';
-    board[10] = '-1';
-    board[11] = '-1';
-    board[12] = '-1';
-    board[13] = '-1';
-    board[14] = '-1';
-    board[15] = '-1';
-    board[16] = '-1';
-    board[17] = '-1';
-    board[18] = '-1';
-    board[19] = '-1';
-    board[20] = '-1';
-    board[21] = '-1';
-    board[22] = '-1';
-    board[23] = '-1';
-    board[24] = '-1';
-    board[25] = '-1';
-    board[26] = '-1';
-    board[27] = '-1';
-    board[28] = '-1';
-    board[29] = '-1';
-    board[30] = '-1';
-    board[31] = '-1';
-    board[32] = '-1';
-    board[33] = '-1';
-    board[34] = '-1';
-    board[35] = '-1';
-    board[36] = '-1';
-    board[37] = '-1';
-    board[38] = '-1';
-    board[39] = '-1';
-    board[40] = '-1';
-    board[41] = '-1';
+    char board[9];
+    board[0] = ' ';
+    board[1] = ' ';
+    board[3] = ' ';
+    board[2] = ' ';
+    board[4] = ' ';
+    board[5] = ' ';
+    board[6] = ' ';
+    board[7] = ' ';
+    board[8] = ' ';
 
-    int move;
-    while(1==1){
+    int x;
+    int y;
+    while(keep_going==1){
+        correct_input = 1;
         putchar('B');
         putchar('O');
         putchar('A');
@@ -81,73 +105,130 @@ int main(){
         putchar(board[0]);
         putchar(board[1]);
         putchar(board[2]);
+        putchar('\n');
         putchar(board[3]);
         putchar(board[4]);
         putchar(board[5]);
-        putchar(board[6]);
         putchar('\n');
+        putchar(board[6]);
         putchar(board[7]);
         putchar(board[8]);
-        putchar(board[9]);
-        putchar(board[10]);
-        putchar(board[11]);
-        putchar(board[12]);
-        putchar(board[13]);
-        putchar('\n');
-        putchar(board[14]);
-        putchar(board[15]);
-        putchar(board[16]);
-        putchar(board[17]);
-        putchar(board[18]);
-        putchar(board[19]);
-        putchar(board[20]);
-        putchar('\n');
-        putchar(board[21]);
-        putchar(board[22]);
-        putchar(board[23]);
-        putchar(board[24]);
-        putchar(board[25]);
-        putchar(board[26]);
-        putchar(board[27]);
-        putchar('\n');
-        putchar(board[28]);
-        putchar(board[29]);
-        putchar(board[30]);
-        putchar(board[31]);
-        putchar(board[32]);
-        putchar(board[33]);
-        putchar(board[34]);
-        putchar('\n');
-        putchar(board[35]);
-        putchar(board[36]);
-        putchar(board[37]);
-        putchar(board[38]);
-        putchar(board[39]);
-        putchar(board[40]);
-        putchar(board[41]);
         putchar('\n');
 
-        print_player_turn(player_turn);
-        move = getchar();
-        int column = move - '0';
+        print_player_turn(player);
+        x = getchar();
+        y = getchar();
+        getchar();
 
-        if(board[column * 7 * 6] == 0){
-            board[column * 7 * 6] = player_turn;
-        } else if(board[column * 7 * 5] == 0){
-            board[column * 7 * 5] = player_turn;
-        } else if(board[column * 7 * 4] == 0){
-            board[column * 7 * 4] = player_turn;
-        } else if(board[column * 7 * 3] == 0){
-            board[column * 7 * 3] = player_turn;
-        } else if(board[column * 7 * 2] == 0){
-            board[column * 7 * 2] = player_turn;
-        } else if(board[column * 7 * 1] == 0){
-            board[column * 7 * 1] = player_turn;
-        } else if(board[column] == 0){
-            board[column] = player_turn;
+        if(x - '0' < 0 || x - '0' > 2 ){
+            print_wrong_input();
+            correct_input = 0;
+        }
+        if(y - '0' < 0 || y - '0' > 2){
+            print_wrong_input();
+            correct_input = 0;
+        }
+        if(correct_input == 1){
+            empty_slots = empty_slots - 1;
+            if(x == '0'){
+                if(y == '0'){
+                    if(player == 0){
+                        symbol = 'X';
+                        board[0] = symbol;
+                    } else {
+                        symbol = 'Y';
+                        board[0] = symbol;
+                    }
+                    if(board[1] == symbol && board[2] == symbol){
+                        game_won = symbol;
+                    }
+                    if(board[3] == symbol && board[6] == symbol){
+                        game_won = symbol;
+                    }
+                    if(board[4] == symbol && board[8] == symbol){
+                        game_won = symbol;
+                    }
+                }
+                if(y == '1'){
+                    if(player == 0){
+                        symbol = 'X';
+                        board[1] = symbol;
+                    } else {
+                        symbol = 'Y';
+                        board[1] = symbol;
+                    } 
+                    if(board[0] == symbol && board[2] == symbol){
+                        game_won = symbol;
+                    }
+                    if(board[4] == symbol && board[7] == symbol){
+                        game_won = symbol;
+                    }
+                }
+            if (y == '2'){
+                    if(player == 0){
+                        board[2] = 'X';
+                    } else {
+                        board[2] = 'Y';
+                    }
+            }
+            }  
+            if(x == '1'){
+                if(y == '0'){
+                    if(player == 0){
+                        board[3] = 'X';
+                    } else {
+                        board[3] = 'Y';
+                    }
+                }  
+                if(y == '1'){
+                    if(player == 0){
+                        board[4] = 'X';
+                    } else {
+                        board[4] = 'Y';
+                    }
+            }
+                if (y == '2'){
+                    if(player == 0){
+                        board[5] = 'X';
+                    } else {
+                        board[5] = 'Y';
+                    }
+            }
+            }
+            if(x == '2'){
+                if(y == '0'){
+                    if(player == 0){
+                        board[6] = 'X';
+                    } else {
+                        board[6] = 'Y';
+                    }
+                } 
+                if(y == '1'){
+                    if(player == 0){
+                        board[7] = 'X';
+                    } else {
+                        board[7] = 'Y';
+                    }
+                } 
+                if (y == '2'){
+                    if(player == 0){
+                        board[8] = 'X';
+                    } else {
+                        board[8] = 'Y';
+                    }
+                }
+                if(game_won != 0){
+                    keep_going = 0;
+                    print_game_won(game_won - 'A');
+                }
+                if(empty_slots == 0 && game_won == 0){
+                    keep_going = 0;
+                    print_full_board();
+                }
+            }
+            player = (player + 1) % 2;
         }
 
-        player_turn = player_turn + 1 % 2;
     }
     return 0;
 }
