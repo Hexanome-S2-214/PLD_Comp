@@ -1,6 +1,7 @@
 #include "expression_plus.h"
 #include "../params/ir-reg.h"
 #include "../../error-reporter/compiler-error-token.h"
+#include "mov.h"
 
 namespace IR
 {
@@ -44,8 +45,20 @@ namespace IR
                 new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Addition between different sizes", get_ctx())
             );
         }
-        
-        o << "\tadd " << (new IRRegA)->get_asm_str() << ", " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
+
+        paste_properties(
+                (new IRInstrMov)
+                    ->set_src(new IRRegArmTemp1)
+                    ->set_dest(src)
+            )->gen_asm(o); 
+
+        paste_properties(
+                (new IRInstrMov)
+                    ->set_src(new IRRegArmTemp2)
+                    ->set_dest(dest)
+            )->gen_asm(o); 
+
+        o << "\tadd " << (new IRRegA)->get_asm_str() << ", " << (new IRRegArmTemp2)->get_asm_str() << ", " << (new IRRegArmTemp1)->get_asm_str() << "\n";
     }
 }
 

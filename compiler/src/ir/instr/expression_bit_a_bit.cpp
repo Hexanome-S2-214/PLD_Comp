@@ -1,5 +1,6 @@
 #include "expression_bit_a_bit.h"
 #include "../params/ir-reg.h"
+#include "mov.h"
 
 namespace IR
 {
@@ -11,13 +12,24 @@ namespace IR
     }
     void IRInstrExprBitABit::gen_asm_arm(ostream& o)
     {
-        
+        paste_properties(
+                (new IRInstrMov)
+                    ->set_src(new IRRegArmTemp1)
+                    ->set_dest(src)
+            )->gen_asm(o); 
+
+        paste_properties(
+                (new IRInstrMov)
+                    ->set_src(new IRRegArmTemp2)
+                    ->set_dest(dest)
+            )->gen_asm(o); 
+
         if (op == "&") {
-            o << "\t\tand " << (new IRRegA)->get_asm_str() << ", " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
+            o << "\t\tand " << (new IRRegA)->get_asm_str() << ", " << (new IRRegArmTemp2)->get_asm_str() << ", " << (new IRRegArmTemp1)->get_asm_str() << "\n";
         } else if (op == "^") {
-            o << "\t\teor " << (new IRRegA)->get_asm_str() << ", " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
+            o << "\t\teor " << (new IRRegA)->get_asm_str() << ", " << (new IRRegArmTemp2)->get_asm_str() << ", " << (new IRRegArmTemp1)->get_asm_str() << "\n";
         } else if (op == "|") {
-            o << "\t\torr " << (new IRRegA)->get_asm_str() << ", " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
+            o << "\t\torr " << (new IRRegA)->get_asm_str() << ", " << (new IRRegArmTemp2)->get_asm_str() << ", " << (new IRRegArmTemp1)->get_asm_str() << "\n";
         } else {
             cerr << "Error: unsupported operator" << endl;
         }

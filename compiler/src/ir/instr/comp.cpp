@@ -1,5 +1,7 @@
 #include "comp.h"
+#include "mov.h"
 #include "../../error-reporter/compiler-error-token.h"
+#include "../params/ir-reg.h"
 
 namespace IR
 {
@@ -39,8 +41,20 @@ namespace IR
             return;
         }
 
+        paste_properties(
+                (new IRInstrMov)
+                    ->set_src(new IRRegArmTemp1)
+                    ->set_dest(src)
+            )->gen_asm(o); 
+
+        paste_properties(
+                (new IRInstrMov)
+                    ->set_src(new IRRegArmTemp2)
+                    ->set_dest(dest)
+            )->gen_asm(o); 
+
         //string comp_op = get_op(src->get_size());
-        o << "\t\tcmp " << " " << src->get_asm_str() << ", " << dest->get_asm_str() << "\n";
+        o << "\t\tcmp " << " " << (new IRRegArmTemp1)->get_asm_str() << ", " << (new IRRegArmTemp2)->get_asm_str() << "\n";
         
     }
 }
