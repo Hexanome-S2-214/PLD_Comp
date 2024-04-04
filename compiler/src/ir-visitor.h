@@ -5,6 +5,12 @@
 
 #include "ir/ir-cfg-set.h"
 
+struct VisitorFlags {
+    IR::Size type_size;
+    bool f_const;
+    int value;
+};
+
 class IRVisitor : public ifccBaseVisitor
 {
 public:

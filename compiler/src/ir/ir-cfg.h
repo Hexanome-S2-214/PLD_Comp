@@ -47,7 +47,8 @@ namespace IR
 
         IRBase * set_error_reporter(ErrorReporter::ErrorReporter * error_reporter);
         void set_current_bb(BasicBlock * bb);
-        void incr_nb_param();
+        void set_nb_param(int n);
+        void set_no_return(bool b);
 
         SymbolTable * get_symbol_table();
         BasicBlock * get_current_bb();
@@ -56,6 +57,7 @@ namespace IR
         string get_epilogue_label();
         string get_fname();
         int get_nb_param();
+        bool get_no_return();
 
         int calc_st_size();
         
@@ -71,6 +73,7 @@ namespace IR
 
         string fname;
         int nb_param;
+        bool no_return;
         
     };
 };
