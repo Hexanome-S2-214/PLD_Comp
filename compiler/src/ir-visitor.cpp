@@ -23,6 +23,7 @@
 #include "ir/instr/jump.h"
 #include "ir/instr/call.h"
 #include "ir/instr/push.h"
+#include "ir/instr/expression_mod.h"
 #include "error-reporter/compiler-error-token.h"
 #include "./error-reporter/error-reporter.h"
 
@@ -312,20 +313,27 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
 {
     this->visit(ctx->expr(0));
 
-    IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    IR::Symbol *num = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
         (new IR::IRInstrAssign)
-            ->set_symbol(varTemp)
+            ->set_symbol(num)
             ->set_ctx(ctx)
     );
     
     this->visit(ctx->expr(1));
 
+    IR::Symbol *dem = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    cfg->add_instr(
+        (new IR::IRInstrAssign)
+            ->set_symbol(dem)
+            ->set_ctx(ctx)
+    );
+
     if (ctx->OP_MULT()->getText() == "*")
     {
         cfg->add_instr(
             (new IR::IRInstrExprMult)
-                ->set_src(varTemp)
+                ->set_src(num)
                 ->set_dest(new IR::IRRegA)
                 ->set_ctx(ctx)
         );
@@ -341,7 +349,7 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
 
         cfg->add_instr(
             (new IR::IRInstrMov)
-                ->set_src(varTemp)
+                ->set_src(num)
                 ->set_dest(new IR::IRRegA)
                 ->set_ctx(ctx)
         );
@@ -353,13 +361,27 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
 
         if (ctx->OP_MULT()->getText() == "%")
         {
-            //Modulo : il faut mettre EDX dans EAX -> c'est ce registre qui contient le reste après idivl
             cfg->add_instr(
                 (new IR::IRInstrMov)
-                    ->set_src(new IR::IRRegD)
-                    ->set_dest(new IR::IRRegA)
+                    ->set_src(num)
+                    ->set_dest(new IR::IRRegArmTemp1)
                     ->set_ctx(ctx)
             );
+            cfg->add_instr(
+                (new IR::IRInstrMov)
+                    ->set_src(dem)
+                    ->set_dest(new IR::IRRegArmTemp2)
+                    ->set_ctx(ctx)
+            );
+
+            //Modulo : il faut mettre EDX dans EAX -> c'est ce registre qui contient le reste après idivl
+            IR::IRInstrExprMod * instr = new IR::IRInstrExprMod;
+            instr->num = new IR::IRRegArmTemp1;
+            instr->dem = new IR::IRRegArmTemp2;
+            instr->div_res = new IR::IRRegA;
+            instr->set_dest(new IR::IRRegA);
+            
+            cfg->add_instr(instr);
         }
     }
 
