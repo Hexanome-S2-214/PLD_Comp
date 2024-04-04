@@ -32,8 +32,8 @@ namespace IR
         string op = "str";
         paste_properties(
                 (new IRInstrMov)
-                    ->set_src((new IRRegArmTemp1)->set_size(src->get_size()))
-                    ->set_dest(src)
+                    ->set_dest((new IRRegArmTemp1)->set_size(src->get_size()))
+                    ->set_src(src)
             )->gen_asm(o); 
 
         // ARM only supports 32-bit and 64-bit push

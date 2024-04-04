@@ -178,7 +178,10 @@ antlrcpp::Any IRVisitor::visitExprTable(ifccParser::ExprTableContext *ctx)
     cfg->add_instr(
     (new IR::IRInstrMov)
         ->set_src(new IR::SymbolT(offset, symbol))
-        ->set_dest(new IR::IRRegA)
+        ->set_dest(
+            (new IR::IRRegA)
+                ->set_size(symbol->get_size())
+        )
         ->set_ctx(ctx)
     );
 
@@ -243,8 +246,7 @@ antlrcpp::Any IRVisitor::visitExprVar(ifccParser::ExprVarContext *ctx)
     IR::Symbol *var = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
     cfg->add_instr(
         (new IR::IRInstrExprVar)
-            ->set_symbol(
-                var)
+            ->set_symbol(var)
             ->set_ctx(ctx));
 
     return var->type.size;
@@ -1026,7 +1028,10 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
             cfg->add_instr(
                 (new IR::IRInstrMov)
                     ->set_src(src)
-                    ->set_dest(new IR::IRRegA)
+                    ->set_dest(
+                        (new IR::IRRegA)
+                            ->set_size(src->get_size())
+                    )
                     ->set_ctx(ctx)
             );
         }

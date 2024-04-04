@@ -12,7 +12,26 @@ namespace IR
     void IRInstrMov::gen_asm_arm(ostream& o)
     {
         if (dynamic_cast<IRReg*>(dest) && (dynamic_cast<IRReg*>(src) || dynamic_cast<IRConst*>(src))) {
-            o << "\tmov " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
+            IRReg * dest_reg = dynamic_cast<IRReg*>(dest);
+            IRReg * src_reg = dynamic_cast<IRReg*>(src);
+            IRConst * src_const = dynamic_cast<IRConst*>(src);
+
+            Size size = max(dest->get_size(), src->get_size());
+
+            dest_reg->set_size(size);
+
+            if (src_reg != nullptr)
+            {
+                src_reg->set_size(size);
+                src = src_reg;
+            }
+            else if (src_const != nullptr)
+            {
+                src_const->set_size(size);
+                src = src_const;
+            }
+
+            o << "\tmov " << dest_reg->get_asm_str() << ", " << src->get_asm_str() << "\n";
         } else if (dynamic_cast<IRReg*>(dest)) {
             o << "\tstr " << dest->get_asm_str() << ", " << src->get_asm_str() << "\n";
         }else {

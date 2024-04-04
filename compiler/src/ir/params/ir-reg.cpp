@@ -170,7 +170,7 @@ namespace IR
     void IRRegStack::gen_asm_arm(ostream& o)
     {
         if (offset != 0) {
-            o << "[sp, " << -offset << "]";
+            o << "[sp, " << abs(offset) << "]";
         } else {
             o << "[sp]";
         }
