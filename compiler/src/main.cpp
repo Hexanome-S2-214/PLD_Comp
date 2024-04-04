@@ -61,12 +61,12 @@ int main(int argn, const char **argv)
   IR::CfgSet * cfg_set = static_cast<IR::CfgSet *>(
     (new IR::CfgSet())
       ->set_error_reporter(new ErrorReporter::ErrorReporter())
-      ->set_arch(IR::IRArch::ARM)
   );
   IRVisitor visitor(cfg_set);
 
   visitor.visit(tree);
 
+  IR::asm_arch = IR::ARM;
   cfg_set->gen_asm(cout);
 
   delete cfg_set;

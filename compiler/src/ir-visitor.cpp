@@ -920,8 +920,7 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
    
     //One CFG and one Symbol Table per fonction (careful : CFG contains the ST in our model)
     IR::CFG * cfg = static_cast<IR::CFG *>(
-        (new IR::CFG(ctx->fname->getText()))
-        ->set_parent(cfg_set)
+        (new IR::CFG(cfg_set, ctx->fname->getText()))
     );
 
     //Update both cfg_set AND current cfg kept as attribute

@@ -1,3 +1,5 @@
+#pragma once
+
 namespace IR {
     enum IRArch {
         UNDEFINED,
@@ -5,5 +7,5 @@ namespace IR {
         ARM,
     };
 
-    const IRArch DEFAULT_ARCH = X86;
+    extern IRArch asm_arch;
 }

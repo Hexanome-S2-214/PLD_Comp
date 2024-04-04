@@ -1,4 +1,5 @@
 #include "mov.h"
+#include "../params/ir-reg.h"
 
 namespace IR
 {

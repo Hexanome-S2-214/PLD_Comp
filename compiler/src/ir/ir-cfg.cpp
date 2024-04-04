@@ -5,8 +5,10 @@
 
 int IR::CFG::bb_count = 2;
 
-IR::CFG::CFG(string name)
+IR::CFG::CFG(IRBase * parent, string name)
 {
+    set_parent(parent);
+
     fname = name;
     nb_param = 0;
 
@@ -209,6 +211,7 @@ string IR::CFG::get_epilogue_label() {
 
 void IR::CFG::add_bb(IR::BasicBlock * bb)
 {
+    bb->set_parent(this);
     blocks.push_back(bb);
     set_current_bb(bb);
 }

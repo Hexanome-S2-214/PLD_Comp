@@ -28,7 +28,7 @@ namespace IR
     class CFG : public IRBase
     {
     public:
-        CFG(string name);
+        CFG(IRBase * parent, string name);
         ~CFG();
 
         void gen_asm_x86(ostream& o) override;
