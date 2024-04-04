@@ -13,7 +13,7 @@ namespace IR
         }
     }
 
-    Symbol * SymbolTable::declare_symbol(IRBase * parent, string id, Type type, bool const_var, antlr4::ParserRuleContext * ctx, int tableSize)
+    Symbol * SymbolTable::declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx, bool const_var, int tableSize)
     {
         if (symbols.find(id) != symbols.end())
         {

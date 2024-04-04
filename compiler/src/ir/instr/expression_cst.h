@@ -1,10 +1,5 @@
 #pragma once
 
-namespace IR
-{
-    class BasicBlock;
-}
-
 #include "../ir-instr-comp.h"
 #include "../ir-attr.h"
 

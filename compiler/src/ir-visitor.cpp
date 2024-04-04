@@ -27,13 +27,25 @@
 #include "error-reporter/compiler-error-token.h"
 #include "./error-reporter/error-reporter.h"
 
+//detects the presence of constants in expressions
+#define CONST_FLAG 1
+
+//global to retrieve informations when expressions are evaluated
+VisitorFlags vf;
 
 ////////////////////////////////////////////
 // RETURN
 ////////////////////////////////////////////
 
 antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *ctx) {
-    
+
+    //detection of return inside a return-void function
+    if (cfg->get_no_return()) {
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::WARNING, "‘return’ with a value, in function returning void", ctx)
+        );
+    }
+
     this->visit(ctx->rvalue());
 
     //Jump to epilogue block in any case
@@ -57,9 +69,15 @@ antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *
 
 antlrcpp::Any IRVisitor::visitSimpleAff(ifccParser::SimpleAffContext *ctx)
 {
-    this->visit(ctx->rvalue());
-
     IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
+    
+    if (symbol->const_var) {
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "'const’ value cannot be used as left-value", ctx)
+        );
+    }
+
+    this->visit(ctx->rvalue());
 
     cfg->add_instr(
         (new IR::IRInstrAssign)
@@ -73,8 +91,6 @@ antlrcpp::Any IRVisitor::visitSimpleAff(ifccParser::SimpleAffContext *ctx)
 antlrcpp::Any IRVisitor::visitSimpleDecl(ifccParser::SimpleDeclContext *ctx)
 {
     IR::Type type;
-    bool const_var = ctx->CONST() ? true : false;
-    cerr << const_var << endl;
 
     if (ctx->getTokens(ifccParser::INT).size() >= 1)
     {
@@ -91,19 +107,21 @@ antlrcpp::Any IRVisitor::visitSimpleDecl(ifccParser::SimpleDeclContext *ctx)
         );
     }
 
-    cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, const_var, ctx);
+    cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx);
 
-    return IR::Int.size;
+    //update flags
+    vf.type_size = type.size;
+    vf.f_const = false;
+
+    return 0;
 }
 
 antlrcpp::Any IRVisitor::visitDeclAffVar(ifccParser::DeclAffVarContext *ctx)
 {
+    IR::Type type;
     bool const_var = ctx->CONST() ? true : false;
-    cerr << const_var << endl;
 
     this->visit(ctx->rvalue());
-
-    IR::Type type;
 
     if (ctx->getTokens(ifccParser::INT).size() >= 1)
     {
@@ -120,7 +138,10 @@ antlrcpp::Any IRVisitor::visitDeclAffVar(ifccParser::DeclAffVarContext *ctx)
         );
     }
 
-    IR::Symbol * symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, const_var, ctx);
+    IR::Symbol * symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx, const_var);
+    if (const_var) {
+        symbol->set_value(vf.value);
+    }
 
     cfg->add_instr(
         (new IR::IRInstrAssign)
@@ -128,7 +149,11 @@ antlrcpp::Any IRVisitor::visitDeclAffVar(ifccParser::DeclAffVarContext *ctx)
             ->set_ctx(ctx)
     );
 
-    return IR::Int.size;
+    //update flags
+    vf.type_size = IR::Int.size;
+    vf.f_const = false;
+
+    return 0;
 }
 
 antlrcpp::Any IRVisitor::visitDeclAffTable(ifccParser::DeclAffTableContext *ctx)
@@ -146,7 +171,7 @@ antlrcpp::Any IRVisitor::visitDeclAffTable(ifccParser::DeclAffTableContext *ctx)
         );
     }
 
-    IR::Symbol * symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, const_var, ctx, size);
+    IR::Symbol * symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx, const_var, size);
 
     for(int i = 0; i < chars.size(); ++i){
         IR::SymbolT * symbolT = new IR::SymbolT(i, symbol);
@@ -179,9 +204,9 @@ antlrcpp::Any IRVisitor::visitDeclAffTable(ifccParser::DeclAffTableContext *ctx)
 antlrcpp::Any IRVisitor::visitTableDecl(ifccParser::TableDeclContext *ctx)
 {
     if(ctx->CHAR()){
-        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Char, false, ctx,  stoi(ctx->NUM()->getText()));
+        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Char, ctx, false, stoi(ctx->NUM()->getText()));
     } else if (ctx->INT()) {
-        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, false, ctx,  stoi(ctx->NUM()->getText()));
+        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, ctx, false, stoi(ctx->NUM()->getText()));
     }
     return 0;
 }
@@ -192,20 +217,20 @@ antlrcpp::Any IRVisitor::visitTableDecl(ifccParser::TableDeclContext *ctx)
 
 //     IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
 
-//     cfg->add_instr(
-//         (new IR::IRInstrAssign)
-//             ->set_symbol(symbol)
-//             ->set_ctx(ctx)
-//     );
-
-//     return 0;
-// }
+    
 
 antlrcpp::Any IRVisitor::visitAffectationRule2(ifccParser::AffectationRule2Context *ctx)
 {
-    this->visit(ctx->rvalue());
 
     IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
+
+    if (symbol->const_var) {
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "const’ value cannot be used as left-value", ctx)
+        );
+    }
+
+    this->visit(ctx->rvalue());
 
     cfg->add_instr(
         (new IR::IRInstrAssign)
@@ -213,7 +238,11 @@ antlrcpp::Any IRVisitor::visitAffectationRule2(ifccParser::AffectationRule2Conte
             ->set_ctx(ctx)
     );
 
-    return IR::Int.size;
+    //update flags
+    vf.type_size = IR::Int.size;
+    vf.f_const = false;
+
+    return 0;
 }
 
 antlrcpp::Any IRVisitor::visitExprTable(ifccParser::ExprTableContext *ctx)
@@ -236,7 +265,6 @@ antlrcpp::Any IRVisitor::visitTableAff(ifccParser::TableAffContext *ctx)
     this->visit(ctx->rvalue());
     IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
     int index = stoi(ctx->NUM()->getText());
-    //TODO: Do we really need to allocate memory here ?
     IR::SymbolT* symbolT = new IR::SymbolT(index, symbol);
     cfg->add_instr(
         (new IR::IRInstrAssignTable(stoi(ctx->NUM()->getText())))
@@ -245,6 +273,24 @@ antlrcpp::Any IRVisitor::visitTableAff(ifccParser::TableAffContext *ctx)
     );
 
     return 0;
+}
+
+antlrcpp::Any IRVisitor::visitTableAff2(ifccParser::TableAff2Context *ctx)
+{
+    this->visit(ctx->VAR(1));
+    int index = vf.value;
+    std::cerr << "index : " << index << std::endl;
+    this->visit(ctx->rvalue());
+    IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR(0)->getText(), ctx);
+    IR::SymbolT* symbolT = new IR::SymbolT(index, symbol);
+    cfg->add_instr(
+        (new IR::IRInstrAssignTable(index))
+            ->set_symbol(symbolT)
+            ->set_ctx(ctx)
+    );
+
+    return 0;
+    
 }
 
 ////////////////////////////////////////////
@@ -271,9 +317,14 @@ antlrcpp::Any IRVisitor::visitExprCharacter(ifccParser::ExprCharacterContext *ct
                     )
                 ->set_ctx(ctx)
         );
+
+        //update flags
+        vf.type_size = IR::Char.size;
+        vf.f_const = true;
+        vf.value = ascii_value;
     }
 
-    return IR::Char.size;
+    return 0;
 }
 
 antlrcpp::Any IRVisitor::visitExprNum(ifccParser::ExprNumContext *ctx){
@@ -287,7 +338,12 @@ antlrcpp::Any IRVisitor::visitExprNum(ifccParser::ExprNumContext *ctx){
             ->set_ctx(ctx)
     );
 
-    return IR::Int.size;
+    //update flags
+    vf.type_size = IR::Int.size;
+    vf.f_const = true;
+    vf.value = stoi(ctx->NUM()->getText());
+
+    return 0;
 }
 
 antlrcpp::Any IRVisitor::visitExprVar(ifccParser::ExprVarContext *ctx)
@@ -297,9 +353,17 @@ antlrcpp::Any IRVisitor::visitExprVar(ifccParser::ExprVarContext *ctx)
         (new IR::IRInstrExprVar)
             ->set_symbol(
                 var)
-            ->set_ctx(ctx));
+            ->set_ctx(ctx)
+    );
 
-    return var->type.size;
+    //update flags
+    vf.type_size = var->type.size;
+    vf.f_const = var->const_var;
+    if (var->const_var) {
+        vf.value = var->value;
+    }
+
+    return 0;
 }
 
 ////////////////////////////////////////////
@@ -307,7 +371,13 @@ antlrcpp::Any IRVisitor::visitExprVar(ifccParser::ExprVarContext *ctx)
 ////////////////////////////////////////////
 
 antlrcpp::Any IRVisitor::visitExprSumSous(ifccParser::ExprSumSousContext *ctx) {
+
+    bool const_left; bool const_right;
+    int val_left; int val_right;
+
     this->visit(ctx->expr(0));
+    const_left = vf.f_const;
+    val_left = vf.value;
 
     IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
@@ -317,50 +387,91 @@ antlrcpp::Any IRVisitor::visitExprSumSous(ifccParser::ExprSumSousContext *ctx) {
     );
 
     this->visit(ctx->expr(1));
+    const_right = vf.f_const;
+    val_right = vf.value;
 
-    if (ctx->op_add->getText() == "+")
-    {
-        cfg->add_instr(
-            (new IR::IRInstrExprPlus)
-                ->set_src(varTemp)
-                ->set_dest(new IR::IRRegA)
-                ->set_ctx(ctx)
-        );
-    }
-    else if (ctx->op_add->getText() == "-")
-    {
+    int final_value;
+
+    if (const_left && const_right) {
+        //If both values are identified as const values, we remove the last instructions and replace with a mov to %eax
+        cfg->get_current_bb()->remove_last_instructions(3);
+
+        if (ctx->op_add->getText() == "+")
+        {
+            final_value = val_left + val_right;
+        } else {
+            final_value = val_left - val_right;
+        }
+
         cfg->add_instr(
         (new IR::IRInstrMov)
-            ->set_src(new IR::IRRegA)
-            ->set_dest(new IR::IRRegB)
+            ->set_src(
+                (new IR::IRConst)
+                    ->set_literal(to_string(final_value))
+                    ->set_size(IR::Int.size)
+            )
+            ->set_dest(new IR::IRRegA)
             ->set_ctx(ctx)
         );
-        cfg->add_instr(
+
+    } else {
+        if (ctx->op_add->getText() == "+")
+        {
+            cfg->add_instr(
+                (new IR::IRInstrExprPlus)
+                    ->set_src(varTemp)
+                    ->set_dest(new IR::IRRegA)
+                    ->set_ctx(ctx)
+            );
+        }
+        else if (ctx->op_add->getText() == "-")
+        {
+            cfg->add_instr(
             (new IR::IRInstrMov)
-                ->set_src(varTemp)
-                ->set_dest(new IR::IRRegA)
+                ->set_src(new IR::IRRegA)
+                ->set_dest(new IR::IRRegB)
                 ->set_ctx(ctx)
-        );
-        cfg->add_instr(
-            (new IR::IRInstrExprMinus)
-                ->set_src(new IR::IRRegB)
-                ->set_dest(new IR::IRRegA)
-                ->set_ctx(ctx)
-        );
-    }
-    else
-    {
-        this->cfg->get_error_reporter()->reportError(
-            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Unrecognized operator", ctx)
-        );
+            );
+            cfg->add_instr(
+                (new IR::IRInstrMov)
+                    ->set_src(varTemp)
+                    ->set_dest(new IR::IRRegA)
+                    ->set_ctx(ctx)
+            );
+            cfg->add_instr(
+                (new IR::IRInstrExprMinus)
+                    ->set_src(new IR::IRRegB)
+                    ->set_dest(new IR::IRRegA)
+                    ->set_ctx(ctx)
+            );
+        }
+        else
+        {
+            this->cfg->get_error_reporter()->reportError(
+                new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Unrecognized operator", ctx)
+            );
+        }
     }
 
-    return IR::Int.size;
+    //update flags
+    vf.type_size = IR::Int.size;
+    vf.f_const = (const_left && const_right);
+    if (vf.f_const) {
+        vf.value = final_value;
+    }
+
+    return 0;
 }
 
 antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *ctx)
 {
+    bool const_left; bool const_right;
+    int val_left; int val_right;
+    int final_value;
+
     this->visit(ctx->expr(0));
+    const_left = vf.f_const;
+    val_left = vf.value;
 
     IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
@@ -370,50 +481,96 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
     );
     
     this->visit(ctx->expr(1));
+    const_right = vf.f_const;
+    val_right = vf.value;
 
-    if (ctx->OP_MULT()->getText() == "*")
-    {
-        cfg->add_instr(
-            (new IR::IRInstrExprMult)
-                ->set_src(varTemp)
-                ->set_dest(new IR::IRRegA)
-                ->set_ctx(ctx)
+    if (val_right == 0 && (ctx->OP_MULT()->getText() == "/" || ctx->OP_MULT()->getText() == "%")) {
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::WARNING, "division by 0", ctx)
         );
     }
-    else if (ctx->OP_MULT()->getText() == "/" || ctx->OP_MULT()->getText() == "%")
-    {
-        cfg->add_instr(
-            (new IR::IRInstrMov)
-                ->set_src(new IR::IRRegA)
-                ->set_dest(new IR::IRRegB)
-                ->set_ctx(ctx)
-        );
+
+    if (const_left && const_right) {
+
+        cfg->get_current_bb()->remove_last_instructions(3);
+
+        if (ctx->OP_MULT()->getText() == "*")
+        {
+            final_value = val_left * val_right;
+
+        }
+        else if (ctx->OP_MULT()->getText() == "/")
+        {
+            final_value = val_left / val_right;
+        }
+        else if (ctx->OP_MULT()->getText() == "%") {
+            final_value = val_left % val_right;
+        }
 
         cfg->add_instr(
             (new IR::IRInstrMov)
-                ->set_src(varTemp)
+                ->set_src(
+                    (new IR::IRConst)
+                        ->set_literal(to_string(final_value))
+                        ->set_size(IR::Int.size)
+                )
                 ->set_dest(new IR::IRRegA)
                 ->set_ctx(ctx)
         );
+        
+    } else {
 
-        cfg->add_instr(
-            (new IR::IRInstrExprDiv)
-                ->set_ctx(ctx)
-        );
-
-        if (ctx->OP_MULT()->getText() == "%")
+        if (ctx->OP_MULT()->getText() == "*")
         {
-            //Modulo : il faut mettre EDX dans EAX -> c'est ce registre qui contient le reste après idivl
             cfg->add_instr(
-                (new IR::IRInstrMov)
-                    ->set_src(new IR::IRRegD)
+                (new IR::IRInstrExprMult)
+                    ->set_src(varTemp)
                     ->set_dest(new IR::IRRegA)
                     ->set_ctx(ctx)
             );
         }
+        else if (ctx->OP_MULT()->getText() == "/" || ctx->OP_MULT()->getText() == "%")
+        {
+            cfg->add_instr(
+                (new IR::IRInstrMov)
+                    ->set_src(new IR::IRRegA)
+                    ->set_dest(new IR::IRRegB)
+                    ->set_ctx(ctx)
+            );
+
+            cfg->add_instr(
+                (new IR::IRInstrMov)
+                    ->set_src(varTemp)
+                    ->set_dest(new IR::IRRegA)
+                    ->set_ctx(ctx)
+            );
+
+            cfg->add_instr(
+                (new IR::IRInstrExprDiv)
+                    ->set_ctx(ctx)
+            );
+
+            if (ctx->OP_MULT()->getText() == "%")
+            {
+                //Modulo : il faut mettre EDX dans EAX -> c'est ce registre qui contient le reste après idivl
+                cfg->add_instr(
+                    (new IR::IRInstrMov)
+                        ->set_src(new IR::IRRegD)
+                        ->set_dest(new IR::IRRegA)
+                        ->set_ctx(ctx)
+                );
+            }
+        }
     }
 
-    return IR::Int.size;
+    //update flags
+    vf.type_size = IR::Int.size;
+    vf.f_const = (const_left && const_right);
+    if (vf.f_const) {
+        vf.value = final_value;
+    }
+
+    return 0;
 }
 
 ////////////////////////////////////////////
@@ -422,33 +579,154 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
 
 antlrcpp::Any IRVisitor::visitExprUnary(ifccParser::ExprUnaryContext *ctx)
 {
-    this->visit(ctx->expr());
+    bool const_flag;
+    int val;
 
-    if (ctx->op_unary->getText() == "-") {
+    this->visit(ctx->expr());
+    const_flag = vf.f_const;
+    val = vf.value;
+
+    int final_value;
+
+    if (const_flag){
+
+        cfg->get_current_bb()->remove_last_instructions(1);
+
+        if (ctx->op_unary->getText() == "-") {
+            final_value = -val;
+        } else {
+            final_value = !val;
+        }
+
         cfg->add_instr(
-            (new IR::IRInstrExprUnaryMinus)
-                ->set_ctx(ctx)
-        );
-    }
-    else {
-        //comparaison EAX (droite) et ECX (gauche)
-        cfg->add_instr(
-            (new IR::IRInstrComp)
+            (new IR::IRInstrMov)
                 ->set_src(
-                    (new IR::IRConst)->set_literal("0")
+                    (new IR::IRConst)
+                        ->set_literal(to_string(final_value))
+                        ->set_size(IR::Int.size)
                 )
                 ->set_dest(new IR::IRRegA)
                 ->set_ctx(ctx)
         );
+
+    } else {
+
+        if (ctx->op_unary->getText() == "-") {
+            cfg->add_instr(
+                (new IR::IRInstrExprUnaryMinus)
+                    ->set_ctx(ctx)
+            );
+        }
+        else {
+            //comparaison EAX (droite) et ECX (gauche)
+            cfg->add_instr(
+                (new IR::IRInstrComp)
+                    ->set_src(
+                        (new IR::IRConst)->set_literal("0")
+                    )
+                    ->set_dest(new IR::IRRegA)
+                    ->set_ctx(ctx)
+            );
+            //résultat de la comparaison dans EAX
+            cfg->add_instr(
+                (new IR::IRInstrSetFlagComp)
+                    ->set_op(ctx->op_unary->getText())
+                    ->set_dest(
+                        (new IR::IRRegA)->set_size(IR::Byte)
+                    )
+                    ->set_ctx(ctx)
+            );
+            cfg->add_instr(
+                (new IR::IRInstrMov)
+                    ->set_src(
+                        (new IR::IRRegA)
+                            ->set_size(IR::Byte)
+                    )
+                    ->set_dest(new IR::IRRegA)
+                    ->set_ctx(ctx)
+            );
+        }
+    }
+    
+    //update flags
+    vf.type_size = IR::Int.size;
+    vf.f_const = const_flag;
+    if (vf.f_const) {
+        vf.value = final_value;
+    }
+
+    return 0;
+}
+
+////////////////////////////////////////////
+// COMPARAISONS
+////////////////////////////////////////////
+
+antlrcpp::Any IRVisitor::visitExprEqComparaison(ifccParser::ExprEqComparaisonContext *ctx)
+{
+    bool const_left; bool const_right;
+    int val_left; int val_right;
+    int final_value;
+
+    //évaluation à gauche
+    this->visit(ctx->expr(0));
+    const_left = vf.f_const;
+    val_left = vf.value;
+
+    //on stocke dans ECX
+    cfg->add_instr(
+        (new IR::IRInstrMov)
+            ->set_src(new IR::IRRegA)
+            ->set_dest(new IR::IRRegC)
+            ->set_ctx(ctx)
+    );
+
+    //évaluation à droite
+    this->visit(ctx->expr(1));
+    const_right = vf.f_const;
+    val_right = vf.value;
+
+    if (const_left && const_right) {
+
+        cfg->get_current_bb()->remove_last_instructions(3);
+
+        if (ctx->EQ_COMPARAISON()->getText() == "==") {
+            final_value = (val_left == val_right);
+        } else if (ctx->EQ_COMPARAISON()->getText() == "!=") {
+            final_value = (val_left != val_right);
+        }
+
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(
+                    (new IR::IRConst)
+                        ->set_literal(to_string(final_value))
+                        ->set_size(IR::Int.size)
+                )
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
+
+    } else {
+
+        //comparaison EAX (droite) et ECX (gauche)
+        cfg->add_instr(
+            (new IR::IRInstrComp)
+                ->set_src(new IR::IRRegA)
+                ->set_dest(new IR::IRRegC)
+                ->set_ctx(ctx)
+        );
+
         //résultat de la comparaison dans EAX
         cfg->add_instr(
             (new IR::IRInstrSetFlagComp)
-                ->set_op(ctx->op_unary->getText())
+                ->set_op(ctx->EQ_COMPARAISON()->getText())
                 ->set_dest(
                     (new IR::IRRegA)->set_size(IR::Byte)
                 )
                 ->set_ctx(ctx)
         );
+
         cfg->add_instr(
             (new IR::IRInstrMov)
                 ->set_src(
@@ -460,128 +738,135 @@ antlrcpp::Any IRVisitor::visitExprUnary(ifccParser::ExprUnaryContext *ctx)
         );
     }
 
-    return IR::Int.size;
+    //update flags
+    vf.type_size = IR::Int.size;
+    vf.f_const = (const_left && const_right);
+    if (vf.f_const) {
+        vf.value = final_value;
+    }
+
+    return 0;
 }
 
-////////////////////////////////////////////
-// COMPARAISONS
-////////////////////////////////////////////
+antlrcpp::Any IRVisitor::visitExprComparaison(ifccParser::ExprComparaisonContext *ctx) {
 
-antlrcpp::Any IRVisitor::visitExprEqComparaison(ifccParser::ExprEqComparaisonContext *ctx) {
-    
-    //évaluation à gauche
+    bool const_left; bool const_right;
+    int val_left; int val_right;
+    int final_value;
+    IR::Size res_size = IR::Int.size;
+
+    // évaluation à gauche
     this->visit(ctx->expr(0));
+    const_left = vf.f_const;
+    val_left = vf.value;
+    IR::Size leftSize = vf.type_size;
 
     //on stocke dans ECX
     cfg->add_instr(
         (new IR::IRInstrMov)
-            ->set_src(new IR::IRRegA)
-            ->set_dest(new IR::IRRegC)
+            ->set_src(
+                (new IR::IRRegA)
+                    ->set_size(leftSize)
+            )
+            ->set_dest(
+                (new IR::IRRegC)
+                    ->set_size(leftSize)
+            )
             ->set_ctx(ctx)
     );
 
     //évaluation à droite
     this->visit(ctx->expr(1));
+    const_right = vf.f_const;
+    val_right = vf.value;
+    IR::Size rightSize = vf.type_size;
+    res_size = min(leftSize, rightSize);
 
-    //comparaison EAX (droite) et ECX (gauche)
-    cfg->add_instr(
-        (new IR::IRInstrComp)
-            ->set_src(new IR::IRRegA)
-            ->set_dest(new IR::IRRegC)
-            ->set_ctx(ctx)
-    );
+    if (const_left && const_right) {
 
-    //résultat de la comparaison dans EAX
-    cfg->add_instr(
-        (new IR::IRInstrSetFlagComp)
-            ->set_op(ctx->EQ_COMPARAISON()->getText())
-            ->set_dest(
-                (new IR::IRRegA)->set_size(IR::Byte)
-            )
-            ->set_ctx(ctx)
-    );
+        cfg->get_current_bb()->remove_last_instructions(3);
 
-    cfg->add_instr(
-        (new IR::IRInstrMov)
-            ->set_src(
-                (new IR::IRRegA)
-                    ->set_size(IR::Byte)
-            )
-            ->set_dest(new IR::IRRegA)
-            ->set_ctx(ctx)
-    );
+        if (ctx->COMPARAISON()->getText() == "<") {
+            final_value = (val_left < val_right);
+        } else if (ctx->COMPARAISON()->getText() == ">") {
+            final_value = (val_left > val_right);
+        } else if (ctx->COMPARAISON()->getText() == "<=") {
+            final_value = (val_left <= val_right);
+        } else if (ctx->COMPARAISON()->getText() == ">=") {
+            final_value = (val_left >= val_right);
+        }
 
-    return IR::Int.size;
-}
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(
+                    (new IR::IRConst)
+                        ->set_literal(to_string(final_value))
+                        ->set_size(IR::Int.size)
+                )
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
 
-antlrcpp::Any IRVisitor::visitExprComparaison(ifccParser::ExprComparaisonContext *ctx) {
-    IR::Size res = IR::Int.size;
-    // évaluation à gauche
-    IR::Size leftSize = any_cast<IR::Size>(this->visit(ctx->expr(0)));
+    } else {
 
-    //on stocke dans ECX
-    cfg->add_instr(
-        (new IR::IRInstrMov)
-            ->set_src(
-                (new IR::IRRegA)
-                    ->set_size(leftSize)
-            )
-            ->set_dest(
-                (new IR::IRRegC)
-                    ->set_size(leftSize)
-            )
-            ->set_ctx(ctx)
-    );
+        cfg->add_instr(
+            (new IR::IRInstrComp)
+                ->set_src(
+                    (new IR::IRRegA)
+                        ->set_size(res_size)
+                )
+                ->set_dest(
+                    (new IR::IRRegC)
+                        ->set_size(res_size)
+                )
+                ->set_ctx(ctx)
+        );
 
-    //évaluation à droite
-    IR::Size rightSize = any_cast<IR::Size>(this->visit(ctx->expr(1)));
-    res = min(leftSize, rightSize);
+        //résultat de la comparaison dans EAX
+        cfg->add_instr(
+            (new IR::IRInstrSetFlagComp)
+                ->set_op(ctx->COMPARAISON()->getText())
+                ->set_dest(
+                    (new IR::IRRegA)
+                        ->set_size(IR::Byte)
+                )
+                ->set_ctx(ctx)
+        );
 
-    cfg->add_instr(
-        (new IR::IRInstrComp)
-            ->set_src(
-                (new IR::IRRegA)
-                    ->set_size(res)
-            )
-            ->set_dest(
-                (new IR::IRRegC)
-                    ->set_size(res)
-            )
-            ->set_ctx(ctx)
-    );
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(
+                    (new IR::IRRegA)
+                        ->set_size(IR::Byte)
+                )
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
+    }
     
+    //update flags
+    vf.type_size = IR::Int.size;
+    vf.f_const = (const_left && const_right);
+    if (vf.f_const) {
+        vf.value = final_value;
+    }
 
-    //résultat de la comparaison dans EAX
-    cfg->add_instr(
-        (new IR::IRInstrSetFlagComp)
-            ->set_op(ctx->COMPARAISON()->getText())
-            ->set_dest(
-                (new IR::IRRegA)
-                    ->set_size(IR::Byte)
-            )
-            ->set_ctx(ctx)
-    );
-
-    cfg->add_instr(
-        (new IR::IRInstrMov)
-            ->set_src(
-                (new IR::IRRegA)
-                    ->set_size(IR::Byte)
-            )
-            ->set_dest(new IR::IRRegA)
-            ->set_ctx(ctx)
-    );
-
-    return res;
+    return 0;
 }
 
 ////////////////////////////////////////////
 // OPERATEURS BIT-A-BIT
 ////////////////////////////////////////////
 
-antlrcpp::Any IRVisitor::visitExprAndBAB(ifccParser::ExprAndBABContext *ctx) {
+antlrcpp::Any IRVisitor::visitExprAndBAB(ifccParser::ExprAndBABContext *ctx)
+{
+    bool const_left; bool const_right;
+    int val_left; int val_right;
+    int final_value;
 
     this->visit(ctx->expr(0));
+    const_left = vf.f_const;
+    val_left = vf.value;
 
     IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
@@ -591,21 +876,58 @@ antlrcpp::Any IRVisitor::visitExprAndBAB(ifccParser::ExprAndBABContext *ctx) {
     );
     
     this->visit(ctx->expr(1));
+    const_right = vf.f_const;
+    val_right = vf.value;
 
-    cfg->add_instr(
-        (new IR::IRInstrExprBitABit)
-            ->set_src(varTemp)
-            ->set_dest(new IR::IRRegA)
-            ->set_op(ctx->B_AND()->getText())
-            ->set_ctx(ctx)
-    );
+    if (const_left && const_right) {
+        
+        cfg->get_current_bb()->remove_last_instructions(3);
 
-    return IR::Int.size;
+        final_value = val_left & val_right;
+
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(
+                    (new IR::IRConst)
+                        ->set_literal(to_string(final_value))
+                        ->set_size(IR::Int.size)
+                )
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
+
+    } else {
+
+        cfg->add_instr(
+            (new IR::IRInstrExprBitABit)
+                ->set_src(varTemp)
+                ->set_dest(new IR::IRRegA)
+                ->set_op(ctx->B_AND()->getText())
+                ->set_ctx(ctx)
+        );
+
+    }
+    
+    //update flags
+    vf.type_size = IR::Int.size;
+    vf.f_const = (const_left && const_right);
+    if (vf.f_const) {
+        vf.value = final_value;
+    }
+
+    return 0;
 }
 
-antlrcpp::Any IRVisitor::visitExprXorBAB(ifccParser::ExprXorBABContext *ctx) {
+antlrcpp::Any IRVisitor::visitExprXorBAB(ifccParser::ExprXorBABContext *ctx)
+{
     
+    bool const_left; bool const_right;
+    int val_left; int val_right;
+    int final_value;
+
     this->visit(ctx->expr(0));
+    const_left = vf.f_const;
+    val_left = vf.value;
 
     IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
@@ -615,6 +937,28 @@ antlrcpp::Any IRVisitor::visitExprXorBAB(ifccParser::ExprXorBABContext *ctx) {
     );
     
     this->visit(ctx->expr(1));
+    const_right = vf.f_const;
+    val_right = vf.value;
+
+    if (const_left && const_right) {
+        
+        cfg->get_current_bb()->remove_last_instructions(3);
+
+        final_value = val_left ^ val_right;
+
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(
+                    (new IR::IRConst)
+                        ->set_literal(to_string(final_value))
+                        ->set_size(IR::Int.size)
+                )
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
+
+    } else {
+
 
     cfg->add_instr(
         (new IR::IRInstrExprBitABit)
@@ -624,12 +968,27 @@ antlrcpp::Any IRVisitor::visitExprXorBAB(ifccParser::ExprXorBABContext *ctx) {
             ->set_ctx(ctx)
     );
 
-    return IR::Int.size;
+    }
+    
+    //update flags
+    vf.type_size = IR::Int.size;
+    vf.f_const = (const_left && const_right);
+    if (vf.f_const) {
+        vf.value = final_value;
+    }
+
+    return 0;
 }
 
-antlrcpp::Any IRVisitor::visitExprOrBAB(ifccParser::ExprOrBABContext *ctx) {
+antlrcpp::Any IRVisitor::visitExprOrBAB(ifccParser::ExprOrBABContext *ctx)
+{
+    bool const_left; bool const_right;
+    int val_left; int val_right;
+    int final_value;
 
     this->visit(ctx->expr(0));
+    const_left = vf.f_const;
+    val_left = vf.value;
 
     IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
@@ -639,16 +998,46 @@ antlrcpp::Any IRVisitor::visitExprOrBAB(ifccParser::ExprOrBABContext *ctx) {
     );
     
     this->visit(ctx->expr(1));
+    const_right = vf.f_const;
+    val_right = vf.value;
 
-    cfg->add_instr(
-        (new IR::IRInstrExprBitABit)
-            ->set_src(varTemp)
-            ->set_dest(new IR::IRRegA)
-            ->set_op(ctx->B_OR()->getText())
-            ->set_ctx(ctx)
-    );
+    if (const_left && const_right) {
+        
+        cfg->get_current_bb()->remove_last_instructions(3);
 
-    return IR::Int.size;
+        final_value = val_left | val_right;
+
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(
+                    (new IR::IRConst)
+                        ->set_literal(to_string(final_value))
+                        ->set_size(IR::Int.size)
+                )
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
+
+    } else {
+
+        cfg->add_instr(
+            (new IR::IRInstrExprBitABit)
+                ->set_src(varTemp)
+                ->set_dest(new IR::IRRegA)
+                ->set_op(ctx->B_OR()->getText())
+                ->set_ctx(ctx)
+        );
+
+    }
+    
+    //update flags
+    vf.type_size = IR::Int.size;
+    vf.f_const = (const_left && const_right);
+    if (vf.f_const) {
+        vf.value = final_value;
+    }
+
+    return 0;
 }
 
 ////////////////////////////////////////////
@@ -658,26 +1047,16 @@ antlrcpp::Any IRVisitor::visitExprOrBAB(ifccParser::ExprOrBABContext *ctx) {
 antlrcpp::Any IRVisitor::visitExprAnd(ifccParser::ExprAndContext *ctx) {
 
     //equivalent to : if first expr is false then return false, else return value of second expr
+    bool const_left; bool const_right;
+    int val_left; int val_right;
+    int final_value;
 
     string first_expr_false_label = cfg->get_next_bb_label();
     string end_label = cfg->get_next_bb_label();
 
-    //setup of block to reach if first expr is false
-    IR::BasicBlock * first_expr_false_bb = new IR::BasicBlock(cfg, first_expr_false_label, nullptr, nullptr);
-    first_expr_false_bb->set_exit(end_label);
-    first_expr_false_bb->add_instr(
-        (new IR::IRInstrMov)
-            ->set_src(
-                (new IR::IRConst)
-                    ->set_literal("0")
-            )
-            ->set_dest(
-                (new IR::IRRegA)
-                    ->set_size(IR::DWord))
-            ->set_ctx(ctx)
-    );
-
     this->visit(ctx->expr(0));
+    const_left = vf.f_const;
+    val_left = vf.value;
 
     //if false -> jump to the block which moves $0 into %eax
     cfg->add_instr(
@@ -689,14 +1068,58 @@ antlrcpp::Any IRVisitor::visitExprAnd(ifccParser::ExprAndContext *ctx) {
 
     //if true -> visit second expression
     this->visit(ctx->expr(1));
+    const_right = vf.f_const;
+    val_right = vf.value;
 
-    //in the end, jump to block which continues the program
-    cfg->get_current_bb()->set_exit(end_label);
+    if (const_left && const_right) {
+        
+        cfg->get_current_bb()->remove_last_instructions(3);
 
-    IR::BasicBlock * end_bb = new IR::BasicBlock(cfg, end_label, nullptr, nullptr);
+        final_value = val_left && val_right;
 
-    cfg->add_bb(first_expr_false_bb);
-    cfg->add_bb(end_bb);
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(
+                    (new IR::IRConst)
+                        ->set_literal(to_string(final_value))
+                        ->set_size(IR::Int.size)
+                )
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
+
+    } else {
+
+        //setup of block to reach if first expr is false
+        IR::BasicBlock * first_expr_false_bb = new IR::BasicBlock(cfg, first_expr_false_label, nullptr, nullptr);
+        first_expr_false_bb->set_exit(end_label);
+        first_expr_false_bb->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(
+                    (new IR::IRConst)
+                        ->set_literal("0")
+                )
+                ->set_dest(
+                    (new IR::IRRegA)
+                        ->set_size(IR::DWord))
+                ->set_ctx(ctx)
+        );
+
+        //in the end, jump to block which continues the program
+        cfg->get_current_bb()->set_exit(end_label);
+
+        IR::BasicBlock * end_bb = new IR::BasicBlock(cfg, end_label, nullptr, nullptr);
+
+        cfg->add_bb(first_expr_false_bb);
+        cfg->add_bb(end_bb);
+    }
+    
+    //update flags
+    vf.type_size = IR::Int.size;
+    vf.f_const = (const_left && const_right);
+    if (vf.f_const) {
+        vf.value = final_value;
+    }
 
     return 0;
 }
@@ -704,25 +1127,16 @@ antlrcpp::Any IRVisitor::visitExprAnd(ifccParser::ExprAndContext *ctx) {
 antlrcpp::Any IRVisitor::visitExprOr(ifccParser::ExprOrContext *ctx) {
 
     //equivalent to : if first expr is true then return true, else return value of second expr
+    bool const_left; bool const_right;
+    int val_left; int val_right;
+    int final_value;
+
     string first_expr_true_label = cfg->get_next_bb_label();
     string end_label = cfg->get_next_bb_label();
 
-    //setup of block to reach if first expr is false
-    IR::BasicBlock * first_expr_true_bb = new IR::BasicBlock(cfg, first_expr_true_label, nullptr, nullptr);
-    first_expr_true_bb->set_exit(end_label);
-    first_expr_true_bb->add_instr(
-        (new IR::IRInstrMov)
-            ->set_src(
-                (new IR::IRConst)
-                    ->set_literal("1")
-            )
-            ->set_dest(
-                (new IR::IRRegA)
-                    ->set_size(IR::DWord))
-            ->set_ctx(ctx)
-    );
-
     this->visit(ctx->expr(0));
+    const_left = vf.f_const;
+    val_left = vf.value;
 
     //if true -> jump to the block which moves $1 into %eax
     cfg->add_instr(
@@ -734,14 +1148,58 @@ antlrcpp::Any IRVisitor::visitExprOr(ifccParser::ExprOrContext *ctx) {
 
     //if true -> visit second expression
     this->visit(ctx->expr(1));
+    const_right = vf.f_const;
+    val_right = vf.value;
 
-    //in the end, jump to block which continues the program
-    cfg->get_current_bb()->set_exit(end_label);
+    if (const_left && const_right) {
+        
+        cfg->get_current_bb()->remove_last_instructions(3);
 
-    IR::BasicBlock * end_bb = new IR::BasicBlock(cfg, end_label, nullptr, nullptr);
+        final_value = val_left || val_right;
 
-    cfg->add_bb(first_expr_true_bb);
-    cfg->add_bb(end_bb);
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(
+                    (new IR::IRConst)
+                        ->set_literal(to_string(final_value))
+                        ->set_size(IR::Int.size)
+                )
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
+
+    } else {
+
+        //setup of block to reach if first expr is false
+        IR::BasicBlock * first_expr_true_bb = new IR::BasicBlock(cfg, first_expr_true_label, nullptr, nullptr);
+        first_expr_true_bb->set_exit(end_label);
+        first_expr_true_bb->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(
+                    (new IR::IRConst)
+                        ->set_literal("1")
+                )
+                ->set_dest(
+                    (new IR::IRRegA)
+                        ->set_size(IR::DWord))
+                ->set_ctx(ctx)
+        );
+
+        //in the end, jump to block which continues the program
+        cfg->get_current_bb()->set_exit(end_label);
+
+        IR::BasicBlock * end_bb = new IR::BasicBlock(cfg, end_label, nullptr, nullptr);
+
+        cfg->add_bb(first_expr_true_bb);
+        cfg->add_bb(end_bb);
+    }
+    
+    //update flags
+    vf.type_size = IR::Int.size;
+    vf.f_const = (const_left && const_right);
+    if (vf.f_const) {
+        vf.value = final_value;
+    }
 
     return 0;
 }
@@ -964,8 +1422,6 @@ antlrcpp::Any IRVisitor::visitStruct_switch_case(ifccParser::Struct_switch_caseC
 
 ////////////////////////////////////////////
 // FONCTIONS
-//
-// WARNING : ONLY INT SUPPORTED FOR NOW
 ////////////////////////////////////////////
 
 antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *ctx) {
@@ -981,6 +1437,8 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
     this->cfg = cfg;
 
     int nb_params = ctx->fparam_decla()->fparam_decla2().size();
+    cfg->set_nb_param(nb_params);
+    cfg->set_no_return(ctx->return_type->getText() == "void");
 
     //Get parameters from registers into temporary variables
     int stop = nb_params > 6 ? 6 : nb_params;
@@ -993,7 +1451,6 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
                 ->set_symbol(symbol)
                 ->set_ctx(ctx)
         );
-        cfg->incr_nb_param();
         i++;
     }
 
@@ -1014,7 +1471,6 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
                 ->set_dest(symbol)
                 ->set_ctx(ctx)
         );
-        cfg->incr_nb_param();
         offset += 8;
     }
 
@@ -1041,12 +1497,15 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
             correct_nb_param = cfg_set->get_cfg_by_fname(ctx->fname->getText())->get_nb_param();
         }
         if (correct_nb_param != nb_params) {
-            throw runtime_error("Function called with wrong number of parameters");
+            this->cfg->get_error_reporter()->reportError(
+                new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "function called with wrong number of parameters", ctx)
+            );
         }
     } catch (exception &e) {
-        std::cerr << "Passage param expression" << std::endl;
-        throw e;
-    }    
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "this function is called but not declared", ctx)
+        );
+    }
 
     //If there is more than 6 parameters, we place the remaining parameters on top of the stack
     if (nb_params > 6) {
@@ -1140,7 +1599,9 @@ antlrcpp::Any IRVisitor::visitBreakStmt(ifccParser::BreakStmtContext *ctx) {
     try {
         bb_loop = cfg->get_break_parent(cfg->get_current_bb()->get_label());
     } catch (exception &e) {
-        throw e;
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "'break' can only be used in loop or 'switch'", ctx)
+        );
     }
 
     //we need to jump to end_while block
@@ -1162,7 +1623,9 @@ antlrcpp::Any IRVisitor::visitContinueStmt(ifccParser::ContinueStmtContext *ctx)
     try {
         bb_loop = cfg->get_continue_parent(cfg->get_current_bb()->get_label());
     } catch (exception &e) {
-        throw e;
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "'continue' can only be used in loop", ctx)
+        );
     }
 
     //we need to jump to condition

@@ -1,12 +1,8 @@
 #pragma once
 
-namespace IR
-{
-    class BasicBlock;
-}
-
 #include "../ir-instr.h"
 #include "../ir-attr.h"
+#include "../../error-reporter/compiler-error-token.h"
 
 namespace IR
 {

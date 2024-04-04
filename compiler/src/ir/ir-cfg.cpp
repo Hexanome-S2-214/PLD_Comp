@@ -124,8 +124,12 @@ int IR::CFG::get_nb_param() {
     return nb_param;
 }
 
-void IR::CFG::incr_nb_param() {
-    this->nb_param++;
+void IR::CFG::set_nb_param(int n) {
+    this->nb_param = n;
+}
+
+void IR::CFG::set_no_return(bool b) {
+    this->no_return = b;
 }
 
 IR::BasicBlock * IR::CFG::get_current_bb()
@@ -157,7 +161,7 @@ IR::BasicBlock * IR::CFG::get_break_parent(string label) {
     }
 
     if (ret_label.empty()){
-        throw runtime_error("break/continue must be used inside a loop");
+        throw runtime_error("break outside of a loop");
     }
 
     return ret_label.top();
@@ -185,7 +189,7 @@ IR::BasicBlock * IR::CFG::get_continue_parent(string label) {
     }
 
     if (ret_label.empty()){
-        throw runtime_error("break/continue must be used inside a loop");
+        throw runtime_error("continue outside of a loop");
     }
 
     return ret_label.top();
@@ -205,6 +209,10 @@ string IR::CFG::get_next_bb_label()
 
 string IR::CFG::get_epilogue_label() {
     return epilogue_label;
+}
+
+bool IR::CFG::get_no_return() {
+    return no_return;
 }
 
 void IR::CFG::add_bb(IR::BasicBlock * bb)
