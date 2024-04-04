@@ -117,7 +117,7 @@ instructionRule
      ;
 
 declStdRule
-     : CONST? (INT|CHAR) VAR ';'
+     : (INT|CHAR) VAR ';'
      ;
 
 declAffRule
