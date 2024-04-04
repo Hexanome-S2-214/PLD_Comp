@@ -1,7 +1,5 @@
 #include "expression_cst.h"
 #include "mov.h"
-#include "../ir-basic-block.h"
-#include "../ir-cfg.h"
 #include "../params/ir-reg.h"
 
 namespace IR

@@ -43,12 +43,24 @@ void IR::BasicBlock::add_instr(IR::IRBase * instr)
     {
         instr->set_parent(this);
         instrs.push_back(static_cast<IR::IRInstr*>(instr));
-
         return;
     }
 }
 
-vector<IR::IRInstr *> * IR::BasicBlock::get_instrs()
+/**
+ * Deletes n last instructions of the block.
+ * Useful for optimization
+*/
+void IR::BasicBlock::remove_last_instructions(int n) {
+    for (int i=0; i < n; ++i) {
+        IR::IRInstr * last_instr = instrs.back();
+        delete last_instr;
+        instrs.pop_back();
+
+    }
+}
+
+list<IR::IRInstr *> * IR::BasicBlock::get_instrs()
 {
     return &instrs;
 }

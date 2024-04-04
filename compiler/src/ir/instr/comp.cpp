@@ -1,5 +1,4 @@
 #include "comp.h"
-#include "../../error-reporter/compiler-error-token.h"
 
 namespace IR
 {
