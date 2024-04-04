@@ -117,7 +117,8 @@ instructionRule
      ;
 
 declStdRule
-     : CONST? (INT|CHAR) VAR ';'
+     : CONST? (INT|CHAR) VAR ';'                  #simpleDecl
+     | CONST? (INT | CHAR) VAR '[' NUM ']' ';'    #tableDecl
      ;
 
 declAffRule
@@ -125,7 +126,8 @@ declAffRule
      ;
 
 affectationRule
-     : VAR '=' rvalue ';'
+     : VAR '=' rvalue ';'               #simpleAff
+     | VAR '[' NUM ']' '=' rvalue ';'   #tableAff
      ;
 
 affectationRule2
@@ -148,6 +150,7 @@ returnStmtRule
 
 expr
      : '(' expr ')'                     #exprParExpr
+     | VAR '[' NUM ']'                  #exprTable
      | op_unary=('-' | '!') expr        #exprUnary
      | expr OP_MULT expr                #exprMultDivMod
      | expr op_add=('+' | '-') expr     #exprSumSous
