@@ -159,9 +159,9 @@ antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
 antlrcpp::Any IRVisitor::visitTableDecl(ifccParser::TableDeclContext *ctx)
 {
     if(ctx->CHAR()){
-        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Char, false, ctx,  stoi(ctx->NUM()->getText()));
+        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Char, ctx, false, stoi(ctx->NUM()->getText()));
     } else if (ctx->INT()) {
-        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, false, ctx,  stoi(ctx->NUM()->getText()));
+        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, ctx, false, stoi(ctx->NUM()->getText()));
     }
     return 0;
 }
