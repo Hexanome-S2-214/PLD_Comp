@@ -182,6 +182,16 @@ namespace IR
         return this;
     }
 
+    void IRRegStackPointer::gen_asm_x86(ostream& o)
+    {
+        o << "%rsp";
+    }
+
+    void IRRegStackPointer::gen_asm_arm(ostream& o)
+    {
+        
+    }
+
     void IRRegDest::gen_asm_x86(ostream& o)
     {
         switch (get_size())

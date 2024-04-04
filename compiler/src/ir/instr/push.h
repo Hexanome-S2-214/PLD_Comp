@@ -10,7 +10,7 @@ namespace IR
 
 namespace IR
 {
-    class IRInstrPushq : public IRInstr, public IRAttrSrc<IRInstrPushq>
+    class IRInstrPush : public IRInstr, public IRAttrSrc<IRInstrPush>
     {
     public:
         void gen_asm_x86(ostream& o) override;

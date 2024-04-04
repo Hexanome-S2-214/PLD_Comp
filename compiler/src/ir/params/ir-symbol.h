@@ -17,7 +17,19 @@ namespace IR
 
         string id;
         int offset;
+        bool const_var;
         bool used = false;
         Type type;
+    };
+
+    class SymbolT: public Symbol
+    {
+        public:
+        SymbolT(int index): index(index){};
+        SymbolT(int index, Symbol* symbol);
+        ~SymbolT() = default;
+
+        void gen_asm_x86(ostream& o) override;
+        int index;
     };
 }

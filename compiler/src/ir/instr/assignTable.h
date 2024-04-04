@@ -10,10 +10,13 @@ namespace IR
 
 namespace IR
 {
-    class IRInstrAddq : public IRInstr, public IRAttrSrc<IRInstrAddq>
+    class IRInstrAssignTable : public IRInstr, public IRAttrSymbol<IRInstrAssignTable>
     {
     public:
+        IRInstrAssignTable(int index) : index(index){};
         void gen_asm_x86(ostream& o) override;
         void gen_asm_arm(ostream& o) override;
+    protected:
+        int index;
     };
 }
