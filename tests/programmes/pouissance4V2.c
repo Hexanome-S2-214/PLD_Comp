@@ -6,7 +6,7 @@ int print_wrong_input(){
     while(i < 12){
         char chr = word[i];
         putchar(chr);
-        i++;
+        i = i + 1;
     }
 }
 
@@ -24,7 +24,7 @@ int print_player_turn(int player_turn){
                 putchar('Y');
             }
         }
-        i++;
+        i = i + 1;
     }
     return 0;
 }
@@ -40,7 +40,7 @@ int print_game_won(int player){
         } else {
             putchar(p);
         }
-        i++;
+        i = i + 1;
     }
 }
 
@@ -50,7 +50,7 @@ int print_full_board(){
     while(i < 21){
         char chr = word[i];
         putchar(chr);
-        i++;
+        i = i + 1;
     }
     
 }
@@ -79,10 +79,10 @@ int main(){
             char chr = board_string[i];
             if(chr == 7){
                 chr = board[board_i];
-                board_i++;
+                board_i = board_i + 1;
             }
             putchar(chr);
-            i++;
+            i = i + 1;
         }
 
         print_player_turn(player - 'X');
@@ -268,10 +268,10 @@ int main(){
             char chr = board_string[i];
             if(chr == 7){
                 chr = board[board_i];
-                board_i++;
+                board_i = board_i + 1;
             }
             putchar(chr);
-            i++;
+            i = i + 1;
         }
 
     return 0;

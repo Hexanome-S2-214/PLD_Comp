@@ -158,8 +158,8 @@ antlrcpp::Any IRVisitor::visitDeclAffVar(ifccParser::DeclAffVarContext *ctx)
 
 antlrcpp::Any IRVisitor::visitDeclAffTable(ifccParser::DeclAffTableContext *ctx)
 {
+    std::cerr << ">>visitDeclAffTable" << std::endl;
     bool const_var = ctx->CONST() ? true : false;
-    cerr << const_var << endl;
 
     IR::Type type = IR::Char;
     int size = stoi(ctx->NUM()->getText());
@@ -171,15 +171,15 @@ antlrcpp::Any IRVisitor::visitDeclAffTable(ifccParser::DeclAffTableContext *ctx)
         );
     }
 
+    std::cerr << "oki" << std::endl;
     IR::Symbol * symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx, const_var, size);
+    std::cerr << "ok" << std::endl;
 
     for(int i = 0; i < chars.size(); ++i){
         IR::SymbolT * symbolT = new IR::SymbolT(i, symbol);
-        std::cerr << chars[i]->getText() << std::endl;
         std::string text = chars[i]->getText();
         if (!text.empty())
         {
-            std::cerr << "Text : " << text << std::endl;
             int ascii_value = static_cast<int>(text[1]);
             cfg->add_instr(
                 (new IR::IRInstrExprCst)
@@ -198,6 +198,7 @@ antlrcpp::Any IRVisitor::visitDeclAffTable(ifccParser::DeclAffTableContext *ctx)
         );
     }
 
+    std::cerr << "<<visitDeclAffTable" << std::endl;
     return IR::Int.size;
 }
 
