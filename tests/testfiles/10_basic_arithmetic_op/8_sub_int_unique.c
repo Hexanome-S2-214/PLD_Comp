@@ -1,6 +1,5 @@
 int main() {
     int x;
-    x = 9 / (5 - 2);
-
+    x = 2 - 3;
     return x;
 }

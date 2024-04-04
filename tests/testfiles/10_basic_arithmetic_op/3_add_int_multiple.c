@@ -1,6 +1,5 @@
 int main() {
     int x;
-    x = 90/3 - 2 - 15/5;
-
+    x = 2 + 3 + 4 + 5;
     return x;
 }

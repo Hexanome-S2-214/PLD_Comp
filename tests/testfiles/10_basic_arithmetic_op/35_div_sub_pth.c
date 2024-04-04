@@ -1,8 +1,5 @@
 int main() {
     int x;
-    int y;
-    y = 2;
-    x = 8/y;
-
+    x = 8/ (3 - 2);
     return x;
 }
