@@ -122,7 +122,8 @@ declStdRule
      ;
 
 declAffRule
-     : CONST? (INT|CHAR) VAR '=' rvalue ';'
+     : CONST? (INT|CHAR) VAR '=' rvalue ';'                                #declAffVar
+     | CONST? (CHAR) VAR '[' NUM ']' '=' '{' CHARACTER(','CHARACTER)* '}' ';'  #declAffTable
      ;
 
 affectationRule
