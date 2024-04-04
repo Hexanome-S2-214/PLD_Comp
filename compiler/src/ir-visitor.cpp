@@ -210,7 +210,12 @@ antlrcpp::Any IRVisitor::visitExprCharacter(ifccParser::ExprCharacterContext *ct
     std::string text = ctx->CHARACTER()->getText();
     if (!text.empty())
     {
-        int ascii_value = static_cast<int>(text[1]);
+        int ascii_value;
+        if(text[1] == '\\'){
+            ascii_value = 10;
+        } else {
+            ascii_value = static_cast<int>(text[1]);
+        }
         cfg->add_instr(
             (new IR::IRInstrExprCst)
                 ->set_value(
@@ -466,7 +471,7 @@ antlrcpp::Any IRVisitor::visitExprEqComparaison(ifccParser::ExprEqComparaisonCon
 antlrcpp::Any IRVisitor::visitExprComparaison(ifccParser::ExprComparaisonContext *ctx) {
     IR::Size res = IR::Int.size;
     // évaluation à gauche
-    IR::Size leftSize = this->visit(ctx->expr(0)).as<IR::Size>();
+    IR::Size leftSize = any_cast<IR::Size>(this->visit(ctx->expr(0)));
 
     //on stocke dans ECX
     cfg->add_instr(
@@ -483,7 +488,7 @@ antlrcpp::Any IRVisitor::visitExprComparaison(ifccParser::ExprComparaisonContext
     );
 
     //évaluation à droite
-    IR::Size rightSize = this->visit(ctx->expr(1)).as<IR::Size>();
+    IR::Size rightSize = any_cast<IR::Size>(this->visit(ctx->expr(1)));
     res = min(leftSize, rightSize);
 
     cfg->add_instr(
@@ -981,11 +986,19 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
 
     //first : check if correct number of parameters
     try {
-        int correct_nb_param = cfg_set->get_cfg_by_fname(ctx->fname->getText())->get_nb_param();
+        int correct_nb_param; 
+        if(ctx->fname->getText() == "putchar"){
+            correct_nb_param = 1;
+        } else if (ctx->fname->getText() == "getchar"){
+            correct_nb_param = 0;
+        }else {
+            correct_nb_param = cfg_set->get_cfg_by_fname(ctx->fname->getText())->get_nb_param();
+        }
         if (correct_nb_param != nb_params) {
             throw runtime_error("Function called with wrong number of parameters");
         }
     } catch (exception &e) {
+        std::cerr << "Passage param expression" << std::endl;
         throw e;
     }    
 
