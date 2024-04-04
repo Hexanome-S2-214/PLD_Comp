@@ -25,9 +25,9 @@ int print_player_turn(int player_turn){
     putchar('r');
     putchar(' ');
     if(player_turn == 0){
-        putchar('0');
+        putchar('X');
     } else {
-        putchar('1');
+        putchar('Y');
     }
     putchar(':');
     putchar('\n');
@@ -71,13 +71,11 @@ int print_full_board(){
 int main(){
     int number_rows = 6;
     int number_columns = 7;
-    int player = 0;
+    char player = 'X';
     int empty_slots = 9;
-    char player_symbol[2];
     int correct_input;
     int keep_going = 1;
     char game_won = 0;
-    char symbol;
 
     char board[9];
     board[0] = ' ';
@@ -220,7 +218,7 @@ int main(){
         putchar('+');
         putchar('\n');
 
-        print_player_turn(player);
+        print_player_turn(player - 'X');
         x = getchar();
         y = getchar();
         getchar();
@@ -237,160 +235,106 @@ int main(){
             empty_slots = empty_slots - 1;
             if(x == '0'){
                 if(y == '0'){
-                    if(player == 0){
-                        symbol = 'X';
-                        board[0] = symbol;
-                    } else {
-                        symbol = 'Y';
-                        board[0] = symbol;
+                    board[0] = player;
+                    if(board[1] == player && board[2] == player){
+                        game_won = player;
                     }
-                    if(board[1] == symbol && board[2] == symbol){
-                        game_won = symbol;
+                    if(board[3] == player && board[6] == player){
+                        game_won = player;
                     }
-                    if(board[3] == symbol && board[6] == symbol){
-                        game_won = symbol;
-                    }
-                    if(board[4] == symbol && board[8] == symbol){
-                        game_won = symbol;
+                    if(board[4] == player && board[8] == player){
+                        game_won = player;
                     }
                 }
                 if(y == '1'){
-                    if(player == 0){
-                        symbol = 'X';
-                        board[1] = symbol;
-                    } else {
-                        symbol = 'Y';
-                        board[1] = symbol;
-                    } 
-                    if(board[0] == symbol && board[2] == symbol){
-                        game_won = symbol;
+                    board[1] = player;
+                    if(board[0] == player && board[2] == player){
+                        game_won = player;
                     }
-                    if(board[4] == symbol && board[7] == symbol){
-                        game_won = symbol;
+                    if(board[4] == player && board[7] == player){
+                        game_won = player;
                     }
                 }
                 if (y == '2'){
-                    if(player == 0){
-                        symbol = 'X';
-                        board[2] = symbol;
-                    } else {
-                        symbol = 'Y';
-                        board[2] = symbol;
+                    board[2] = player;
+                    if(board[0] == player && board[1] == player){
+                        game_won = player;
                     }
-                    if(board[0] == symbol && board[1] == symbol){
-                        game_won = symbol;
+                    if(board[5] == player && board[8] == player){
+                        game_won = player;
                     }
-                    if(board[5] == symbol && board[8] == symbol){
-                        game_won = symbol;
-                    }
-                    if(board[4] == symbol && board[6] == symbol){
-                        game_won = symbol;
+                    if(board[4] == player && board[6] == player){
+                        game_won = player;
                     }
                 }
             }  
             if(x == '1'){
                 if(y == '0'){
-                    if(player == 0){
-                        symbol = 'X';
-                        board[3] = symbol;
-                    } else {
-                        symbol = 'Y';
-                        board[3] = symbol;
-                    } 
-                    if(board[4] == symbol && board[5] == symbol){
-                        game_won = symbol;
+                    board[3] = player;
+                    if(board[4] == player && board[5] == player){
+                        game_won = player;
                     }
-                    if(board[0] == symbol && board[6] == symbol){
-                        game_won = symbol;
+                    if(board[0] == player && board[6] == player){
+                        game_won = player;
                     }
                 }
                 if(y == '1'){
-                    if(player == 0){
-                        symbol = 'X';
-                        board[4] = symbol;
-                    } else {
-                        symbol = 'Y';
-                        board[4] = symbol;
+                    board[4] = player;
+                    if(board[3] == player && board[5] == player){
+                        game_won = player;
                     }
-                    if(board[3] == symbol && board[5] == symbol){
-                        game_won = symbol;
+                    if(board[1] == player && board[7] == player){
+                        game_won = player;
                     }
-                    if(board[1] == symbol && board[7] == symbol){
-                        game_won = symbol;
+                    if(board[0] == player && board[8] == player){
+                        game_won = player;
                     }
-                    if(board[0] == symbol && board[8] == symbol){
-                        game_won = symbol;
-                    }
-                    if(board[2] == symbol && board[6] == symbol){
-                        game_won = symbol;
+                    if(board[2] == player && board[6] == player){
+                        game_won = player;
                     }
                 }
                 if (y == '2'){
-                    if(player == 0){
-                        symbol = 'X';
-                        board[5] = symbol;
-                    } else {
-                        symbol = 'Y';
-                        board[5] = symbol;
-                    } 
-                    if(board[3] == symbol && board[4] == symbol){
-                        game_won = symbol;
+                    board[5] = player;
+                    if(board[3] == player && board[4] == player){
+                        game_won = player;
                     }
-                    if(board[2] == symbol && board[8] == symbol){
-                        game_won = symbol;
+                    if(board[2] == player && board[8] == player){
+                        game_won = player;
                     }
                }
             }
             if(x == '2'){
                 if(y == '0'){
-                    if(player == 0){
-                        symbol = 'X';
-                        board[6] = symbol;
-                    } else {
-                        symbol = 'Y';
-                        board[6] = symbol;
-                    } 
-                    if(board[7] == symbol && board[8] == symbol){
-                        game_won = symbol;
+                    board[6] = player;
+                    if(board[7] == player && board[8] == player){
+                        game_won = player;
                     }
-                    if(board[0] == symbol && board[3] == symbol){
-                        game_won = symbol;
+                    if(board[0] == player && board[3] == player){
+                        game_won = player;
                     }
-                    if(board[4] == symbol && board[2] == symbol){
-                        game_won = symbol;
+                    if(board[4] == player && board[2] == player){
+                        game_won = player;
                     }
                 } 
                 if(y == '1'){
-                    if(player == 0){
-                        symbol = 'X';
-                        board[7] = symbol;
-                    } else {
-                        symbol = 'Y';
-                        board[7] = symbol;
-                    } 
-                    if(board[6] == symbol && board[8] == symbol){
-                        game_won = symbol;
+                    board[7] = player;
+                    if(board[6] == player && board[8] == player){
+                        game_won = player;
                     }
-                    if(board[1] == symbol && board[4] == symbol){
-                        game_won = symbol;
+                    if(board[1] == player && board[4] == player){
+                        game_won = player;
                     }
                 } 
                 if (y == '2'){
-                    if(player == 0){
-                        symbol = 'X';
-                        board[8] = symbol;
-                    } else {
-                        symbol = 'Y';
-                        board[8] = symbol;
-                    } 
-                    if(board[6] == symbol && board[7] == symbol){
-                        game_won = symbol;
+                    board[8] = player;
+                    if(board[6] == player && board[7] == player){
+                        game_won = player;
                     }
-                    if(board[2] == symbol && board[5] == symbol){
-                        game_won = symbol;
+                    if(board[2] == player && board[5] == player){
+                        game_won = player;
                     }
-                    if(board[0] == symbol && board[4] == symbol){
-                        game_won = symbol;
+                    if(board[0] == player && board[4] == player){
+                        game_won = player;
                     }
                 }
 
@@ -403,7 +347,11 @@ int main(){
                 keep_going = 0;
                 print_full_board();
             }
-            player = (player + 1) % 2;
+            if(player == 'X'){
+                player = 'O';
+            } else {
+                player = 'X';
+            }
         }
     }
     putchar('\n');

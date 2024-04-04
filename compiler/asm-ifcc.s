@@ -82,12 +82,12 @@ print_player_turn:
 	movzbl %al, %eax
 	cmpl $1, %eax
 	jne .L7
-	movb $48, %al
+	movb $88, %al
 	movl %eax, %edi
 	call putchar@PLT
 	jmp .L6
 .L7:
-	movb $49, %al
+	movb $89, %al
 	movl %eax, %edi
 	call putchar@PLT
 	jmp .L6
@@ -218,41 +218,41 @@ print_full_board:
 main:
 	pushq %rbp
 	movq %rsp, %rbp
-	subq $160, %rsp
+	subq $128, %rsp
 .L13:
 	movl $6, %eax
 	movl %eax, -4(%rbp)
 	movl $7, %eax
 	movl %eax, -12(%rbp)
-	movl $0, %eax
-	movl %eax, -20(%rbp)
+	movb $88, %al
+	movb %al, -17(%rbp)
 	movl $9, %eax
-	movl %eax, -28(%rbp)
+	movl %eax, -22(%rbp)
 	movl $1, %eax
-	movl %eax, -47(%rbp)
+	movl %eax, -38(%rbp)
 	movl $0, %eax
+	movb %al, -43(%rbp)
+	movb $32, %al
+	movb %al, -45(%rbp)
+	movb $32, %al
+	movb %al, -46(%rbp)
+	movb $32, %al
+	movb %al, -48(%rbp)
+	movb $32, %al
+	movb %al, -47(%rbp)
+	movb $32, %al
+	movb %al, -49(%rbp)
+	movb $32, %al
+	movb %al, -50(%rbp)
+	movb $32, %al
+	movb %al, -51(%rbp)
+	movb $32, %al
 	movb %al, -52(%rbp)
 	movb $32, %al
-	movb %al, -56(%rbp)
-	movb $32, %al
-	movb %al, -57(%rbp)
-	movb $32, %al
-	movb %al, -59(%rbp)
-	movb $32, %al
-	movb %al, -58(%rbp)
-	movb $32, %al
-	movb %al, -60(%rbp)
-	movb $32, %al
-	movb %al, -61(%rbp)
-	movb $32, %al
-	movb %al, -62(%rbp)
-	movb $32, %al
-	movb %al, -63(%rbp)
-	movb $32, %al
-	movb %al, -64(%rbp)
+	movb %al, -53(%rbp)
 	jmp .L14
 .L14:
-	movl -47(%rbp), %eax
+	movl -38(%rbp), %eax
 	movl %eax, %ecx
 	movl $1, %eax
 	cmpl %eax, %ecx
@@ -263,7 +263,7 @@ main:
 	jmp .L16
 .L15:
 	movl $1, %eax
-	movl %eax, -39(%rbp)
+	movl %eax, -30(%rbp)
 	movb $66, %al
 	movl %eax, %edi
 	call putchar@PLT
@@ -378,7 +378,7 @@ main:
 	movb $32, %al
 	movl %eax, %edi
 	call putchar@PLT
-	movzbl -56(%rbp), %eax
+	movzbl -45(%rbp), %eax
 	movl %eax, %edi
 	call putchar@PLT
 	movb $32, %al
@@ -390,7 +390,7 @@ main:
 	movb $32, %al
 	movl %eax, %edi
 	call putchar@PLT
-	movzbl -57(%rbp), %eax
+	movzbl -46(%rbp), %eax
 	movl %eax, %edi
 	call putchar@PLT
 	movb $32, %al
@@ -402,7 +402,7 @@ main:
 	movb $32, %al
 	movl %eax, %edi
 	call putchar@PLT
-	movzbl -58(%rbp), %eax
+	movzbl -47(%rbp), %eax
 	movl %eax, %edi
 	call putchar@PLT
 	movb $32, %al
@@ -468,7 +468,7 @@ main:
 	movb $32, %al
 	movl %eax, %edi
 	call putchar@PLT
-	movzbl -59(%rbp), %eax
+	movzbl -48(%rbp), %eax
 	movl %eax, %edi
 	call putchar@PLT
 	movb $32, %al
@@ -480,7 +480,7 @@ main:
 	movb $32, %al
 	movl %eax, %edi
 	call putchar@PLT
-	movzbl -60(%rbp), %eax
+	movzbl -49(%rbp), %eax
 	movl %eax, %edi
 	call putchar@PLT
 	movb $32, %al
@@ -492,7 +492,7 @@ main:
 	movb $32, %al
 	movl %eax, %edi
 	call putchar@PLT
-	movzbl -61(%rbp), %eax
+	movzbl -50(%rbp), %eax
 	movl %eax, %edi
 	call putchar@PLT
 	movb $32, %al
@@ -558,7 +558,7 @@ main:
 	movb $32, %al
 	movl %eax, %edi
 	call putchar@PLT
-	movzbl -62(%rbp), %eax
+	movzbl -51(%rbp), %eax
 	movl %eax, %edi
 	call putchar@PLT
 	movb $32, %al
@@ -570,7 +570,7 @@ main:
 	movb $32, %al
 	movl %eax, %edi
 	call putchar@PLT
-	movzbl -63(%rbp), %eax
+	movzbl -52(%rbp), %eax
 	movl %eax, %edi
 	call putchar@PLT
 	movb $32, %al
@@ -582,7 +582,7 @@ main:
 	movb $32, %al
 	movl %eax, %edi
 	call putchar@PLT
-	movzbl -64(%rbp), %eax
+	movzbl -53(%rbp), %eax
 	movl %eax, %edi
 	call putchar@PLT
 	movb $32, %al
@@ -639,19 +639,24 @@ main:
 	movb $10, %al
 	movl %eax, %edi
 	call putchar@PLT
-	movl -20(%rbp), %eax
+	movb -17(%rbp), %al
+	movl %eax, -74(%rbp)
+	movb $88, %al
+	movl %eax, %ebx
+	movl -74(%rbp), %eax
+	subl %ebx, %eax
 	movl %eax, %edi
 	call print_player_turn
 	call getchar@PLT
-	movl %eax, -69(%rbp)
+	movl %eax, -58(%rbp)
 	call getchar@PLT
-	movl %eax, -77(%rbp)
+	movl %eax, -66(%rbp)
 	call getchar@PLT
-	movl -69(%rbp), %eax
-	movl %eax, -85(%rbp)
+	movl -58(%rbp), %eax
+	movl %eax, -82(%rbp)
 	movb $48, %al
 	movl %eax, %ebx
-	movl -85(%rbp), %eax
+	movl -82(%rbp), %eax
 	subl %ebx, %eax
 	movl %eax, %ecx
 	movl $0, %eax
@@ -659,11 +664,11 @@ main:
 	setl %al
 	movzbl %al, %eax
 	je .L17
-	movl -69(%rbp), %eax
-	movl %eax, -93(%rbp)
+	movl -58(%rbp), %eax
+	movl %eax, -90(%rbp)
 	movb $48, %al
 	movl %eax, %ebx
-	movl -93(%rbp), %eax
+	movl -90(%rbp), %eax
 	subl %ebx, %eax
 	movl %eax, %ecx
 	movl $2, %eax
@@ -674,7 +679,7 @@ main:
 	jne .L19
 	call print_wrong_input
 	movl $0, %eax
-	movl %eax, -39(%rbp)
+	movl %eax, -30(%rbp)
 	jmp .L19
 	jmp .L14
 .L17:
@@ -682,11 +687,11 @@ main:
 	jmp .L18
 .L18:
 .L19:
-	movl -77(%rbp), %eax
-	movl %eax, -101(%rbp)
+	movl -66(%rbp), %eax
+	movl %eax, -98(%rbp)
 	movb $48, %al
 	movl %eax, %ebx
-	movl -101(%rbp), %eax
+	movl -98(%rbp), %eax
 	subl %ebx, %eax
 	movl %eax, %ecx
 	movl $0, %eax
@@ -694,11 +699,11 @@ main:
 	setl %al
 	movzbl %al, %eax
 	je .L20
-	movl -77(%rbp), %eax
-	movl %eax, -109(%rbp)
+	movl -66(%rbp), %eax
+	movl %eax, -106(%rbp)
 	movb $48, %al
 	movl %eax, %ebx
-	movl -109(%rbp), %eax
+	movl -106(%rbp), %eax
 	subl %ebx, %eax
 	movl %eax, %ecx
 	movl $2, %eax
@@ -709,7 +714,7 @@ main:
 	jne .L22
 	call print_wrong_input
 	movl $0, %eax
-	movl %eax, -39(%rbp)
+	movl %eax, -30(%rbp)
 	jmp .L22
 	jmp .L21
 .L20:
@@ -717,7 +722,7 @@ main:
 	jmp .L21
 .L21:
 .L22:
-	movl -39(%rbp), %eax
+	movl -30(%rbp), %eax
 	movl %eax, %ecx
 	movl $1, %eax
 	cmpl %eax, %ecx
@@ -725,14 +730,14 @@ main:
 	movzbl %al, %eax
 	cmpl $1, %eax
 	jne .L23
-	movl -28(%rbp), %eax
-	movl %eax, -117(%rbp)
+	movl -22(%rbp), %eax
+	movl %eax, -114(%rbp)
 	movl $1, %eax
 	movl %eax, %ebx
-	movl -117(%rbp), %eax
+	movl -114(%rbp), %eax
 	subl %ebx, %eax
-	movl %eax, -28(%rbp)
-	movl -69(%rbp), %eax
+	movl %eax, -22(%rbp)
+	movl -58(%rbp), %eax
 	movl %eax, %ecx
 	movb $48, %al
 	cmpl %eax, %ecx
@@ -740,7 +745,7 @@ main:
 	movzbl %al, %eax
 	cmpl $1, %eax
 	jne .L24
-	movl -77(%rbp), %eax
+	movl -66(%rbp), %eax
 	movl %eax, %ecx
 	movb $48, %al
 	cmpl %eax, %ecx
@@ -748,172 +753,171 @@ main:
 	movzbl %al, %eax
 	cmpl $1, %eax
 	jne .L25
-	movl -20(%rbp), %eax
+	movb -17(%rbp), %al
+	movb %al, -45(%rbp)
+	movzbl -46(%rbp), %eax
 	movl %eax, %ecx
-	movl $0, %eax
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L26
+	movzbl -47(%rbp), %eax
+	movl %eax, %ecx
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L27
-	movb $88, %al
-	movb %al, -54(%rbp)
-	movb -54(%rbp), %al
-	movb %al, -56(%rbp)
-	jmp .L26
-	jmp .L14
-.L27:
-	movb $89, %al
-	movb %al, -54(%rbp)
-	movb -54(%rbp), %al
-	movb %al, -56(%rbp)
-	jmp .L26
-.L26:
-	movzbl -57(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
 	jne .L28
-	movzbl -58(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	cmpl $1, %eax
-	jne .L30
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
-	jmp .L30
-	jmp .L29
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
+	jmp .L28
+	jmp .L27
+.L26:
+	movl $0, %eax
+	jmp .L27
+.L27:
 .L28:
-	movl $0, %eax
-	jmp .L29
-.L29:
-.L30:
-	movzbl -59(%rbp), %eax
+	movzbl -48(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
+	jne .L29
+	movzbl -51(%rbp), %eax
+	movl %eax, %ecx
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
 	jne .L31
-	movzbl -62(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	cmpl $1, %eax
-	jne .L33
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
-	jmp .L33
-	jmp .L32
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
+	jmp .L31
+	jmp .L30
+.L29:
+	movl $0, %eax
+	jmp .L30
+.L30:
 .L31:
-	movl $0, %eax
-	jmp .L32
-.L32:
-.L33:
-	movzbl -60(%rbp), %eax
+	movzbl -49(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
-	jne .L34
-	movzbl -64(%rbp), %eax
+	jne .L32
+	movzbl -53(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L36
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
-	jmp .L36
-	jmp .L35
-.L34:
+	jne .L34
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
+	jmp .L34
+	jmp .L33
+.L32:
 	movl $0, %eax
-	jmp .L35
-.L35:
-.L36:
+	jmp .L33
+.L33:
+.L34:
 	jmp .L25
 	jmp .L25
 .L25:
-	movl -77(%rbp), %eax
+	movl -66(%rbp), %eax
 	movl %eax, %ecx
 	movb $49, %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L37
-	movl -20(%rbp), %eax
+	jne .L35
+	movb -17(%rbp), %al
+	movb %al, -46(%rbp)
+	movzbl -45(%rbp), %eax
 	movl %eax, %ecx
-	movl $0, %eax
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L36
+	movzbl -47(%rbp), %eax
+	movl %eax, %ecx
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L39
-	movb $88, %al
-	movb %al, -54(%rbp)
-	movb -54(%rbp), %al
-	movb %al, -57(%rbp)
+	jne .L38
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
 	jmp .L38
-	jmp .L24
-.L39:
-	movb $89, %al
-	movb %al, -54(%rbp)
-	movb -54(%rbp), %al
-	movb %al, -57(%rbp)
-	jmp .L38
+	jmp .L37
+.L36:
+	movl $0, %eax
+	jmp .L37
+.L37:
 .L38:
-	movzbl -56(%rbp), %eax
+	movzbl -49(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
-	jne .L40
-	movzbl -58(%rbp), %eax
+	jne .L39
+	movzbl -52(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L41
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
+	jmp .L41
+	jmp .L40
+.L39:
+	movl $0, %eax
+	jmp .L40
+.L40:
+.L41:
+	jmp .L35
+	jmp .L35
+.L35:
+	movl -66(%rbp), %eax
+	movl %eax, %ecx
+	movb $50, %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
 	jne .L42
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
-	jmp .L42
-	jmp .L41
-.L40:
-	movl $0, %eax
-	jmp .L41
-.L41:
-.L42:
-	movzbl -60(%rbp), %eax
+	movb -17(%rbp), %al
+	movb %al, -47(%rbp)
+	movzbl -45(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	jne .L43
-	movzbl -63(%rbp), %eax
+	movzbl -46(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
 	jne .L45
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
 	jmp .L45
 	jmp .L44
 .L43:
@@ -921,55 +925,47 @@ main:
 	jmp .L44
 .L44:
 .L45:
-	jmp .L37
-	jmp .L37
-.L37:
-	movl -77(%rbp), %eax
+	movzbl -50(%rbp), %eax
 	movl %eax, %ecx
-	movb $50, %al
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
-	cmpl $1, %eax
 	jne .L46
-	movl -20(%rbp), %eax
+	movzbl -53(%rbp), %eax
 	movl %eax, %ecx
-	movl $0, %eax
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
 	jne .L48
-	movb $88, %al
-	movb %al, -54(%rbp)
-	movb -54(%rbp), %al
-	movb %al, -58(%rbp)
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
+	jmp .L48
 	jmp .L47
-	jmp .L24
-.L48:
-	movb $89, %al
-	movb %al, -54(%rbp)
-	movb -54(%rbp), %al
-	movb %al, -58(%rbp)
+.L46:
+	movl $0, %eax
 	jmp .L47
 .L47:
-	movzbl -56(%rbp), %eax
+.L48:
+	movzbl -49(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	jne .L49
-	movzbl -57(%rbp), %eax
+	movzbl -51(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
 	jne .L51
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
 	jmp .L51
 	jmp .L50
 .L49:
@@ -977,218 +973,217 @@ main:
 	jmp .L50
 .L50:
 .L51:
-	movzbl -61(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	jne .L52
-	movzbl -64(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	cmpl $1, %eax
-	jne .L54
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
-	jmp .L54
-	jmp .L53
-.L52:
-	movl $0, %eax
-	jmp .L53
-.L53:
-.L54:
-	movzbl -60(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	jne .L55
-	movzbl -62(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	cmpl $1, %eax
-	jne .L57
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
-	jmp .L57
-	jmp .L56
-.L55:
-	movl $0, %eax
-	jmp .L56
-.L56:
-.L57:
-	jmp .L46
-	jmp .L46
-.L46:
+	jmp .L42
+	jmp .L42
+.L42:
 	jmp .L24
 	jmp .L24
 .L24:
-	movl -69(%rbp), %eax
+	movl -58(%rbp), %eax
 	movl %eax, %ecx
 	movb $49, %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L58
-	movl -77(%rbp), %eax
+	jne .L52
+	movl -66(%rbp), %eax
 	movl %eax, %ecx
 	movb $48, %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
+	jne .L53
+	movb -17(%rbp), %al
+	movb %al, -48(%rbp)
+	movzbl -49(%rbp), %eax
+	movl %eax, %ecx
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L54
+	movzbl -50(%rbp), %eax
+	movl %eax, %ecx
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L56
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
+	jmp .L56
+	jmp .L55
+.L54:
+	movl $0, %eax
+	jmp .L55
+.L55:
+.L56:
+	movzbl -45(%rbp), %eax
+	movl %eax, %ecx
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L57
+	movzbl -51(%rbp), %eax
+	movl %eax, %ecx
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
 	jne .L59
-	movl -20(%rbp), %eax
-	movl %eax, %ecx
-	movl $0, %eax
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	cmpl $1, %eax
-	jne .L61
-	movb $88, %al
-	movb %al, -54(%rbp)
-	movb -54(%rbp), %al
-	movb %al, -59(%rbp)
-	jmp .L60
-	jmp .L23
-.L61:
-	movb $89, %al
-	movb %al, -54(%rbp)
-	movb -54(%rbp), %al
-	movb %al, -59(%rbp)
-	jmp .L60
-.L60:
-	movzbl -60(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	jne .L62
-	movzbl -61(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	cmpl $1, %eax
-	jne .L64
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
-	jmp .L64
-	jmp .L63
-.L62:
-	movl $0, %eax
-	jmp .L63
-.L63:
-.L64:
-	movzbl -56(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	jne .L65
-	movzbl -62(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	cmpl $1, %eax
-	jne .L67
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
-	jmp .L67
-	jmp .L66
-.L65:
-	movl $0, %eax
-	jmp .L66
-.L66:
-.L67:
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
 	jmp .L59
-	jmp .L59
+	jmp .L58
+.L57:
+	movl $0, %eax
+	jmp .L58
+.L58:
 .L59:
-	movl -77(%rbp), %eax
+	jmp .L53
+	jmp .L53
+.L53:
+	movl -66(%rbp), %eax
 	movl %eax, %ecx
 	movb $49, %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L68
-	movl -20(%rbp), %eax
+	jne .L60
+	movb -17(%rbp), %al
+	movb %al, -49(%rbp)
+	movzbl -48(%rbp), %eax
 	movl %eax, %ecx
-	movl $0, %eax
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L61
+	movzbl -50(%rbp), %eax
+	movl %eax, %ecx
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L70
-	movb $88, %al
-	movb %al, -54(%rbp)
-	movb -54(%rbp), %al
-	movb %al, -60(%rbp)
-	jmp .L69
-	jmp .L58
-.L70:
-	movb $89, %al
-	movb %al, -54(%rbp)
-	movb -54(%rbp), %al
-	movb %al, -60(%rbp)
-	jmp .L69
-.L69:
-	movzbl -59(%rbp), %eax
+	jne .L63
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
+	jmp .L63
+	jmp .L62
+.L61:
+	movl $0, %eax
+	jmp .L62
+.L62:
+.L63:
+	movzbl -46(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
-	jne .L71
-	movzbl -61(%rbp), %eax
+	jne .L64
+	movzbl -52(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L66
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
+	jmp .L66
+	jmp .L65
+.L64:
+	movl $0, %eax
+	jmp .L65
+.L65:
+.L66:
+	movzbl -45(%rbp), %eax
+	movl %eax, %ecx
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L67
+	movzbl -53(%rbp), %eax
+	movl %eax, %ecx
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L69
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
+	jmp .L69
+	jmp .L68
+.L67:
+	movl $0, %eax
+	jmp .L68
+.L68:
+.L69:
+	movzbl -47(%rbp), %eax
+	movl %eax, %ecx
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L70
+	movzbl -51(%rbp), %eax
+	movl %eax, %ecx
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L72
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
+	jmp .L72
+	jmp .L71
+.L70:
+	movl $0, %eax
+	jmp .L71
+.L71:
+.L72:
+	jmp .L60
+	jmp .L60
+.L60:
+	movl -66(%rbp), %eax
+	movl %eax, %ecx
+	movb $50, %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
 	jne .L73
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
-	jmp .L73
-	jmp .L72
-.L71:
-	movl $0, %eax
-	jmp .L72
-.L72:
-.L73:
-	movzbl -57(%rbp), %eax
+	movb -17(%rbp), %al
+	movb %al, -50(%rbp)
+	movzbl -48(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	jne .L74
-	movzbl -63(%rbp), %eax
+	movzbl -49(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
 	jne .L76
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
 	jmp .L76
 	jmp .L75
 .L74:
@@ -1196,23 +1191,23 @@ main:
 	jmp .L75
 .L75:
 .L76:
-	movzbl -56(%rbp), %eax
+	movzbl -47(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	jne .L77
-	movzbl -64(%rbp), %eax
+	movzbl -53(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
 	jne .L79
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
 	jmp .L79
 	jmp .L78
 .L77:
@@ -1220,194 +1215,193 @@ main:
 	jmp .L78
 .L78:
 .L79:
-	movzbl -58(%rbp), %eax
+	jmp .L73
+	jmp .L73
+.L73:
+	jmp .L52
+	jmp .L52
+.L52:
+	movl -58(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb $50, %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
+	cmpl $1, %eax
 	jne .L80
-	movzbl -62(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	cmpl $1, %eax
-	jne .L82
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
-	jmp .L82
-	jmp .L81
-.L80:
-	movl $0, %eax
-	jmp .L81
-.L81:
-.L82:
-	jmp .L68
-	jmp .L68
-.L68:
-	movl -77(%rbp), %eax
-	movl %eax, %ecx
-	movb $50, %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	cmpl $1, %eax
-	jne .L83
-	movl -20(%rbp), %eax
-	movl %eax, %ecx
-	movl $0, %eax
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	cmpl $1, %eax
-	jne .L85
-	movb $88, %al
-	movb %al, -54(%rbp)
-	movb -54(%rbp), %al
-	movb %al, -61(%rbp)
-	jmp .L84
-	jmp .L58
-.L85:
-	movb $89, %al
-	movb %al, -54(%rbp)
-	movb -54(%rbp), %al
-	movb %al, -61(%rbp)
-	jmp .L84
-.L84:
-	movzbl -59(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	jne .L86
-	movzbl -60(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	cmpl $1, %eax
-	jne .L88
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
-	jmp .L88
-	jmp .L87
-.L86:
-	movl $0, %eax
-	jmp .L87
-.L87:
-.L88:
-	movzbl -58(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	jne .L89
-	movzbl -64(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	cmpl $1, %eax
-	jne .L91
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
-	jmp .L91
-	jmp .L90
-.L89:
-	movl $0, %eax
-	jmp .L90
-.L90:
-.L91:
-	jmp .L83
-	jmp .L83
-.L83:
-	jmp .L58
-	jmp .L58
-.L58:
-	movl -69(%rbp), %eax
-	movl %eax, %ecx
-	movb $50, %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	cmpl $1, %eax
-	jne .L92
-	movl -77(%rbp), %eax
+	movl -66(%rbp), %eax
 	movl %eax, %ecx
 	movb $48, %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L93
-	movl -20(%rbp), %eax
+	jne .L81
+	movb -17(%rbp), %al
+	movb %al, -51(%rbp)
+	movzbl -52(%rbp), %eax
 	movl %eax, %ecx
-	movl $0, %eax
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L82
+	movzbl -53(%rbp), %eax
+	movl %eax, %ecx
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L95
-	movb $88, %al
-	movb %al, -54(%rbp)
-	movb -54(%rbp), %al
-	movb %al, -62(%rbp)
-	jmp .L94
-	jmp .L23
-.L95:
-	movb $89, %al
-	movb %al, -54(%rbp)
-	movb -54(%rbp), %al
-	movb %al, -62(%rbp)
-	jmp .L94
-.L94:
-	movzbl -63(%rbp), %eax
+	jne .L84
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
+	jmp .L84
+	jmp .L83
+.L82:
+	movl $0, %eax
+	jmp .L83
+.L83:
+.L84:
+	movzbl -45(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
-	jne .L96
-	movzbl -64(%rbp), %eax
+	jne .L85
+	movzbl -48(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L87
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
+	jmp .L87
+	jmp .L86
+.L85:
+	movl $0, %eax
+	jmp .L86
+.L86:
+.L87:
+	movzbl -49(%rbp), %eax
+	movl %eax, %ecx
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L88
+	movzbl -47(%rbp), %eax
+	movl %eax, %ecx
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L90
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
+	jmp .L90
+	jmp .L89
+.L88:
+	movl $0, %eax
+	jmp .L89
+.L89:
+.L90:
+	jmp .L81
+	jmp .L81
+.L81:
+	movl -66(%rbp), %eax
+	movl %eax, %ecx
+	movb $49, %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L91
+	movb -17(%rbp), %al
+	movb %al, -52(%rbp)
+	movzbl -51(%rbp), %eax
+	movl %eax, %ecx
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L92
+	movzbl -53(%rbp), %eax
+	movl %eax, %ecx
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L94
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
+	jmp .L94
+	jmp .L93
+.L92:
+	movl $0, %eax
+	jmp .L93
+.L93:
+.L94:
+	movzbl -46(%rbp), %eax
+	movl %eax, %ecx
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	jne .L95
+	movzbl -49(%rbp), %eax
+	movl %eax, %ecx
+	movb -17(%rbp), %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L97
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
+	jmp .L97
+	jmp .L96
+.L95:
+	movl $0, %eax
+	jmp .L96
+.L96:
+.L97:
+	jmp .L91
+	jmp .L91
+.L91:
+	movl -66(%rbp), %eax
+	movl %eax, %ecx
+	movb $50, %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
 	jne .L98
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
-	jmp .L98
-	jmp .L97
-.L96:
-	movl $0, %eax
-	jmp .L97
-.L97:
-.L98:
-	movzbl -56(%rbp), %eax
+	movb -17(%rbp), %al
+	movb %al, -53(%rbp)
+	movzbl -51(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	jne .L99
-	movzbl -59(%rbp), %eax
+	movzbl -52(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
 	jne .L101
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
 	jmp .L101
 	jmp .L100
 .L99:
@@ -1415,23 +1409,23 @@ main:
 	jmp .L100
 .L100:
 .L101:
-	movzbl -60(%rbp), %eax
+	movzbl -47(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	jne .L102
-	movzbl -58(%rbp), %eax
+	movzbl -50(%rbp), %eax
 	movl %eax, %ecx
-	movb -54(%rbp), %al
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
 	jne .L104
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
 	jmp .L104
 	jmp .L103
 .L102:
@@ -1439,254 +1433,99 @@ main:
 	jmp .L103
 .L103:
 .L104:
-	jmp .L93
-	jmp .L93
-.L93:
-	movl -77(%rbp), %eax
+	movzbl -45(%rbp), %eax
 	movl %eax, %ecx
-	movb $49, %al
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
-	cmpl $1, %eax
 	jne .L105
-	movl -20(%rbp), %eax
+	movzbl -49(%rbp), %eax
 	movl %eax, %ecx
-	movl $0, %eax
+	movb -17(%rbp), %al
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
 	jne .L107
-	movb $88, %al
-	movb %al, -54(%rbp)
-	movb -54(%rbp), %al
-	movb %al, -63(%rbp)
+	movb -17(%rbp), %al
+	movb %al, -43(%rbp)
+	jmp .L107
 	jmp .L106
-	jmp .L92
-.L107:
-	movb $89, %al
-	movb %al, -54(%rbp)
-	movb -54(%rbp), %al
-	movb %al, -63(%rbp)
+.L105:
+	movl $0, %eax
 	jmp .L106
 .L106:
-	movzbl -62(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	jne .L108
-	movzbl -64(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	cmpl $1, %eax
-	jne .L110
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
-	jmp .L110
-	jmp .L109
-.L108:
-	movl $0, %eax
-	jmp .L109
-.L109:
-.L110:
-	movzbl -57(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	jne .L111
-	movzbl -60(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	cmpl $1, %eax
-	jne .L113
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
-	jmp .L113
-	jmp .L112
-.L111:
-	movl $0, %eax
-	jmp .L112
-.L112:
-.L113:
-	jmp .L105
-	jmp .L105
-.L105:
-	movl -77(%rbp), %eax
-	movl %eax, %ecx
-	movb $50, %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	cmpl $1, %eax
-	jne .L114
-	movl -20(%rbp), %eax
-	movl %eax, %ecx
-	movl $0, %eax
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	cmpl $1, %eax
-	jne .L116
-	movb $88, %al
-	movb %al, -54(%rbp)
-	movb -54(%rbp), %al
-	movb %al, -64(%rbp)
-	jmp .L115
-	jmp .L92
-.L116:
-	movb $89, %al
-	movb %al, -54(%rbp)
-	movb -54(%rbp), %al
-	movb %al, -64(%rbp)
-	jmp .L115
-.L115:
-	movzbl -62(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	jne .L117
-	movzbl -63(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	cmpl $1, %eax
-	jne .L119
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
-	jmp .L119
-	jmp .L118
-.L117:
-	movl $0, %eax
-	jmp .L118
-.L118:
-.L119:
-	movzbl -58(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	jne .L120
-	movzbl -61(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	cmpl $1, %eax
-	jne .L122
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
-	jmp .L122
-	jmp .L121
-.L120:
-	movl $0, %eax
-	jmp .L121
-.L121:
-.L122:
-	movzbl -56(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	jne .L123
-	movzbl -60(%rbp), %eax
-	movl %eax, %ecx
-	movb -54(%rbp), %al
-	cmpl %eax, %ecx
-	sete %al
-	movzbl %al, %eax
-	cmpl $1, %eax
-	jne .L125
-	movb -54(%rbp), %al
-	movb %al, -52(%rbp)
-	jmp .L125
-	jmp .L124
-.L123:
-	movl $0, %eax
-	jmp .L124
-.L124:
-.L125:
-	jmp .L114
-	jmp .L114
-.L114:
-	jmp .L92
-	jmp .L92
-.L92:
-	movb -52(%rbp), %al
+.L107:
+	jmp .L98
+	jmp .L98
+.L98:
+	jmp .L80
+	jmp .L80
+.L80:
+	movb -43(%rbp), %al
 	movl %eax, %ecx
 	movl $0, %eax
 	cmpl %eax, %ecx
 	setne %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L126
+	jne .L108
 	movl $0, %eax
-	movl %eax, -47(%rbp)
-	movb -52(%rbp), %al
-	movl %eax, -125(%rbp)
+	movl %eax, -38(%rbp)
+	movb -43(%rbp), %al
+	movl %eax, -122(%rbp)
 	movb $65, %al
 	movl %eax, %ebx
-	movl -125(%rbp), %eax
+	movl -122(%rbp), %eax
 	subl %ebx, %eax
 	movl %eax, %edi
 	call print_game_won
-	jmp .L126
+	jmp .L108
 	jmp .L23
-.L126:
-	movl -28(%rbp), %eax
+.L108:
+	movl -22(%rbp), %eax
 	movl %eax, %ecx
 	movl $0, %eax
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
-	jne .L127
-	movb -52(%rbp), %al
+	jne .L109
+	movb -43(%rbp), %al
 	movl %eax, %ecx
 	movl $0, %eax
 	cmpl %eax, %ecx
 	sete %al
 	movzbl %al, %eax
 	cmpl $1, %eax
-	jne .L129
+	jne .L111
 	movl $0, %eax
-	movl %eax, -47(%rbp)
+	movl %eax, -38(%rbp)
 	call print_full_board
-	jmp .L129
-	jmp .L128
-.L127:
+	jmp .L111
+	jmp .L110
+.L109:
 	movl $0, %eax
-	jmp .L128
-.L128:
-.L129:
-	movl -20(%rbp), %eax
-	movl %eax, -133(%rbp)
-	movl $1, %eax
-	addl -133(%rbp), %eax
-	movl %eax, -141(%rbp)
-	movl $2, %eax
-	movl %eax, %ebx
-	movl -141(%rbp), %eax
-	cltd
-	idivl %ebx
-	movl %edx, %eax
-	movl %eax, -20(%rbp)
+	jmp .L110
+.L110:
+.L111:
+	movb -17(%rbp), %al
+	movl %eax, %ecx
+	movb $88, %al
+	cmpl %eax, %ecx
+	sete %al
+	movzbl %al, %eax
+	cmpl $1, %eax
+	jne .L113
+	movb $79, %al
+	movb %al, -17(%rbp)
+	jmp .L112
+	jmp .L23
+.L113:
+	movb $88, %al
+	movb %al, -17(%rbp)
+	jmp .L112
+.L112:
 	jmp .L23
 	jmp .L23
 .L23:
@@ -1788,7 +1627,7 @@ main:
 	movb $32, %al
 	movl %eax, %edi
 	call putchar@PLT
-	movzbl -56(%rbp), %eax
+	movzbl -45(%rbp), %eax
 	movl %eax, %edi
 	call putchar@PLT
 	movb $32, %al
@@ -1800,7 +1639,7 @@ main:
 	movb $32, %al
 	movl %eax, %edi
 	call putchar@PLT
-	movzbl -57(%rbp), %eax
+	movzbl -46(%rbp), %eax
 	movl %eax, %edi
 	call putchar@PLT
 	movb $32, %al
@@ -1812,91 +1651,7 @@ main:
 	movb $32, %al
 	movl %eax, %edi
 	call putchar@PLT
-	movzbl -58(%rbp), %eax
-	movl %eax, %edi
-	call putchar@PLT
-	movb $32, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $124, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $10, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $43, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $45, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $45, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $45, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $45, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $45, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $45, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $45, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $45, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $45, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $45, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $45, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $43, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $10, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $124, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $32, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movzbl -59(%rbp), %eax
-	movl %eax, %edi
-	call putchar@PLT
-	movb $32, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $124, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $32, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movzbl -60(%rbp), %eax
-	movl %eax, %edi
-	call putchar@PLT
-	movb $32, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $124, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movb $32, %al
-	movl %eax, %edi
-	call putchar@PLT
-	movzbl -61(%rbp), %eax
+	movzbl -47(%rbp), %eax
 	movl %eax, %edi
 	call putchar@PLT
 	movb $32, %al
@@ -1956,7 +1711,7 @@ main:
 	movb $32, %al
 	movl %eax, %edi
 	call putchar@PLT
-	movzbl -62(%rbp), %eax
+	movzbl -48(%rbp), %eax
 	movl %eax, %edi
 	call putchar@PLT
 	movb $32, %al
@@ -1968,7 +1723,7 @@ main:
 	movb $32, %al
 	movl %eax, %edi
 	call putchar@PLT
-	movzbl -63(%rbp), %eax
+	movzbl -49(%rbp), %eax
 	movl %eax, %edi
 	call putchar@PLT
 	movb $32, %al
@@ -1980,7 +1735,91 @@ main:
 	movb $32, %al
 	movl %eax, %edi
 	call putchar@PLT
-	movzbl -64(%rbp), %eax
+	movzbl -50(%rbp), %eax
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $124, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $10, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $43, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $45, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $43, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $10, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $124, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movzbl -51(%rbp), %eax
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $124, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movzbl -52(%rbp), %eax
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $124, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movb $32, %al
+	movl %eax, %edi
+	call putchar@PLT
+	movzbl -53(%rbp), %eax
 	movl %eax, %edi
 	call putchar@PLT
 	movb $32, %al
