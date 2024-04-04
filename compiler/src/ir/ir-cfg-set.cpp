@@ -29,7 +29,7 @@ IR::CFG * IR::CfgSet::get_cfg_by_fname(string fname) {
         }
     }
 
-    throw runtime_error("Function " + fname + " called but not declared");
+    throw runtime_error("function not declared");
 }
 
 /** 

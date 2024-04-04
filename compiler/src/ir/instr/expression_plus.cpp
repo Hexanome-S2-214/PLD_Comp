@@ -4,7 +4,6 @@ namespace IR
 {
     void IRInstrExprPlus::gen_asm_x86(ostream& o)
     {
-        cerr <<"1" << endl;
         if (src->get_size() != dest->get_size())
         {
             get_error_reporter()->reportError(
@@ -29,9 +28,7 @@ namespace IR
                 op = "addq";
                 break;
         }
-        cerr <<"2" << endl;
         o << "\t" << op << " "<< src->get_asm_str() << ", " << dest->get_asm_str() << endl;
-        cerr <<"3" << endl;
     }
     
     void IRInstrExprPlus::gen_asm_arm(ostream& o)

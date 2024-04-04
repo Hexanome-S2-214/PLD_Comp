@@ -35,7 +35,7 @@ fparam_decla2
      ;
 
 decla_function
-     : ('int' | 'void') fname=VAR '(' fparam_decla ')' struct_bloc
+     : return_type=('int' | 'void') fname=VAR '(' fparam_decla ')' struct_bloc
      ;
 
 functionCallRule

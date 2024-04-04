@@ -20,7 +20,6 @@ IR::BasicBlock::~BasicBlock()
 
 void IR::BasicBlock::add_instr(IR::IRBase * instr)
 {
-    cerr << "add instr" << endl;
     IRInstrComposition * instr_comp_cast = dynamic_cast<IRInstrComposition *>(instr);
 
     if (!write_mode) {
@@ -30,12 +29,10 @@ void IR::BasicBlock::add_instr(IR::IRBase * instr)
     //write_mode : to handle returns anywhere
     if (instr_comp_cast != nullptr)
     {
-        cerr << "instr comp" << endl;
         for (IR::IRInstr * instr : instr_comp_cast->get_instrs())
         {
             add_instr(instr);
         }
-        cerr << "add instr end 2" << endl;
         
         return;
     }
@@ -44,13 +41,8 @@ void IR::BasicBlock::add_instr(IR::IRBase * instr)
 
     if (instr_cast != nullptr)
     {
-        cerr << "instr simple" << endl;
         instr->set_parent(this);
-        cerr << "parent set" << endl;
         instrs.push_back(static_cast<IR::IRInstr*>(instr));
-        cerr << "instr pushed back" << endl;
-
-        cerr << "add instr end 3" << endl;
         return;
     }
 }
@@ -60,14 +52,12 @@ void IR::BasicBlock::add_instr(IR::IRBase * instr)
  * Useful for optimization
 */
 void IR::BasicBlock::remove_last_instructions(int n) {
-    cerr << "remove_last_instruction" << endl;
     for (int i=0; i < n; ++i) {
         IR::IRInstr * last_instr = instrs.back();
         delete last_instr;
         instrs.pop_back();
 
     }
-    cerr << "remove_last_instruction out" << endl;
 }
 
 list<IR::IRInstr *> * IR::BasicBlock::get_instrs()

@@ -32,19 +32,19 @@
 //global to retrieve informations when expressions are evaluated
 VisitorFlags vf;
 
-void printflags() {
-    cerr << "Flags udpated" << endl;
-    cerr << "\t size : " << vf.type_size << endl;
-    cerr << "\t const_flag : " << vf.f_const << endl;
-    cerr << "\t value : " << vf.value << endl;
-}
-
-
 ////////////////////////////////////////////
 // RETURN
 ////////////////////////////////////////////
 
 antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *ctx) {
+
+    //detection of return inside a return-void function
+    if (cfg->get_no_return()) {
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::WARNING, "‘return’ with a value, in function returning void", ctx)
+        );
+    }
+
     this->visit(ctx->rvalue());
 
     //Jump to epilogue block in any case
@@ -58,7 +58,6 @@ antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *
 
     //Disable writing in the block AFTER adding jmp instruction
     this->cfg->get_current_bb()->set_write_mode(false);
-    cerr << "block return OK" << endl;
 
     return 0;
 }
@@ -89,10 +88,8 @@ antlrcpp::Any IRVisitor::visitDeclStdRule(ifccParser::DeclStdRuleContext *ctx)
     cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx);
 
     //update flags
-    cerr << "flags decl" << endl;
     vf.type_size = type.size;
     vf.f_const = false;
-    printflags();
 
     return 0;
 }
@@ -131,10 +128,8 @@ antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
     );
 
     //update flags
-    cerr << "flags declaff" << endl;
     vf.type_size = IR::Int.size;
     vf.f_const = false;
-    printflags();
 
     return 0;
 }
@@ -144,7 +139,9 @@ antlrcpp::Any IRVisitor::visitAffectationRule(ifccParser::AffectationRuleContext
     IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
 
     if (symbol->const_var) {
-        throw runtime_error("Const value cannot be used as left-value");
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "const’ value cannot be used as left-value", ctx)
+        );
     }
 
     this->visit(ctx->rvalue());
@@ -156,10 +153,8 @@ antlrcpp::Any IRVisitor::visitAffectationRule(ifccParser::AffectationRuleContext
     );
 
     //update flags
-    cerr << "flags affect" << endl;
     vf.type_size = IR::Int.size;
     vf.f_const = false;
-    printflags();
 
     return 0;
 }
@@ -171,7 +166,9 @@ antlrcpp::Any IRVisitor::visitAffectationRule2(ifccParser::AffectationRule2Conte
     IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
 
     if (symbol->const_var) {
-        throw runtime_error("Const value cannot be used as left-value");
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "const’ value cannot be used as left-value", ctx)
+        );
     }
 
     cfg->add_instr(
@@ -181,10 +178,8 @@ antlrcpp::Any IRVisitor::visitAffectationRule2(ifccParser::AffectationRule2Conte
     );
 
     //update flags
-    cerr << "flags affect2" << endl;
     vf.type_size = IR::Int.size;
     vf.f_const = false;
-    printflags();
 
     return 0;
 }
@@ -209,18 +204,15 @@ antlrcpp::Any IRVisitor::visitExprCharacter(ifccParser::ExprCharacterContext *ct
         );
 
         //update flags
-        cerr << "flags expr char" << endl;
         vf.type_size = IR::Char.size;
         vf.f_const = true;
         vf.value = ascii_value;
-        printflags();
     }
 
     return 0;
 }
 
 antlrcpp::Any IRVisitor::visitExprNum(ifccParser::ExprNumContext *ctx){
-    cerr << "01" << endl;
     cfg->add_instr(
         (new IR::IRInstrExprCst)
             ->set_value(
@@ -230,14 +222,11 @@ antlrcpp::Any IRVisitor::visitExprNum(ifccParser::ExprNumContext *ctx){
             )
             ->set_ctx(ctx)
     );
-    cerr << "02" << endl;
 
     //update flags
-    cerr << "flags expr num" << endl;
     vf.type_size = IR::Int.size;
     vf.f_const = true;
     vf.value = stoi(ctx->NUM()->getText());
-    printflags();
 
     return 0;
 }
@@ -253,13 +242,11 @@ antlrcpp::Any IRVisitor::visitExprVar(ifccParser::ExprVarContext *ctx)
     );
 
     //update flags
-    cerr << "flags var" << endl;
     vf.type_size = var->type.size;
     vf.f_const = var->const_var;
     if (var->const_var) {
         vf.value = var->value;
     }
-    printflags();
 
     return 0;
 }
@@ -276,28 +263,21 @@ antlrcpp::Any IRVisitor::visitExprSumSous(ifccParser::ExprSumSousContext *ctx) {
     this->visit(ctx->expr(0));
     const_left = vf.f_const;
     val_left = vf.value;
-    cerr << "Somme/sous : left visisited" << endl;
 
-    cerr << "1" << endl;
     IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
-    cerr << "2" << endl;
     cfg->add_instr(
         (new IR::IRInstrAssign)
             ->set_symbol(varTemp)
             ->set_ctx(ctx)
     );
-    cerr << "4" << endl;
 
     this->visit(ctx->expr(1));
-    cerr << "5" << endl;
     const_right = vf.f_const;
     val_right = vf.value;
-    cerr << "Somme/sous : right  visisited" << endl;
 
     int final_value;
 
     if (const_left && const_right) {
-        cerr << "opti const" << endl;
         //If both values are identified as const values, we remove the last instructions and replace with a mov to %eax
         cfg->get_current_bb()->remove_last_instructions(3);
 
@@ -320,7 +300,6 @@ antlrcpp::Any IRVisitor::visitExprSumSous(ifccParser::ExprSumSousContext *ctx) {
         );
 
     } else {
-        cerr << "no opti const" << endl;
         if (ctx->op_add->getText() == "+")
         {
             cfg->add_instr(
@@ -1323,8 +1302,6 @@ antlrcpp::Any IRVisitor::visitStruct_switch_case(ifccParser::Struct_switch_caseC
 
 ////////////////////////////////////////////
 // FONCTIONS
-//
-// WARNING : ONLY INT SUPPORTED FOR NOW
 ////////////////////////////////////////////
 
 antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *ctx) {
@@ -1340,6 +1317,8 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
     this->cfg = cfg;
 
     int nb_params = ctx->fparam_decla()->fparam_decla2().size();
+    cfg->set_nb_param(nb_params);
+    cfg->set_no_return(ctx->return_type->getText() == "void");
 
     //Get parameters from registers into temporary variables
     int stop = nb_params > 6 ? 6 : nb_params;
@@ -1352,7 +1331,6 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
                 ->set_symbol(symbol)
                 ->set_ctx(ctx)
         );
-        cfg->incr_nb_param();
         i++;
     }
 
@@ -1373,7 +1351,6 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
                 ->set_dest(symbol)
                 ->set_ctx(ctx)
         );
-        cfg->incr_nb_param();
         offset += 8;
     }
 
@@ -1393,10 +1370,14 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
     try {
         int correct_nb_param = cfg_set->get_cfg_by_fname(ctx->fname->getText())->get_nb_param();
         if (correct_nb_param != nb_params) {
-            throw runtime_error("Function called with wrong number of parameters");
+            this->cfg->get_error_reporter()->reportError(
+                new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "function called with wrong number of parameters", ctx)
+            );
         }
     } catch (exception &e) {
-        throw e;
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "this function is called but not declared", ctx)
+        );
     }
 
     //If there is more than 6 parameters, we place the remaining parameters on top of the stack
@@ -1491,7 +1472,9 @@ antlrcpp::Any IRVisitor::visitBreakStmt(ifccParser::BreakStmtContext *ctx) {
     try {
         bb_loop = cfg->get_break_parent(cfg->get_current_bb()->get_label());
     } catch (exception &e) {
-        throw e;
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "'break' can only be used in loop or 'switch'", ctx)
+        );
     }
 
     //we need to jump to end_while block
@@ -1513,7 +1496,9 @@ antlrcpp::Any IRVisitor::visitContinueStmt(ifccParser::ContinueStmtContext *ctx)
     try {
         bb_loop = cfg->get_continue_parent(cfg->get_current_bb()->get_label());
     } catch (exception &e) {
-        throw e;
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "'continue' can only be used in loop", ctx)
+        );
     }
 
     //we need to jump to condition
