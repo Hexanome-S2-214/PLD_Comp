@@ -96,7 +96,7 @@ antlrcpp::Any IRVisitor::visitSimpleDecl(ifccParser::SimpleDeclContext *ctx)
     return IR::Int.size;
 }
 
-antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
+antlrcpp::Any IRVisitor::visitDeclAffVar(ifccParser::DeclAffVarContext *ctx)
 {
     bool const_var = ctx->CONST() ? true : false;
     cerr << const_var << endl;
@@ -127,6 +127,51 @@ antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
             ->set_symbol(symbol)
             ->set_ctx(ctx)
     );
+
+    return IR::Int.size;
+}
+
+antlrcpp::Any IRVisitor::visitDeclAffTable(ifccParser::DeclAffTableContext *ctx)
+{
+    bool const_var = ctx->CONST() ? true : false;
+    cerr << const_var << endl;
+
+    IR::Type type = IR::Char;
+    int size = stoi(ctx->NUM()->getText());
+
+    std::vector<antlr4::tree::TerminalNode *> chars = ctx->CHARACTER();
+    if(chars.size() != size){
+        this->cfg->get_error_reporter()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "DeclAffTable sizes are not matching", ctx)
+        );
+    }
+
+    IR::Symbol * symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, const_var, ctx, size);
+
+    for(int i = 0; i < chars.size(); ++i){
+        IR::SymbolT * symbolT = new IR::SymbolT(i, symbol);
+        std::cerr << chars[i]->getText() << std::endl;
+        std::string text = chars[i]->getText();
+        if (!text.empty())
+        {
+            std::cerr << "Text : " << text << std::endl;
+            int ascii_value = static_cast<int>(text[1]);
+            cfg->add_instr(
+                (new IR::IRInstrExprCst)
+                    ->set_value(
+                        (new IR::IRConst)
+                            ->set_literal(to_string(ascii_value))
+                            ->set_size(IR::Char.size)
+                        )
+                    ->set_ctx(ctx)
+            );
+        }
+        cfg->add_instr(
+            (new IR::IRInstrAssignTable(stoi(ctx->NUM()->getText())))
+                ->set_symbol(symbolT)
+                ->set_ctx(ctx)
+        );
+    }
 
     return IR::Int.size;
 }
@@ -208,6 +253,7 @@ antlrcpp::Any IRVisitor::visitTableAff(ifccParser::TableAffContext *ctx)
 
 antlrcpp::Any IRVisitor::visitExprCharacter(ifccParser::ExprCharacterContext *ctx){
     std::string text = ctx->CHARACTER()->getText();
+    std::cerr << "visitExprCharacter" << std::endl;
     if (!text.empty())
     {
         int ascii_value;
