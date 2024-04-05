@@ -62,7 +62,7 @@ namespace IR
 
     void IRScopedBlock::set_parent_scope(IRScopedBlock * parent)
     {
-        cerr << "set_parent_scope(" << parent << ")" << endl; 
+        // cerr << "set_parent_scope(" << parent << ")" << endl; 
         parentScope = parent;
     }
 
@@ -72,7 +72,7 @@ namespace IR
         if (parentScope != nullptr)
         {
             // BasicBlock * bb = dynamic_cast<BasicBlock *>(bb);
-            cerr << "this=" << this << " parent=" << parentScope << endl;
+            // cerr << "this=" << this << " parent=" << parentScope << endl;
             depth += parentScope->log();
         }
 

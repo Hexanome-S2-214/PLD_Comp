@@ -726,6 +726,7 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
 }
 
 antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx) {
+    IR::BasicBlock * expr_bb = cfg->get_current_bb();
 
     //Labels for new blocks
     string condition_label = cfg->get_next_bb_label();
@@ -773,6 +774,7 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
     this->visit(ctx->struct_bloc());
     body_bb->set_exit(condition_label);
 
+    cfg->set_current_bb(expr_bb);
     //Adding the end-while block
     IR::BasicBlock * end_while_bb = new IR::BasicBlock(cfg, end_while_label, nullptr, nullptr);
     body_bb->set_bb_id(BB_END_WHILE);
@@ -795,7 +797,7 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
 }
 
 antlrcpp::Any IRVisitor::visitStruct_switch_case(ifccParser::Struct_switch_caseContext *ctx) {
-    
+    IR::BasicBlock * expr_bb = cfg->get_current_bb();
     int nb_case = ctx->case_opt().size();
     bool default_opt = ctx->default_opt() ? true : false;
 
@@ -846,6 +848,7 @@ antlrcpp::Any IRVisitor::visitStruct_switch_case(ifccParser::Struct_switch_caseC
         this->visit(ctx->case_opt(i)->case_block());
     }
 
+    cfg->set_current_bb(expr_bb);
     IR::BasicBlock * end_switch_bb = new IR::BasicBlock(cfg, end_switch_label, nullptr, nullptr);
     cfg->add_bb(end_switch_bb);
 
