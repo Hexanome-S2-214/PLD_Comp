@@ -1,8 +1,9 @@
-int func(int a) {
-    return 2*a;
+int func(int c) {
+    return 2*c;
 }
 
 int main() {
-    int b = func(1);
+    int a=2;
+    int b = func((5*2)+a);
     return b;
 }
