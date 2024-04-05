@@ -8,6 +8,7 @@ IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label) : BasicBlock(cfg, label,
 
 IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label, IR::BasicBlock * exit_true, IR::BasicBlock * exit_false) : label(label), exit_true(exit_true), exit_false(exit_false) {
     set_parent(cfg);
+    // ref = "BB<" + label + ">";
 }
 
 IR::BasicBlock::~BasicBlock()

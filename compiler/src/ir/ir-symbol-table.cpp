@@ -1,10 +1,13 @@
 #include "ir-symbol-table.h"
 #include "ir-base.h"
+#include "ir-errors.h"
 #include "params/ir-symbol.h"
 #include "../error-reporter/compiler-error-token.h"
 
 namespace IR
 {
+    int SymbolTable::symbol_offset = 0;
+
     SymbolTable::~SymbolTable()
     {
         for (pair<const string, Symbol *> symbol : symbols)
@@ -17,8 +20,7 @@ namespace IR
     {
         if (symbols.find(id) != symbols.end())
         {
-            this->error_reporter->reportError(new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "symbol " + id + " already declared", ctx));
-            exit(1);
+            throw IRSymbolError("symbol '" + id + "' already declared");
         }
 
         symbol_offset -= size_to_bytes(type.size);
@@ -48,8 +50,7 @@ namespace IR
     {
         if (symbols.find(id) == symbols.end() || symbols[id]->offset == 0)
         {
-            this->error_reporter->reportError(new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "symbol " + id + " not declared", ctx));
-            exit(1);
+            throw IRSymbolError("symbol '" + id + "' not declared");
         }
 
         symbols[id]->used = true;

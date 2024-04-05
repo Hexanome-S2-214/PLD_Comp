@@ -20,6 +20,5 @@ namespace IR
         ~IRInstr() = default;
 
         BasicBlock * get_bb();
-        SymbolTable * get_symbol_table();
     };
 };

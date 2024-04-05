@@ -9,6 +9,7 @@
 #include "../generated/ifccBaseVisitor.h"
 
 #include "ir/ir-cfg.h"
+#include "ir/ir-symbol-table.h"
 #include "ir-visitor.h"
 #include "error-reporter/error-reporter.h"
 #include "error-reporter/error-listener.h"
@@ -32,7 +33,7 @@ int main(int argn, const char **argv)
   
   ANTLRInputStream input(in.str());
 
-  ErrorReporter::ErrorReporter * error_reporter = new ErrorReporter::ErrorReporter();
+  ErrorReporter::ErrorReporter * error_reporter = ErrorReporter::ErrorReporter::getInstance();
   ErrorReporter::ErrorListener * error_listener = new ErrorReporter::ErrorListener(error_reporter);
 
   ifccLexer lexer(&input);
@@ -57,15 +58,18 @@ int main(int argn, const char **argv)
       exit(1);
   }
 
-
   IR::CfgSet * cfg_set = static_cast<IR::CfgSet *>(
     (new IR::CfgSet())
-      ->set_error_reporter(new ErrorReporter::ErrorReporter())
       ->set_arch(IR::IRArch::X86)
   );
   IRVisitor visitor(cfg_set);
-
+  
   visitor.visit(tree);
+
+  if (error_reporter->getShouldThrow())
+  {
+      exit(1);
+  }
 
   cfg_set->gen_asm(cout);
 
