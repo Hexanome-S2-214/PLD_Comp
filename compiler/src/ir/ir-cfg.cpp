@@ -13,14 +13,10 @@ IR::CFG::CFG(string name)
     //Create epilogue BB -> we store it apart from the other because we need to write it at the end
     epilogue_label = get_next_bb_label();
     this->epilogue_bb = new BasicBlock(this, epilogue_label, nullptr, nullptr);
-    // this->epilogue_bb->set_parent_scope(this);
     this->epilogue_bb->add_instr(new IR::IRInstrEpilogue);
 
     //Create BB to write beginning of the function in -> the order of the blocks doesn't matter since we store epilogue_label
     BasicBlock * bb = new BasicBlock(this, get_next_bb_label(), nullptr, nullptr);
-    // cerr << "Set parent scope to default bb " << this << endl;
-    // bb->set_parent_scope(this);
-    // ref = "CFG<" + name + ">";
     add_bb(bb);
 }
 

@@ -77,15 +77,11 @@ void IR::BasicBlock::gen_asm_arm(ostream &o){
 
 void IR::BasicBlock::set_exit_true(IR::BasicBlock * exit_true)
 {
-    // cerr << "Set parent to exit true " << this << endl;
-    // exit_true->set_parent_scope(this);
     this->exit_true = exit_true;
 }
 
 void IR::BasicBlock::set_exit_false(IR::BasicBlock * exit_false)
 {
-    // cerr << "Set parent to exit false " << this << endl;
-    // exit_false->set_parent_scope(this);
     this->exit_false = exit_false;
 }
 

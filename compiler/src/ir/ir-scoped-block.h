@@ -8,7 +8,6 @@ namespace IR
     class IRScopedBlock
     {
     public:
-        IRScopedBlock();
         Symbol * declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx = nullptr, int personalized_offset = 0);
         Symbol * get_symbol(string id, antlr4::ParserRuleContext * ctx = nullptr);
 
@@ -19,9 +18,8 @@ namespace IR
         void set_parent_scope(IRScopedBlock * parent);
         IRScopedBlock * get_parent_scope() { return parentScope; }
 
-        int log();
+    private:
         SymbolTable symbolTable;
         IRScopedBlock * parentScope = nullptr;
-    private:
     };
 }
