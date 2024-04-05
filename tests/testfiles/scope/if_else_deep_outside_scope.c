@@ -9,7 +9,7 @@ int main() {
 
         if (1) {
             if (1) {
-                if (0)
+                if (0) {}
                 else {
                     int c = b;
                 }
