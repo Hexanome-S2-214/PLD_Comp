@@ -35,7 +35,7 @@ fparam_decla2
      ;
 
 decla_function
-     : ('int' | 'void') fname=VAR '(' fparam_decla ')' struct_bloc
+     : return_type=('int' | 'void') fname=VAR '(' fparam_decla ')' struct_bloc
      ;
 
 functionCallRule
@@ -117,7 +117,8 @@ instructionRule
      ;
 
 declStdRule
-     : CONST? (INT|CHAR) VAR ';'
+     : (INT|CHAR) VAR ';'                  #simpleDecl
+     | (INT | CHAR) VAR '[' NUM ']' ';'    #tableDecl
      ;
 
 declAffRule
@@ -125,7 +126,8 @@ declAffRule
      ;
 
 affectationRule
-     : VAR '=' rvalue ';'
+     : VAR '=' rvalue ';'               #simpleAff
+     | VAR '[' NUM ']' '=' rvalue ';'   #tableAff
      ;
 
 affectationRule2
@@ -148,6 +150,7 @@ returnStmtRule
 
 expr
      : '(' expr ')'                     #exprParExpr
+     | VAR '[' NUM ']'                  #exprTable
      | op_unary=('-' | '!') expr        #exprUnary
      | expr OP_MULT expr                #exprMultDivMod
      | expr op_add=('+' | '-') expr     #exprSumSous

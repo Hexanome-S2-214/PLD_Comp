@@ -1,5 +1,4 @@
 #include "expression_plus.h"
-#include "../../error-reporter/compiler-error-token.h"
 
 namespace IR
 {
@@ -29,7 +28,6 @@ namespace IR
                 op = "addq";
                 break;
         }
-
         o << "\t" << op << " "<< src->get_asm_str() << ", " << dest->get_asm_str() << endl;
     }
     

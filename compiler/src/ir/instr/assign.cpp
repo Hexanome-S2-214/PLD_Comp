@@ -1,8 +1,5 @@
 #include "assign.h"
 #include "mov.h"
-#include "../ir-basic-block.h"
-#include "../ir-cfg.h"
-#include "../params/ir-param.h"
 
 namespace IR
 {

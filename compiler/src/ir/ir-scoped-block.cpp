@@ -5,10 +5,13 @@
 
 namespace IR
 {
-    Symbol * IRScopedBlock::declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx, int personalized_offset)
+    Symbol * IRScopedBlock::declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx, bool const_var, int personalized_offset)
     {
+        cerr << "Declare symbol '" << id << "' in: " << this << " (ctx=" << ctx << ")" << endl;
+        log();
+
         try {
-            return symbolTable.declare_symbol(parent, id, type, ctx, personalized_offset);
+            return symbolTable.declare_symbol(parent, id, type, ctx, const_var, personalized_offset);
         } catch (IRSymbolError e) {
             ErrorReporter::ErrorReporter::getInstance()->reportError(
                 new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, e.what(), ctx)
@@ -19,6 +22,9 @@ namespace IR
 
     Symbol * IRScopedBlock::get_symbol(string id, antlr4::ParserRuleContext * ctx)
     {
+        cerr << "Get symbol '" << id << "' in: " << this << " (ctx=" << ctx << ")" << endl;
+        log();
+
         try
         {
             return symbolTable.get_symbol(id, ctx);
@@ -55,5 +61,21 @@ namespace IR
     void IRScopedBlock::set_parent_scope(IRScopedBlock * parent)
     {
         parentScope = parent;
+    }
+
+    int IRScopedBlock::log() {
+        int depth = 1;
+
+        if (parentScope != nullptr) {
+            depth += parentScope->log();
+        }
+
+        for (int i = 0; i < depth; ++i) {
+            cerr << "   ";
+        }
+
+        cerr << this << endl;
+
+        return depth;
     }
 }

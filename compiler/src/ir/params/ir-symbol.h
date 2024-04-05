@@ -15,9 +15,24 @@ namespace IR
         void gen_asm_arm(ostream& o) override;
         Size get_size() override;
 
+        void set_value(int value);
+
         string id;
         int offset;
+        bool const_var;
+        int value;
         bool used = false;
         Type type;
+    };
+
+    class SymbolT: public Symbol
+    {
+        public:
+        SymbolT(int index): index(index){};
+        SymbolT(int index, Symbol* symbol);
+        ~SymbolT() = default;
+
+        void gen_asm_x86(ostream& o) override;
+        int index;
     };
 }

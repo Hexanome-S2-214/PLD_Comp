@@ -7,7 +7,7 @@ namespace IR
     class IRInstrComposition;
 }
 
-#include <vector>
+#include <list>
 #include "ir-base.h"
 #include "ir-scoped-block.h"
 
@@ -23,10 +23,12 @@ namespace IR
         ~BasicBlock();
 
         void add_instr(IRBase * instr);
-        vector<IRInstr *> * get_instrs();
+        list<IRInstr *> * get_instrs();
 
         void gen_asm_x86(ostream& o) override;
         void gen_asm_arm(ostream& o) override;
+
+        void remove_last_instructions(int n);
 
         void set_exit_true(BasicBlock * exit_true);
         void set_exit_false(BasicBlock * exit_false);
@@ -39,7 +41,7 @@ namespace IR
         int get_bb_id();
         CFG * get_cfg();
     private:
-        vector<IRInstr *> instrs;
+        list<IRInstr *> instrs;
         string label;
         
         BasicBlock * exit_true;

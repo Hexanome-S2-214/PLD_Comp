@@ -9,7 +9,8 @@
 #include "params/ir-symbol.h"
 #include "params/ir-reg.h"
 
-#define SYMBOL_SIZE 4
+#define INT_SIZE 4
+#define CHAR_SIZE 1
 
 using namespace std;
 
@@ -21,7 +22,7 @@ namespace IR
         SymbolTable() {};
         ~SymbolTable();
 
-        Symbol * declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx = nullptr, int personalized_offset = 0);
+        Symbol * declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx = nullptr, bool const_var=false, int personalized_offset = 0);
         Symbol * get_symbol(string id, antlr4::ParserRuleContext * ctx = nullptr);
 
         Symbol * declare_tmp(IRBase * parent, Type type, antlr4::ParserRuleContext * ctx = nullptr);

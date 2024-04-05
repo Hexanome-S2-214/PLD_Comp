@@ -51,6 +51,13 @@ namespace IR
         int offset = 0;
     };
 
+    class IRRegStackPointer : public IRReg
+    {
+    public:
+        void gen_asm_x86(ostream& o) override;
+        void gen_asm_arm(ostream& o) override;
+    };
+
     class IRRegDest : public IRReg
     {
     public:
