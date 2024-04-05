@@ -166,13 +166,13 @@ antlrcpp::Any IRVisitor::visitDeclAffTable(ifccParser::DeclAffTableContext *ctx)
 
     std::vector<antlr4::tree::TerminalNode *> chars = ctx->CHARACTER();
     if(chars.size() != size){
-        this->cfg->get_error_reporter()->reportError(
+        ErrorReporter::ErrorReporter::getInstance()->reportError(
             new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "DeclAffTable sizes are not matching", ctx)
         );
     }
 
     std::cerr << "oki" << std::endl;
-    IR::Symbol * symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx, const_var, size);
+    IR::Symbol * symbol = cfg->get_current_bb()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx, const_var, size);
     std::cerr << "ok" << std::endl;
 
     for(int i = 0; i < chars.size(); ++i){
@@ -271,7 +271,7 @@ antlrcpp::Any IRVisitor::visitExprTableVar(ifccParser::ExprTableVarContext *ctx)
 {
     int offset = vf.value;
     std::cerr << "offset : " << offset  << std::endl;
-    IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR(0)->getText(), ctx);
+    IR::Symbol * symbol = cfg->get_current_bb()->get_symbol(ctx->VAR(0)->getText(), ctx);
 
     cfg->add_instr(
     (new IR::IRInstrMov)
@@ -304,7 +304,7 @@ antlrcpp::Any IRVisitor::visitTableAff2(ifccParser::TableAff2Context *ctx)
     IR::Size size = vf.type_size;
     std::cerr << "index : " << index << std::endl;
     this->visit(ctx->rvalue());
-    IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR(0)->getText(), ctx);
+    IR::Symbol * symbol = cfg->get_current_bb()->get_symbol(ctx->VAR(0)->getText(), ctx);
     IR::SymbolT* symbolT = new IR::SymbolT(index, symbol);
     cfg->add_instr(
         (new IR::IRInstrAssignTable(index))
