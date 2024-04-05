@@ -184,7 +184,6 @@ void IR::CFG::add_bb(IR::BasicBlock * bb)
 {
     if (bb->get_parent_scope() == nullptr)
     {
-        cerr << "Set parent to bb " << get_current_bb() << endl;
         bb->set_parent_scope(get_current_bb());
     }
 
