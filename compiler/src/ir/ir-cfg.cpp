@@ -10,34 +10,22 @@ IR::CFG::CFG(string name)
     fname = name;
     nb_param = 0;
 
-    symbol_table = new SymbolTable();
-
     //Create epilogue BB -> we store it apart from the other because we need to write it at the end
     epilogue_label = get_next_bb_label();
     this->epilogue_bb = new BasicBlock(this, epilogue_label, nullptr, nullptr);
-    this->epilogue_bb->add_instr((new IR::IRInstrEpilogue));
+    this->epilogue_bb->add_instr(new IR::IRInstrEpilogue);
 
     //Create BB to write beginning of the function in -> the order of the blocks doesn't matter since we store epilogue_label
-    BasicBlock * new_bb = new BasicBlock(this, get_next_bb_label(), nullptr, nullptr);
-    add_bb(new_bb);
+    BasicBlock * bb = new BasicBlock(this, get_next_bb_label(), nullptr, nullptr);
+    add_bb(bb);
 }
 
 IR::CFG::~CFG()
 {
-    delete symbol_table;
-
     for (BasicBlock * block : blocks)
     {
         delete block;
     }
-}
-
-IR::IRBase * IR::CFG::set_error_reporter(ErrorReporter::ErrorReporter * error_reporter)
-{
-    IRBase::set_error_reporter(error_reporter);
-    symbol_table->error_reporter = error_reporter;
-
-    return this;
 }
 
 void IR::CFG::gen_asm_x86(ostream& o)
@@ -83,7 +71,7 @@ void IR::CFG::gen_asm_x86_prologue(ostream& o)
     o << "\tpushq %rbp\n" ;
     o << "\tmovq %rsp, %rbp\n" ;
     //TODO : handle this via an instr ?
-    o << "\tsubq $" << calc_st_size() << ", %rsp" << endl;
+    o << "\tsubq $" << get_st_size() << ", %rsp" << endl;
 }
 
 void IR::CFG::gen_asm_x86_epilogue(ostream& o)
@@ -91,24 +79,9 @@ void IR::CFG::gen_asm_x86_epilogue(ostream& o)
     this->epilogue_bb->gen_asm_x86(o);
 }
 
-int IR::CFG::calc_st_size() {
-    int offset = symbol_table->get_symbol_offset();
-
-    if (offset == 0) {
-        return 0;
-    } else {
-        return ((-offset / 16)+1)*16;
-    }
-}
-
 void IR::CFG::add_instr(IR::IRBase * instr)
 {
     get_current_bb()->add_instr(instr);
-}
-
-IR::SymbolTable * IR::CFG::get_symbol_table()
-{
-    return symbol_table;
 }
 
 void IR::CFG::set_current_bb(IR::BasicBlock * bb)
@@ -217,6 +190,18 @@ bool IR::CFG::get_no_return() {
 
 void IR::CFG::add_bb(IR::BasicBlock * bb)
 {
+    if (bb->get_parent_scope() == nullptr)
+    {
+        if (get_current_bb() != nullptr)
+        {
+            bb->set_parent_scope(get_current_bb());
+        }
+        else
+        {
+            bb->set_parent_scope(this);
+        }
+    }
+
     blocks.push_back(bb);
     set_current_bb(bb);
 }

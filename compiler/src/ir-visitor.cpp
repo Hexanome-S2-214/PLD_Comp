@@ -41,7 +41,7 @@ antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *
 
     //detection of return inside a return-void function
     if (cfg->get_no_return()) {
-        this->cfg->get_error_reporter()->reportError(
+        ErrorReporter::ErrorReporter::getInstance()->reportError(
             new ErrorReporter::CompilerErrorToken(ErrorReporter::WARNING, "‘return’ with a value, in function returning void", ctx)
         );
     }
@@ -69,10 +69,10 @@ antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *
 
 antlrcpp::Any IRVisitor::visitSimpleAff(ifccParser::SimpleAffContext *ctx)
 {
-    IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
+    IR::Symbol * symbol = cfg->get_current_bb()->get_symbol(ctx->VAR()->getText(), ctx);
     
     if (symbol->const_var) {
-        this->cfg->get_error_reporter()->reportError(
+        ErrorReporter::ErrorReporter::getInstance()->reportError(
             new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "'const’ value cannot be used as left-value", ctx)
         );
     }
@@ -102,12 +102,12 @@ antlrcpp::Any IRVisitor::visitSimpleDecl(ifccParser::SimpleDeclContext *ctx)
     }
     else
     {
-        this->cfg->get_error_reporter()->reportError(
+        ErrorReporter::ErrorReporter::getInstance()->reportError(
             new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Unrecognized type", ctx)
         );
     }
 
-    cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx);
+    cfg->get_current_bb()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx);
 
     //update flags
     vf.type_size = type.size;
@@ -133,12 +133,12 @@ antlrcpp::Any IRVisitor::visitDeclAffVar(ifccParser::DeclAffVarContext *ctx)
     }
     else
     {
-        this->cfg->get_error_reporter()->reportError(
+        ErrorReporter::ErrorReporter::getInstance()->reportError(
             new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Unrecognized type", ctx)
         );
     }
 
-    IR::Symbol * symbol = cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx, const_var);
+    IR::Symbol * symbol = cfg->get_current_bb()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx, const_var);
     if (const_var) {
         symbol->set_value(vf.value);
     }
@@ -204,29 +204,35 @@ antlrcpp::Any IRVisitor::visitDeclAffTable(ifccParser::DeclAffTableContext *ctx)
 
 antlrcpp::Any IRVisitor::visitTableDecl(ifccParser::TableDeclContext *ctx)
 {
-    if(ctx->CHAR()){
-        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Char, ctx, false, stoi(ctx->NUM()->getText()));
-    } else if (ctx->INT()) {
-        cfg->get_symbol_table()->declare_symbol(cfg, ctx->VAR()->getText(), IR::Int, ctx, false, stoi(ctx->NUM()->getText()));
+    IR::Type type;
+
+    if (ctx->CHAR())
+    {
+        type = IR::Char;
     }
+    else if (ctx->INT())
+    {
+        type = IR::Int;
+    }
+    else
+    {
+        ErrorReporter::ErrorReporter::getInstance()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Unrecognized type", ctx)
+        );
+    }
+
+    cfg->get_current_bb()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx, false, stoi(ctx->NUM()->getText()));
+
     return 0;
 }
-
-// antlrcpp::Any IRVisitor::visitSimpleAff(ifccParser::SimpleAffContext *ctx)
-// {
-//     this->visit(ctx->rvalue());
-
-//     IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
-
-    
 
 antlrcpp::Any IRVisitor::visitAffectationRule2(ifccParser::AffectationRule2Context *ctx)
 {
 
-    IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
+    IR::Symbol * symbol = cfg->get_current_bb()->get_symbol(ctx->VAR()->getText(), ctx);
 
     if (symbol->const_var) {
-        this->cfg->get_error_reporter()->reportError(
+        ErrorReporter::ErrorReporter::getInstance()->reportError(
             new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "const’ value cannot be used as left-value", ctx)
         );
     }
@@ -248,7 +254,7 @@ antlrcpp::Any IRVisitor::visitAffectationRule2(ifccParser::AffectationRule2Conte
 
 antlrcpp::Any IRVisitor::visitExprTable(ifccParser::ExprTableContext *ctx)
 {
-    IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
+    IR::Symbol * symbol = cfg->get_current_bb()->get_symbol(ctx->VAR()->getText(), ctx);
     int offset = stoi(ctx->NUM()->getText());
 
     cfg->add_instr(
@@ -279,7 +285,7 @@ antlrcpp::Any IRVisitor::visitExprTableVar(ifccParser::ExprTableVarContext *ctx)
 antlrcpp::Any IRVisitor::visitTableAff(ifccParser::TableAffContext *ctx)
 {
     this->visit(ctx->rvalue());
-    IR::Symbol * symbol = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
+    IR::Symbol * symbol = cfg->get_current_bb()->get_symbol(ctx->VAR()->getText(), ctx);
     int index = stoi(ctx->NUM()->getText());
     IR::SymbolT* symbolT = new IR::SymbolT(index, symbol);
     cfg->add_instr(
@@ -367,7 +373,7 @@ antlrcpp::Any IRVisitor::visitExprNum(ifccParser::ExprNumContext *ctx){
 
 antlrcpp::Any IRVisitor::visitExprVar(ifccParser::ExprVarContext *ctx)
 {
-    IR::Symbol *var = cfg->get_symbol_table()->get_symbol(ctx->VAR()->getText(), ctx);
+    IR::Symbol *var = cfg->get_current_bb()->get_symbol(ctx->VAR()->getText(), ctx);
     cfg->add_instr(
         (new IR::IRInstrExprVar)
             ->set_symbol(
@@ -398,7 +404,7 @@ antlrcpp::Any IRVisitor::visitExprSumSous(ifccParser::ExprSumSousContext *ctx) {
     const_left = vf.f_const;
     val_left = vf.value;
 
-    IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    IR::Symbol *varTemp = this->cfg->get_current_bb()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
         (new IR::IRInstrAssign)
             ->set_symbol(varTemp)
@@ -466,7 +472,7 @@ antlrcpp::Any IRVisitor::visitExprSumSous(ifccParser::ExprSumSousContext *ctx) {
         }
         else
         {
-            this->cfg->get_error_reporter()->reportError(
+            ErrorReporter::ErrorReporter::getInstance()->reportError(
                 new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Unrecognized operator", ctx)
             );
         }
@@ -492,7 +498,7 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
     const_left = vf.f_const;
     val_left = vf.value;
 
-    IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    IR::Symbol *varTemp = this->cfg->get_current_bb()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
         (new IR::IRInstrAssign)
             ->set_symbol(varTemp)
@@ -504,7 +510,7 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
     val_right = vf.value;
 
     if (val_right == 0 && (ctx->OP_MULT()->getText() == "/" || ctx->OP_MULT()->getText() == "%")) {
-        this->cfg->get_error_reporter()->reportError(
+        ErrorReporter::ErrorReporter::getInstance()->reportError(
             new ErrorReporter::CompilerErrorToken(ErrorReporter::WARNING, "division by 0", ctx)
         );
     }
@@ -887,7 +893,7 @@ antlrcpp::Any IRVisitor::visitExprAndBAB(ifccParser::ExprAndBABContext *ctx)
     const_left = vf.f_const;
     val_left = vf.value;
 
-    IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    IR::Symbol *varTemp = this->cfg->get_current_bb()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
         (new IR::IRInstrAssign)
             ->set_symbol(varTemp)
@@ -948,7 +954,7 @@ antlrcpp::Any IRVisitor::visitExprXorBAB(ifccParser::ExprXorBABContext *ctx)
     const_left = vf.f_const;
     val_left = vf.value;
 
-    IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    IR::Symbol *varTemp = this->cfg->get_current_bb()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
         (new IR::IRInstrAssign)
             ->set_symbol(varTemp)
@@ -1009,7 +1015,7 @@ antlrcpp::Any IRVisitor::visitExprOrBAB(ifccParser::ExprOrBABContext *ctx)
     const_left = vf.f_const;
     val_left = vf.value;
 
-    IR::Symbol *varTemp = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    IR::Symbol *varTemp = this->cfg->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
         (new IR::IRInstrAssign)
             ->set_symbol(varTemp)
@@ -1238,6 +1244,7 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
 
     // Create labels for jumps -> now because the child needs to jump to the parent when finished
     string exit_label = cfg->get_next_bb_label();
+    string if_true_label = cfg->get_next_bb_label();
     string if_false_label;
 
     // Push end jump label to stack for children
@@ -1268,24 +1275,26 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
     //Jump after condition evaluation
     cfg->add_instr(
         (new IR::IRInstrJump)
+            ->set_jump(IR::JumpType::IfEqual)
+            ->set_label(if_true_label)
+            ->set_ctx(ctx)
+    );
+    cfg->add_instr(
+        (new IR::IRInstrJump)
             ->set_jump(IR::JumpType::IfNotEqual)
             ->set_label(jump_after_eval_cond)
             ->set_ctx(ctx)
     );
 
     // Visit if true : always
+    IR::BasicBlock * if_true = new IR::BasicBlock(cfg, if_true_label, nullptr, nullptr);
+    cfg->add_bb(if_true);
     this->visit(ctx->struct_bloc(0)); // Add if true
-
-    // Jump to endif block when if complete
-    cfg->add_instr(
-        (new IR::IRInstrJump)
-            ->set_jump(IR::JumpType::Jump)
-            ->set_label(exit_label)
-            ->set_ctx(ctx)
-    );
+    if_true->set_exit(exit_label);
 
     // Add if false
     if (if_then_else) {
+        cfg->set_current_bb(expr_bb);
         IR::BasicBlock * if_false = new IR::BasicBlock(cfg, if_false_label, nullptr, nullptr);
         cfg->add_bb(if_false);
         this->visit(ctx->struct_bloc(1));
@@ -1294,6 +1303,7 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
 
     // Pop exit from stack
     cfg->stack.pop_back();
+    cfg->set_current_bb(expr_bb);
 
     // Add exit
     IR::BasicBlock * exit_bb = new IR::BasicBlock(cfg, exit_label, nullptr, nullptr);
@@ -1313,6 +1323,7 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
 }
 
 antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx) {
+    IR::BasicBlock * expr_bb = cfg->get_current_bb();
 
     //Labels for new blocks
     string condition_label = cfg->get_next_bb_label();
@@ -1360,6 +1371,7 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
     this->visit(ctx->struct_bloc());
     body_bb->set_exit(condition_label);
 
+    cfg->set_current_bb(expr_bb);
     //Adding the end-while block
     IR::BasicBlock * end_while_bb = new IR::BasicBlock(cfg, end_while_label, nullptr, nullptr);
     body_bb->set_bb_id(BB_END_WHILE);
@@ -1382,7 +1394,7 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
 }
 
 antlrcpp::Any IRVisitor::visitStruct_switch_case(ifccParser::Struct_switch_caseContext *ctx) {
-    
+    IR::BasicBlock * expr_bb = cfg->get_current_bb();
     int nb_case = ctx->case_opt().size();
     bool default_opt = ctx->default_opt() ? true : false;
 
@@ -1433,6 +1445,7 @@ antlrcpp::Any IRVisitor::visitStruct_switch_case(ifccParser::Struct_switch_caseC
         this->visit(ctx->case_opt(i)->case_block());
     }
 
+    cfg->set_current_bb(expr_bb);
     IR::BasicBlock * end_switch_bb = new IR::BasicBlock(cfg, end_switch_label, nullptr, nullptr);
     cfg->add_bb(end_switch_bb);
 
@@ -1444,7 +1457,7 @@ antlrcpp::Any IRVisitor::visitStruct_switch_case(ifccParser::Struct_switch_caseC
 ////////////////////////////////////////////
 
 antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *ctx) {
-   
+    cerr << "\nfunction " << ctx->fname->getText() << endl;
     //One CFG and one Symbol Table per fonction (careful : CFG contains the ST in our model)
     IR::CFG * cfg = static_cast<IR::CFG *>(
         (new IR::CFG(ctx->fname->getText()))
@@ -1463,7 +1476,7 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
     int stop = nb_params > 6 ? 6 : nb_params;
     int i=0;
     while(i < stop) {
-        IR::Symbol *symbol = this->cfg->get_symbol_table()->declare_symbol(cfg, ctx->fparam_decla()->fparam_decla2(i)->VAR()->getText(), IR::Int, ctx);
+        IR::Symbol *symbol = this->cfg->get_current_bb()->declare_symbol(cfg, ctx->fparam_decla()->fparam_decla2(i)->VAR()->getText(), IR::Int, ctx);
         cfg->add_instr(
             (new IR::IRInstrAssign)
                 ->set_src(reg_function_params[i])
@@ -1477,7 +1490,7 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
     //Careful : we declare variables with personnalized offset
     int offset = 16;
     for (int i=6 ; i < nb_params ; i++) {
-        IR::Symbol *symbol = this->cfg->get_symbol_table()->declare_symbol(cfg, ctx->fparam_decla()->fparam_decla2(i)->VAR()->getText(), IR::Int, ctx);
+        IR::Symbol *symbol = this->cfg->get_current_bb()->declare_symbol(cfg, ctx->fparam_decla()->fparam_decla2(i)->VAR()->getText(), IR::Int, ctx);
         cfg->add_instr(
             (new IR::IRInstrMov)
                 ->set_src((new IR::IRRegStack)->set_offset(offset))
@@ -1516,12 +1529,12 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
             correct_nb_param = cfg_set->get_cfg_by_fname(ctx->fname->getText())->get_nb_param();
         }
         if (correct_nb_param != nb_params) {
-            this->cfg->get_error_reporter()->reportError(
+            ErrorReporter::ErrorReporter::getInstance()->reportError(
                 new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "function called with wrong number of parameters", ctx)
             );
         }
     } catch (exception &e) {
-        this->cfg->get_error_reporter()->reportError(
+        ErrorReporter::ErrorReporter::getInstance()->reportError(
             new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "this function is called but not declared", ctx)
         );
     }
@@ -1561,7 +1574,7 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
         }
         //If it's a variable
         else if (ctx->fparam_call()->fparam_call2(i)->VAR()) {
-            IR::Symbol* src = cfg->get_symbol_table()->get_symbol(ctx->fparam_call()->fparam_call2(i)->VAR()->getText());
+            IR::Symbol* src = cfg->get_current_bb()->get_symbol(ctx->fparam_call()->fparam_call2(i)->VAR()->getText(), ctx);
             cfg->add_instr(
                 (new IR::IRInstrMov)
                     ->set_src(src)
@@ -1618,7 +1631,7 @@ antlrcpp::Any IRVisitor::visitBreakStmt(ifccParser::BreakStmtContext *ctx) {
     try {
         bb_loop = cfg->get_break_parent(cfg->get_current_bb()->get_label());
     } catch (exception &e) {
-        this->cfg->get_error_reporter()->reportError(
+        ErrorReporter::ErrorReporter::getInstance()->reportError(
             new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "'break' can only be used in loop or 'switch'", ctx)
         );
     }
@@ -1642,7 +1655,7 @@ antlrcpp::Any IRVisitor::visitContinueStmt(ifccParser::ContinueStmtContext *ctx)
     try {
         bb_loop = cfg->get_continue_parent(cfg->get_current_bb()->get_label());
     } catch (exception &e) {
-        this->cfg->get_error_reporter()->reportError(
+        ErrorReporter::ErrorReporter::getInstance()->reportError(
             new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "'continue' can only be used in loop", ctx)
         );
     }

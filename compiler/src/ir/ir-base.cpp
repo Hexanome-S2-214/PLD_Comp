@@ -8,7 +8,7 @@ using namespace std;
 
 namespace IR
 {
-    IRBase::IRBase() : parent(nullptr), arch(DEFAULT_ARCH), ctx(nullptr), error_reporter(nullptr) {}
+    IRBase::IRBase() : parent(nullptr), arch(DEFAULT_ARCH), ctx(nullptr) {}
 
     void IRBase::gen_asm(ostream& o){
         switch(arch){
@@ -46,13 +46,6 @@ namespace IR
         return this;
     }
 
-    IRBase * IRBase::set_error_reporter(ErrorReporter::ErrorReporter * error_reporter)
-    {
-        this->error_reporter = error_reporter;
-
-        return this;
-    }
-
     IRBase * IRBase::set_parent(IRBase * parent)
     {
         this->parent = parent;
@@ -62,9 +55,6 @@ namespace IR
         if (this->ctx == nullptr)
             this->ctx = parent->ctx;
 
-        if (this->error_reporter == nullptr)
-            this->error_reporter = parent->error_reporter;
-
         return this;
     }
 
@@ -72,7 +62,6 @@ namespace IR
     {
         other->set_arch(arch);
         other->set_ctx(ctx);
-        other->set_error_reporter(error_reporter);
         other->set_parent(parent);
 
         return other;
@@ -105,10 +94,5 @@ namespace IR
     antlr4::ParserRuleContext* IRBase::get_ctx()
     {
         return ctx;
-    }
-
-    ErrorReporter::ErrorReporter * IRBase::get_error_reporter()
-    {
-        return error_reporter;
     }
 }
