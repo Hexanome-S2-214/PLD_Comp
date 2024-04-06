@@ -451,7 +451,9 @@ antlrcpp::Any IRVisitor::visitExprSumSous(ifccParser::ExprSumSousContext *ctx) {
     //update flags
     vf.type_size = IR::Int.size;
     vf.f_const = (const_left && const_right);
-    vf.value = final_value;
+    if (vf.f_const) {
+        vf.value = final_value;
+    }
 
     return 0;
 }
@@ -558,7 +560,9 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
     //update flags
     vf.type_size = IR::Int.size;
     vf.f_const = (const_left && const_right);
-    vf.value = final_value;
+    if (vf.f_const) {
+        vf.value = final_value;
+    }
 
     return 0;
 }
@@ -584,8 +588,10 @@ antlrcpp::Any IRVisitor::visitExprUnary(ifccParser::ExprUnaryContext *ctx)
 
         if (ctx->op_unary->getText() == "-") {
             final_value = -val;
-        } else {
+        } else if (ctx->op_unary->getText() == "!"){
             final_value = !val;
+        } else if (ctx->op_unary->getText() == "+"){
+            final_value = val;
         }
 
         cfg->add_instr(
@@ -607,7 +613,7 @@ antlrcpp::Any IRVisitor::visitExprUnary(ifccParser::ExprUnaryContext *ctx)
                     ->set_ctx(ctx)
             );
         }
-        else {
+        else if (ctx->op_unary->getText() == "!") {
             //comparaison EAX (droite) et ECX (gauche)
             cfg->add_instr(
                 (new IR::IRInstrComp)
@@ -1592,6 +1598,7 @@ antlrcpp::Any IRVisitor::visitBreakStmt(ifccParser::BreakStmtContext *ctx) {
         ErrorReporter::ErrorReporter::getInstance()->reportError(
             new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "'break' can only be used in loop or 'switch'", ctx)
         );
+        return 0;
     }
 
     //we need to jump to end_while block
@@ -1616,6 +1623,7 @@ antlrcpp::Any IRVisitor::visitContinueStmt(ifccParser::ContinueStmtContext *ctx)
         ErrorReporter::ErrorReporter::getInstance()->reportError(
             new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "'continue' can only be used in loop", ctx)
         );
+        return 0;
     }
 
     //we need to jump to condition
