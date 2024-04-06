@@ -38,7 +38,7 @@ VisitorFlags vf;
 ////////////////////////////////////////////
 
 antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *ctx) {
-
+    cerr << "visit return" << endl;
     //detection of return inside a return-void function
     if (cfg->get_no_return()) {
         ErrorReporter::ErrorReporter::getInstance()->reportError(
@@ -60,6 +60,7 @@ antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *
     //Disable writing in the block AFTER adding jmp instruction
     this->cfg->get_current_bb()->set_write_mode(false);
 
+    cerr << "end return" << endl;
     return 0;
 }
 
@@ -69,21 +70,103 @@ antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *
 
 antlrcpp::Any IRVisitor::visitSimpleAff(ifccParser::SimpleAffContext *ctx)
 {
+    cerr << "visit affectation" << endl;
     IR::Symbol * symbol = cfg->get_current_bb()->get_symbol(ctx->VAR()->getText(), ctx);
     
     if (symbol->const_var) {
         ErrorReporter::ErrorReporter::getInstance()->reportError(
-            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "'const’ value cannot be used as left-value", ctx)
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "'const' value cannot be used as left-value", ctx)
         );
     }
 
     this->visit(ctx->rvalue());
 
+    if (ctx->op_aff->getText() == "=") {
+        //base affectation : simply affect value
+        cerr << "aff =" << endl;
+
+        cfg->add_instr(
+            (new IR::IRInstrAssign)
+                ->set_symbol(symbol)
+                ->set_ctx(ctx)
+        );
+    } else if (ctx->op_aff->getText() == "+=") {
+        cerr << "aff +" << endl;
+        cfg->add_instr(
+            (new IR::IRInstrExprPlus)
+                ->set_src(new IR::IRRegA)
+                ->set_dest(symbol)
+                ->set_ctx(ctx)
+        );
+
+    } else if (ctx->op_aff->getText() == "*=") {
+        cerr << "aff *" << endl;
+
+        cfg->add_instr(
+                (new IR::IRInstrExprMult)
+                    ->set_src(symbol)
+                    ->set_dest(new IR::IRRegA)
+                    ->set_ctx(ctx)
+        );
+
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(new IR::IRRegA)
+                ->set_dest(symbol)
+                ->set_ctx(ctx)
+        );
+
+    } else if (ctx->op_aff->getText() == "-=") {
+        cerr << "aff -" << endl;
+        cfg->add_instr(
+                (new IR::IRInstrExprMinus)
+                    ->set_src(new IR::IRRegA)
+                    ->set_dest(symbol)
+                    ->set_ctx(ctx)
+        );
+
+    } else if (ctx->op_aff->getText() == "/=") {
+        cerr << "aff /" << endl;
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(new IR::IRRegA)
+                ->set_dest(new IR::IRRegB)
+                ->set_ctx(ctx)
+        );
+
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(symbol)
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
+
+        cfg->add_instr(
+            (new IR::IRInstrExprDiv)
+                ->set_ctx(ctx)
+        );
+
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(new IR::IRRegA)
+                ->set_dest(symbol)
+                ->set_ctx(ctx)
+        );
+    }
+
+    //move value of result into %eax
     cfg->add_instr(
-        (new IR::IRInstrAssign)
-            ->set_symbol(symbol)
+        (new IR::IRInstrMov)
+            ->set_src(symbol)
+            ->set_dest(new IR::IRRegA)
             ->set_ctx(ctx)
     );
+
+    //update flags : not the value, we need to propagate it
+    vf.type_size = IR::Int.size;
+    vf.f_const = false;
+
+    cerr << "end affectation" << endl;
 
     return 0;
 }
@@ -180,42 +263,16 @@ antlrcpp::Any IRVisitor::visitTableDecl(ifccParser::TableDeclContext *ctx)
     return 0;
 }
 
-antlrcpp::Any IRVisitor::visitAffectationRule2(ifccParser::AffectationRule2Context *ctx)
-{
-
-    IR::Symbol * symbol = cfg->get_current_bb()->get_symbol(ctx->VAR()->getText(), ctx);
-
-    if (symbol->const_var) {
-        ErrorReporter::ErrorReporter::getInstance()->reportError(
-            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "const’ value cannot be used as left-value", ctx)
-        );
-    }
-
-    this->visit(ctx->rvalue());
-
-    cfg->add_instr(
-        (new IR::IRInstrAssign)
-            ->set_symbol(symbol)
-            ->set_ctx(ctx)
-    );
-
-    //update flags
-    vf.type_size = IR::Int.size;
-    vf.f_const = false;
-
-    return 0;
-}
-
 antlrcpp::Any IRVisitor::visitExprTable(ifccParser::ExprTableContext *ctx)
 {
     IR::Symbol * symbol = cfg->get_current_bb()->get_symbol(ctx->VAR()->getText(), ctx);
     int offset = stoi(ctx->NUM()->getText());
 
     cfg->add_instr(
-    (new IR::IRInstrMov)
-        ->set_src(new IR::SymbolT(offset, symbol))
-        ->set_dest(new IR::IRRegA)
-        ->set_ctx(ctx)
+        (new IR::IRInstrMov)
+            ->set_src(new IR::SymbolT(offset, symbol))
+            ->set_dest(new IR::IRRegA)
+            ->set_ctx(ctx)
     );
 
     return 0;
@@ -394,9 +451,7 @@ antlrcpp::Any IRVisitor::visitExprSumSous(ifccParser::ExprSumSousContext *ctx) {
     //update flags
     vf.type_size = IR::Int.size;
     vf.f_const = (const_left && const_right);
-    if (vf.f_const) {
-        vf.value = final_value;
-    }
+    vf.value = final_value;
 
     return 0;
 }
@@ -435,7 +490,6 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
         if (ctx->OP_MULT()->getText() == "*")
         {
             final_value = val_left * val_right;
-
         }
         else if (ctx->OP_MULT()->getText() == "/")
         {
@@ -504,9 +558,7 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
     //update flags
     vf.type_size = IR::Int.size;
     vf.f_const = (const_left && const_right);
-    if (vf.f_const) {
-        vf.value = final_value;
-    }
+    vf.value = final_value;
 
     return 0;
 }
