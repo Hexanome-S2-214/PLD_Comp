@@ -29,6 +29,11 @@ string getLines(antlr4::CharStream *stream, size_t start, size_t stop)
             stop--; // Exclude the newline character
             break;
         }
+        if (stop == stream->size() - 1)
+        {
+            break;
+        }
+        
         stop++;
     }
 

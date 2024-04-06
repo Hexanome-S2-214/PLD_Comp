@@ -66,6 +66,24 @@ int main(int argn, const char **argv)
   
   visitor.visit(tree);
 
+  for (auto symbol : IR::SymbolTable::get_all_unused_symbols())
+  {
+      error_reporter->reportError(new ErrorReporter::CompilerErrorToken(
+          ErrorReporter::WARNING,
+          "'" + symbol->id + "' is declared but never used. Variable declared here:",
+          symbol->get_ctx()
+      ));
+  }
+
+  for (auto function : cfg_set->get_unused_functions())
+  {
+    error_reporter->reportError(new ErrorReporter::CompilerErrorToken(
+        ErrorReporter::WARNING,
+        "function '" + function->name + "' is declared but never used. Function declared here:",
+        function->ctx
+    ));    
+  }
+
   if (error_reporter->getShouldThrow())
   {
       exit(1);
