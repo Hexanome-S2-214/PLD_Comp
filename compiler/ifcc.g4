@@ -128,6 +128,7 @@ declAffRule
 affectationRule
      : VAR op_aff=('='|'+='|'-='|'*='|'/=') rvalue               #simpleAff
      | VAR '[' NUM ']' op_aff=('='|'+='|'-='|'*='|'/=') rvalue   #tableAff
+     | '(' affectationRule ')'                                   #parAff
      ;
 
 rvalue
@@ -147,7 +148,7 @@ returnStmtRule
 expr
      : '(' expr ')'                     #exprParExpr
      | VAR '[' NUM ']'                  #exprTable
-     | op_unary=('-' | '!') expr        #exprUnary
+     | op_unary=('-' | '!' | '+') expr  #exprUnary
      | expr OP_MULT expr                #exprMultDivMod
      | expr op_add=('+' | '-') expr     #exprSumSous
      | expr COMPARAISON expr            #exprComparaison
