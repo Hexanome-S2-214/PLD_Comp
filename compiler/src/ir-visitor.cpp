@@ -1428,7 +1428,8 @@ antlrcpp::Any IRVisitor::visitStruct_switch_case(ifccParser::Struct_switch_caseC
 ////////////////////////////////////////////
 
 antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *ctx) {
-    cerr << "\nfunction " << ctx->fname->getText() << endl;
+    cfg_set->declare_function(ctx->fname->getText(), ctx);
+
     //One CFG and one Symbol Table per fonction (careful : CFG contains the ST in our model)
     IR::CFG * cfg = static_cast<IR::CFG *>(
         (new IR::CFG(ctx->fname->getText()))
@@ -1447,12 +1448,17 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
     int stop = nb_params > 6 ? 6 : nb_params;
     int i=0;
     while(i < stop) {
-        IR::Symbol *symbol = this->cfg->get_current_bb()->declare_symbol(cfg, ctx->fparam_decla()->fparam_decla2(i)->VAR()->getText(), IR::Int, ctx);
+        IR::Symbol *symbol = this->cfg->get_current_bb()->declare_symbol(
+            cfg,
+            ctx->fparam_decla()->fparam_decla2(i)->VAR()->getText(),
+            IR::Int,
+            ctx->fparam_decla()->fparam_decla2(i)
+        );
         cfg->add_instr(
             (new IR::IRInstrAssign)
                 ->set_src(reg_function_params[i])
                 ->set_symbol(symbol)
-                ->set_ctx(ctx)
+                ->set_ctx(ctx->fparam_decla()->fparam_decla2(i))
         );
         i++;
     }
@@ -1461,7 +1467,12 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
     //Careful : we declare variables with personnalized offset
     int offset = 16;
     for (int i=6 ; i < nb_params ; i++) {
-        IR::Symbol *symbol = this->cfg->get_current_bb()->declare_symbol(cfg, ctx->fparam_decla()->fparam_decla2(i)->VAR()->getText(), IR::Int, ctx);
+        IR::Symbol *symbol = this->cfg->get_current_bb()->declare_symbol(
+            cfg,
+            ctx->fparam_decla()->fparam_decla2(i)->VAR()->getText(),
+            IR::Int,
+            ctx->fparam_decla()->fparam_decla2(i)
+        );
         cfg->add_instr(
             (new IR::IRInstrMov)
                 ->set_src((new IR::IRRegStack)->set_offset(offset))

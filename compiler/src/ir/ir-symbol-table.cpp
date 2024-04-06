@@ -7,6 +7,12 @@
 namespace IR
 {
     int SymbolTable::symbol_offset = 0;
+    vector<SymbolTable *> SymbolTable::symbol_tables = {};
+
+    SymbolTable::SymbolTable()
+    {
+        symbol_tables.push_back(this);
+    }
 
     SymbolTable::~SymbolTable()
     {
@@ -66,5 +72,30 @@ namespace IR
         return tmp;
     }
 
+    vector<Symbol *> SymbolTable::get_unused_symbols()
+    {
+        vector<Symbol *> unused_symbols;
+        for (pair<const string, Symbol *> symbol : symbols)
+        {
+            if (!symbol.second->used)
+            {
+                unused_symbols.push_back(symbol.second);
+            }
+        }
+
+        return unused_symbols;
+    }
+
+    vector<Symbol *> SymbolTable::get_all_unused_symbols()
+    {
+        vector<Symbol *> unused_symbols;
+        for (SymbolTable * symbol_table : symbol_tables)
+        {
+            vector<Symbol *> table_unused_symbols = symbol_table->get_unused_symbols();
+            unused_symbols.insert(unused_symbols.end(), table_unused_symbols.begin(), table_unused_symbols.end());
+        }
+
+        return unused_symbols;
+    }
 }
 

@@ -7,9 +7,6 @@ namespace IR
 {
     Symbol * IRScopedBlock::declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx, bool const_var, int personalized_offset)
     {
-        cerr << "Declare symbol '" << id << "' in: " << this << " (ctx=" << ctx << ")" << endl;
-        log();
-
         try {
             return symbolTable.declare_symbol(parent, id, type, ctx, const_var, personalized_offset);
         } catch (IRSymbolError e) {
@@ -22,9 +19,6 @@ namespace IR
 
     Symbol * IRScopedBlock::get_symbol(string id, antlr4::ParserRuleContext * ctx)
     {
-        cerr << "Get symbol '" << id << "' in: " << this << " (ctx=" << ctx << ")" << endl;
-        log();
-
         try
         {
             return symbolTable.get_symbol(id, ctx);
