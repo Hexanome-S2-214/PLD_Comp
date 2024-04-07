@@ -9,7 +9,9 @@ void IR::CfgSet::gen_asm_x86(ostream& o)
 
 void IR::CfgSet::gen_asm_arm(ostream& o)
 {
-    
+    for (auto cfg : cfgs) {
+        cfg->gen_asm(o);
+    }
 }
 
 IR::Func * IR::CfgSet::declare_function(string name, antlr4::ParserRuleContext * ctx)

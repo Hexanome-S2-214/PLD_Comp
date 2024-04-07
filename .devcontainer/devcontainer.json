@@ -6,7 +6,7 @@
 	"build": {
 		"dockerfile": "Dockerfile",
 		"context": ".",
-		"options": ["--platform=linux/amd64"]	// For Mac M1 and M2 users
+		// "options": ["--platform=linux/amd64"]	// For Mac M1 and M2 users
 	},
 
 	"features": {

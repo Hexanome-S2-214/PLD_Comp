@@ -15,7 +15,8 @@ namespace IR
 
     void IRInstrCall::gen_asm_arm(ostream& o)
     {
-        
+        o << "\tadr x16, " << literal << "\n"; // mettre l'addresse du literal dans x16
+        o << "\tblr x16\n"; // brancher sur l'adresse de x16
     }
     
 }

@@ -20,10 +20,10 @@
 #include "ir/instr/comp.h"
 #include "ir/instr/set_flag_comp.h"
 #include "ir/instr/expression_bit_a_bit.h"
-#include "ir/instr/intr-cheat.h"
 #include "ir/instr/jump.h"
 #include "ir/instr/call.h"
 #include "ir/instr/push.h"
+#include "ir/instr/expression_mod.h"
 #include "error-reporter/compiler-error-token.h"
 #include "./error-reporter/error-reporter.h"
 
@@ -269,10 +269,13 @@ antlrcpp::Any IRVisitor::visitExprTable(ifccParser::ExprTableContext *ctx)
     int offset = stoi(ctx->NUM()->getText());
 
     cfg->add_instr(
-        (new IR::IRInstrMov)
-            ->set_src(new IR::SymbolT(offset, symbol))
-            ->set_dest(new IR::IRRegA)
-            ->set_ctx(ctx)
+    (new IR::IRInstrMov)
+        ->set_src(new IR::SymbolT(offset, symbol))
+        ->set_dest(
+            (new IR::IRRegA)
+                ->set_size(symbol->get_size())
+        )
+        ->set_ctx(ctx)
     );
 
     return 0;
@@ -346,10 +349,8 @@ antlrcpp::Any IRVisitor::visitExprVar(ifccParser::ExprVarContext *ctx)
     IR::Symbol *var = cfg->get_current_bb()->get_symbol(ctx->VAR()->getText(), ctx);
     cfg->add_instr(
         (new IR::IRInstrExprVar)
-            ->set_symbol(
-                var)
-            ->set_ctx(ctx)
-    );
+            ->set_symbol(var)
+            ->set_ctx(ctx));
 
     //update flags
     vf.type_size = var->type.size;
@@ -468,14 +469,21 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
     const_left = vf.f_const;
     val_left = vf.value;
 
-    IR::Symbol *varTemp = this->cfg->get_current_bb()->declare_tmp(cfg, IR::Int, ctx);
+    IR::Symbol *num = this->cfg->get_current_bb()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
         (new IR::IRInstrAssign)
-            ->set_symbol(varTemp)
+            ->set_symbol(num)
             ->set_ctx(ctx)
     );
     
     this->visit(ctx->expr(1));
+
+    IR::Symbol *dem = this->cfg->get_current_bb()->declare_tmp(cfg, IR::Int, ctx);
+    cfg->add_instr(
+        (new IR::IRInstrAssign)
+            ->set_symbol(dem)
+            ->set_ctx(ctx)
+    );
     const_right = vf.f_const;
     val_right = vf.value;
 
@@ -514,47 +522,48 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
         
     } else {
 
-        if (ctx->OP_MULT()->getText() == "*")
-        {
-            cfg->add_instr(
-                (new IR::IRInstrExprMult)
-                    ->set_src(varTemp)
-                    ->set_dest(new IR::IRRegA)
-                    ->set_ctx(ctx)
-            );
-        }
-        else if (ctx->OP_MULT()->getText() == "/" || ctx->OP_MULT()->getText() == "%")
-        {
-            cfg->add_instr(
-                (new IR::IRInstrMov)
-                    ->set_src(new IR::IRRegA)
-                    ->set_dest(new IR::IRRegB)
-                    ->set_ctx(ctx)
-            );
+    if (ctx->OP_MULT()->getText() == "*")
+    {
+        cfg->add_instr(
+            (new IR::IRInstrExprMult)
+                ->set_src(num)
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
+    }
+    else if (ctx->OP_MULT()->getText() == "/" || ctx->OP_MULT()->getText() == "%")
+    {
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(new IR::IRRegA)
+                ->set_dest(new IR::IRRegB)
+                ->set_ctx(ctx)
+        );
 
-            cfg->add_instr(
-                (new IR::IRInstrMov)
-                    ->set_src(varTemp)
-                    ->set_dest(new IR::IRRegA)
-                    ->set_ctx(ctx)
-            );
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(num)
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
 
             cfg->add_instr(
                 (new IR::IRInstrExprDiv)
                     ->set_ctx(ctx)
             );
 
-            if (ctx->OP_MULT()->getText() == "%")
-            {
-                //Modulo : il faut mettre EDX dans EAX -> c'est ce registre qui contient le reste après idivl
-                cfg->add_instr(
-                    (new IR::IRInstrMov)
-                        ->set_src(new IR::IRRegD)
-                        ->set_dest(new IR::IRRegA)
-                        ->set_ctx(ctx)
-                );
-            }
+        if (ctx->OP_MULT()->getText() == "%")
+        {
+            //Modulo : il faut mettre EDX dans EAX -> c'est ce registre qui contient le reste après idivl
+            IR::IRInstrExprMod * instr = new IR::IRInstrExprMod;
+            instr->num = num;
+            instr->dem = dem;
+            instr->div_res = new IR::IRRegA;
+            instr->set_dest(new IR::IRRegA);
+            
+            cfg->add_instr(instr);
         }
+    }
     }
 
     //update flags
@@ -1432,8 +1441,7 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
 
     //One CFG and one Symbol Table per fonction (careful : CFG contains the ST in our model)
     IR::CFG * cfg = static_cast<IR::CFG *>(
-        (new IR::CFG(ctx->fname->getText()))
-        ->set_parent(cfg_set)
+        (new IR::CFG(cfg_set, ctx->fname->getText()))
     );
 
     //Update both cfg_set AND current cfg kept as attribute
@@ -1553,7 +1561,10 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
             cfg->add_instr(
                 (new IR::IRInstrMov)
                     ->set_src(src)
-                    ->set_dest(new IR::IRRegA)
+                    ->set_dest(
+                        (new IR::IRRegA)
+                            ->set_size(src->get_size())
+                    )
                     ->set_ctx(ctx)
             );
         }

@@ -83,8 +83,21 @@ void IR::BasicBlock::gen_asm_x86(ostream& o)
     }
 }
 
-void IR::BasicBlock::gen_asm_arm(ostream &o){
+void IR::BasicBlock::gen_asm_arm(ostream &o)
+{
+    if (get_label() != "") {
+        o << get_label() << ":" << endl;
+    }
 
+    for (IR::IRInstr * instr : instrs)
+    {
+        instr->gen_asm_arm(o);
+    }
+
+    if (exit_label != "")
+    {
+        o << "\tb " << exit_label << endl;
+    }
 }
 
 void IR::BasicBlock::set_exit_true(IR::BasicBlock * exit_true)

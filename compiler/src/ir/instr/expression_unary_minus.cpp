@@ -10,5 +10,7 @@ namespace IR
     
     void IRInstrExprUnaryMinus::gen_asm_arm(ostream& o)
     {
+        
+        o << "\tneg " << (new IRRegA)->get_asm_str() << ", " << (new IRRegA)->get_asm_str() << "\n";
     }
 }

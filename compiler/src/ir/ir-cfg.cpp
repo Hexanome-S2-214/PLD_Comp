@@ -5,8 +5,10 @@
 
 int IR::CFG::bb_count = 2;
 
-IR::CFG::CFG(string name)
+IR::CFG::CFG(IRBase * parent, string name)
 {
+    set_parent(parent);
+
     fname = name;
     nb_param = 0;
 
@@ -49,19 +51,21 @@ void IR::CFG::gen_asm_arm(ostream& o)
         block->gen_asm_arm(o);
     }
 
-    // gen_asm_arm_epilogue(o);
+    gen_asm_arm_epilogue(o);
 }
 
 void IR::CFG::gen_asm_arm_prologue(ostream& o){
     o << ".globl main\n";
     o << "main:\n";
-    o << "    push {fp, lr}\n";
-    o << "    add fp, sp, #4\n";
+    o << "\tsub	sp, sp, 16\n";
+    //o << "    push {fp, lr}\n";
+    //o << "    add fp, sp, #4\n";
 }
 
-// void IR::CFG::gen_asm_arm_epilogue(ostream& o){
-//     o << "    pop {fp, pc}\n";
-// }
+void IR::CFG::gen_asm_arm_epilogue(ostream& o){
+    // o << "    pop {fp, pc}\n";
+    this->epilogue_bb->gen_asm_arm(o);
+}
 
 void IR::CFG::gen_asm_x86_prologue(ostream& o)
 {
