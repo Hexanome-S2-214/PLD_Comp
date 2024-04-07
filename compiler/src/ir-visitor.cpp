@@ -165,6 +165,7 @@ antlrcpp::Any IRVisitor::visitSimpleAff(ifccParser::SimpleAffContext *ctx)
 antlrcpp::Any IRVisitor::visitSimpleDecl(ifccParser::SimpleDeclContext *ctx)
 {
     IR::Type type;
+    bool const_var = ctx->CONST() ? true : false;
 
     if (ctx->getTokens(ifccParser::INT).size() >= 1)
     {
@@ -181,7 +182,7 @@ antlrcpp::Any IRVisitor::visitSimpleDecl(ifccParser::SimpleDeclContext *ctx)
         );
     }
 
-    cfg->get_current_bb()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx);
+    cfg->get_current_bb()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx, const_var);
 
     //update flags
     vf.type_size = type.size;
@@ -233,6 +234,8 @@ antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
 antlrcpp::Any IRVisitor::visitTableDecl(ifccParser::TableDeclContext *ctx)
 {
     IR::Type type;
+    bool const_var = ctx->CONST() ? true : false;
+    cerr << const_var << endl;
 
     if (ctx->CHAR())
     {
@@ -249,7 +252,7 @@ antlrcpp::Any IRVisitor::visitTableDecl(ifccParser::TableDeclContext *ctx)
         );
     }
 
-    cfg->get_current_bb()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx, false, stoi(ctx->NUM()->getText()));
+    cfg->get_current_bb()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx, const_var, stoi(ctx->NUM()->getText()));
 
     return 0;
 }
@@ -274,8 +277,15 @@ antlrcpp::Any IRVisitor::visitExprTable(ifccParser::ExprTableContext *ctx)
 
 antlrcpp::Any IRVisitor::visitTableAff(ifccParser::TableAffContext *ctx)
 {
-    this->visit(ctx->rvalue());
     IR::Symbol * symbol = cfg->get_current_bb()->get_symbol(ctx->VAR()->getText(), ctx);
+    if (symbol->const_var) {
+        ErrorReporter::ErrorReporter::getInstance()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "'const' value cannot be used as left-value", ctx)
+        );
+    }
+
+    this->visit(ctx->rvalue());
+
     int index = stoi(ctx->NUM()->getText());
     //TODO: Do we really need to allocate memory here ?
     IR::SymbolT* symbolT = new IR::SymbolT(index, symbol);
