@@ -1,10 +1,19 @@
 #include "ir-symbol-table.h"
 #include "ir-base.h"
+#include "ir-errors.h"
 #include "params/ir-symbol.h"
 #include "../error-reporter/compiler-error-token.h"
 
 namespace IR
 {
+    int SymbolTable::symbol_offset = 0;
+    vector<SymbolTable *> SymbolTable::symbol_tables = {};
+
+    SymbolTable::SymbolTable()
+    {
+        symbol_tables.push_back(this);
+    }
+
     SymbolTable::~SymbolTable()
     {
         for (pair<const string, Symbol *> symbol : symbols)
@@ -13,12 +22,11 @@ namespace IR
         }
     }
 
-    Symbol * SymbolTable::declare_symbol(IRBase * parent, string id, Type type, bool const_var, antlr4::ParserRuleContext * ctx, int tableSize)
+    Symbol * SymbolTable::declare_symbol(IRBase * parent, string id, Type type, antlr4::ParserRuleContext * ctx, bool const_var, int tableSize)
     {
         if (symbols.find(id) != symbols.end())
         {
-            this->error_reporter->reportError(new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "symbol " + id + " already declared", ctx));
-            exit(1);
+            throw IRSymbolError("symbol '" + id + "' already declared");
         }
 
         symbol_offset -= size_to_bytes(type.size);
@@ -48,8 +56,7 @@ namespace IR
     {
         if (symbols.find(id) == symbols.end() || symbols[id]->offset == 0)
         {
-            this->error_reporter->reportError(new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "symbol " + id + " not declared", ctx));
-            exit(1);
+            throw IRSymbolError("symbol '" + id + "' not declared");
         }
 
         symbols[id]->used = true;
@@ -65,5 +72,30 @@ namespace IR
         return tmp;
     }
 
+    vector<Symbol *> SymbolTable::get_unused_symbols()
+    {
+        vector<Symbol *> unused_symbols;
+        for (pair<const string, Symbol *> symbol : symbols)
+        {
+            if (!symbol.second->used)
+            {
+                unused_symbols.push_back(symbol.second);
+            }
+        }
+
+        return unused_symbols;
+    }
+
+    vector<Symbol *> SymbolTable::get_all_unused_symbols()
+    {
+        vector<Symbol *> unused_symbols;
+        for (SymbolTable * symbol_table : symbol_tables)
+        {
+            vector<Symbol *> table_unused_symbols = symbol_table->get_unused_symbols();
+            unused_symbols.insert(unused_symbols.end(), table_unused_symbols.begin(), table_unused_symbols.end());
+        }
+
+        return unused_symbols;
+    }
 }
 

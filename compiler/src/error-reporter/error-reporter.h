@@ -2,6 +2,7 @@
 
 #include <vector>
 #include "compiler-error.h"
+#include "compiler-error-token.h"
 
 namespace ErrorReporter
 {
@@ -11,6 +12,8 @@ namespace ErrorReporter
         ErrorReporter() = default;
         ErrorReporter(bool printErrors);
         ~ErrorReporter();
+
+        static ErrorReporter * getInstance();
 
         /*
         * Add error to reporter
@@ -34,6 +37,7 @@ namespace ErrorReporter
         bool getShouldThrow() const;
 
     private:
+        static ErrorReporter * instance;
         vector<CompilerError *> errors;
         bool shouldThrow = false;
         bool printErrors = true;

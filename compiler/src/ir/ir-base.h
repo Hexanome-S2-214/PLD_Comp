@@ -23,7 +23,6 @@ namespace IR
         string get_asm_str();
 
         IRBase * set_ctx(antlr4::ParserRuleContext * ctx);
-        IRBase * set_error_reporter(ErrorReporter::ErrorReporter * error_reporter);
         IRBase * set_parent(IRBase * parent);
 
         IRBase * paste_properties(IRBase * other);
@@ -31,10 +30,8 @@ namespace IR
         template<typename T = IRBase>
         T * get_parent();
         antlr4::ParserRuleContext * get_ctx();
-        ErrorReporter::ErrorReporter * get_error_reporter();
     private:
         IRBase * parent;
         antlr4::ParserRuleContext * ctx;
-        ErrorReporter::ErrorReporter * error_reporter;
     };
 };

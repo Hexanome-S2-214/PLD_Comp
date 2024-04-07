@@ -1,6 +1,7 @@
 #include <iostream>
 #include "error-reporter.h"
-#include "compiler-error-token.h"
+
+ErrorReporter::ErrorReporter* ErrorReporter::ErrorReporter::instance = nullptr;
 
 ErrorReporter::ErrorReporter::ErrorReporter(bool printErrors) : printErrors(printErrors) {}
 
@@ -10,6 +11,16 @@ ErrorReporter::ErrorReporter::~ErrorReporter()
     {
         delete error;
     }
+}
+
+ErrorReporter::ErrorReporter * ErrorReporter::ErrorReporter::getInstance()
+{
+    if (instance == nullptr)
+    {
+        instance = new ErrorReporter();
+    }
+
+    return instance;
 }
 
 void ErrorReporter::ErrorReporter::reportError(CompilerError * error)

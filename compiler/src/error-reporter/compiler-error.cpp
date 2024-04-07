@@ -17,6 +17,8 @@ string ErrorReporter::CompilerError::getLevelString()
 {
     switch (this->level)
     {
+    case INFO:
+        return "Info";
     case WARNING:
         return "Warning";
     case ERROR:

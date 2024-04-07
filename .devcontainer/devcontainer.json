@@ -27,7 +27,10 @@
 				"ms-vscode.cpptools-extension-pack",
 				"ms-vscode.cpptools",
 				"ms-python.python"
-			]
+			],
+			"settings": {
+                "extensions.verifySignature": false
+            }
 		}
 	}
 }

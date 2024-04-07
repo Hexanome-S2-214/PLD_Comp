@@ -8,6 +8,7 @@ IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label) : BasicBlock(cfg, label,
 
 IR::BasicBlock::BasicBlock(IR::CFG * cfg, string label, IR::BasicBlock * exit_true, IR::BasicBlock * exit_false) : label(label), exit_true(exit_true), exit_false(exit_false) {
     set_parent(cfg);
+    // ref = "BB<" + label + ">";
 }
 
 IR::BasicBlock::~BasicBlock()
@@ -43,12 +44,24 @@ void IR::BasicBlock::add_instr(IR::IRBase * instr)
     {
         instr->set_parent(this);
         instrs.push_back(static_cast<IR::IRInstr*>(instr));
-
         return;
     }
 }
 
-vector<IR::IRInstr *> * IR::BasicBlock::get_instrs()
+/**
+ * Deletes n last instructions of the block.
+ * Useful for optimization
+*/
+void IR::BasicBlock::remove_last_instructions(int n) {
+    for (int i=0; i < n; ++i) {
+        IR::IRInstr * last_instr = instrs.back();
+        delete last_instr;
+        instrs.pop_back();
+
+    }
+}
+
+list<IR::IRInstr *> * IR::BasicBlock::get_instrs()
 {
     return &instrs;
 }

@@ -10,6 +10,7 @@ namespace IR
 #include "ir-symbol-table.h"
 #include "../error-reporter/error-reporter.h"
 #include "ir-instr-comp.h"
+#include "ir-scoped-block.h"
 
 #define BB_INSTR 0
 
@@ -25,7 +26,7 @@ using namespace std;
 
 namespace IR
 {
-    class CFG : public IRBase
+    class CFG : public IRBase, public IRScopedBlock
     {
     public:
         CFG(IRBase * parent, string name);
@@ -45,32 +46,32 @@ namespace IR
         BasicBlock * get_break_parent(string label);
         BasicBlock * get_continue_parent(string label);
 
-        IRBase * set_error_reporter(ErrorReporter::ErrorReporter * error_reporter);
         void set_current_bb(BasicBlock * bb);
-        void incr_nb_param();
+        void set_nb_param(int n);
+        void set_no_return(bool b);
 
-        SymbolTable * get_symbol_table();
         BasicBlock * get_current_bb();
         vector<BasicBlock *> get_blocks();
         string get_next_bb_label();
         string get_epilogue_label();
         string get_fname();
         int get_nb_param();
+        bool get_no_return();
 
         int calc_st_size();
         
         vector<string> stack; // TODO: Make private and add push/pop methods (also maybe rename to something that means something)
     private:
         vector<BasicBlock *> blocks;
-        SymbolTable * symbol_table;
 
-        BasicBlock * current_bb;
+        BasicBlock * current_bb = nullptr;
         static int bb_count;
         BasicBlock * epilogue_bb;
         string epilogue_label;
 
         string fname;
         int nb_param;
+        bool no_return;
         
     };
 };

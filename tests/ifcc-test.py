@@ -229,6 +229,11 @@ for jobname in jobs:
     
     if gccstatus != 0 and ifccstatus != 0:
         ## ifcc correctly rejects invalid program -> test-case ok
+        if open("ifcc-compile.txt").read().find("Segmentation fault") != -1:
+            print(Fore.RED +"TEST FAIL (your compiler crashes)")
+            print(Style.RESET_ALL)
+            failed_tests.append(jobname)
+            continue
         print(Fore.GREEN +"TEST OK")
         print(Style.RESET_ALL)
         cpt_test_ok += 1
