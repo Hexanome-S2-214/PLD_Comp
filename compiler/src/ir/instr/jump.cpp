@@ -17,6 +17,12 @@ namespace IR
             case JumpType::IfNotEqual:
                 op = "jne";
                 break;
+            case JumpType::IfFalse:
+                op = "jz";
+                break;
+            case JumpType::IfTrue:
+                op = "jnz";
+                break;
             default:
                 ErrorReporter::ErrorReporter::getInstance()->reportError(
                     new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Invalid jump type", get_ctx())

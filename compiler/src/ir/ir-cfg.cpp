@@ -2,6 +2,7 @@
 #include "ir-basic-block.h"
 #include "ir-symbol-table.h"
 #include "instr/epilogue.h"
+#include "ir-errors.h"
 
 int IR::CFG::bb_count = 2;
 
@@ -110,34 +111,26 @@ IR::BasicBlock * IR::CFG::get_current_bb()
     return current_bb;
 }
 
-/**
- * Retourne le parent-"break" (switch ou boucle) du bloc passé en paramètre
- * Retourne une erreur si pas de bloc parent
- * @param label : label du block dont on veut l'indentation par rapport à une boucle
- * @return bloc "boucle"
-*/
-IR::BasicBlock * IR::CFG::get_break_parent(string label) {
-    std::stack<IR::BasicBlock *> ret_label;
+void IR::CFG::push_break(string label) {
+    stack.push_back(label);
+}
 
-    for (auto bb : blocks) {
-        switch(bb->get_bb_id()) {
-            case BB_SWITCH:
-            case BB_WHILE:
-                ret_label.push(bb);
-                break;
-            
-            case BB_END_SWITCH:
-            case BB_END_WHILE:
-                ret_label.pop();
-                break;
-        }
+string IR::CFG::pop_break() {
+    if (stack.empty()) {
+        throw IRLoopError("break statement outside of a loop or switch");
     }
 
-    if (ret_label.empty()){
-        throw runtime_error("break outside of a loop");
+    string label = stack.back();
+    stack.pop_back();
+    return label;
+}
+
+string IR::CFG::get_break() {
+    if (stack.empty()) {
+        throw IRLoopError("break statement outside of a loop or switch");
     }
 
-    return ret_label.top();
+    return stack.back();
 }
 
 /**
@@ -173,9 +166,15 @@ vector<IR::BasicBlock *> IR::CFG::get_blocks()
     return blocks;
 }
 
-string IR::CFG::get_next_bb_label()
+string IR::CFG::get_next_bb_label(string name_label)
 {
     string label = ".L" + to_string(IR::CFG::bb_count);
+
+    if (name_label.length() > 0)
+    {
+        label += "_" + name_label;
+    }
+
     IR::CFG::bb_count++;
     return label;
 }

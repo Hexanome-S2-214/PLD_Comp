@@ -1,12 +1,12 @@
 int main() {
     int a=1;
+    int b=0;
     int c;
     switch(a) {
         case 1:
             c=1;
         
         case 2:
-            int b=0;
             while (a < 5) {
                 if (a == 3) {
                     break;
