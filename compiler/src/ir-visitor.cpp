@@ -1687,6 +1687,8 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
         }
     }
 
+    cfg_set->set_function_as_used(ctx->fname->getText());
+
     //If there is more than 6 parameters, we place the remaining parameters on top of the stack
     if (nb_params > 6) {
         more_6_params = true;

@@ -35,6 +35,7 @@ namespace IR
         void add_cfg(CFG * cfg);
 
         Func * declare_function(string name, antlr4::ParserRuleContext * ctx);
+        void set_function_as_used(string name);
         vector<Func *> get_unused_functions();
 
         CFG * get_current_cfg();
