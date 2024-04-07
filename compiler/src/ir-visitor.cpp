@@ -1234,6 +1234,7 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
             ->set_ctx(ctx)
     );
 
+    cfg->set_current_bb(expr_bb);
     IR::BasicBlock * if_true_bb = new IR::BasicBlock(cfg, if_true_label, nullptr, nullptr);
     cfg->add_bb(if_true_bb);
     this->visit(ctx->struct_bloc(0));
@@ -1241,6 +1242,7 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
 
     if (has_else_stmt)
     {
+        cfg->set_current_bb(expr_bb);
         IR::BasicBlock * if_false_bb = new IR::BasicBlock(cfg, if_false_label, nullptr, nullptr);
         cfg->add_bb(if_false_bb);
         this->visit(ctx->struct_bloc(1));
@@ -1285,6 +1287,7 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
             ->set_ctx(ctx)
     );
 
+    cfg->set_current_bb(expr_bb);
     IR::BasicBlock * if_true_bb = new IR::BasicBlock(cfg, if_true_label, nullptr, nullptr);
     cfg->add_bb(if_true_bb);
     cfg->push_break(exit_label);         // Add exit label to break stack
