@@ -104,46 +104,43 @@ struct_element
      ;
 
 declarationRule
-     : declStdRule       # declStd
-     | declAffRule       # declAff
+     : declStdRule ';'      # declStd
+     | declAffRule ';'      # declAff
      ;
 
 instructionRule
-     : returnStmtRule         # returnStmt
-     | affectationRule        # affectation
-     | functionCallRule ';'   # functionCall
-     | 'break' ';'            # breakStmt
-     | 'continue' ';'         # continueStmt
+     : returnStmtRule ';'          # returnStmt
+     | affectationRule ';'         # affectation
+     | functionCallRule ';'        # functionCall
+     | 'break' ';'                 # breakStmt
+     | 'continue' ';'              # continueStmt
      ;
 
 declStdRule
-     : (INT|CHAR) VAR ';'                  #simpleDecl
-     | (INT | CHAR) VAR '[' NUM ']' ';'    #tableDecl
+     : CONST? (INT|CHAR) VAR                   #simpleDecl
+     | CONST? (INT | CHAR) VAR '[' NUM ']'     #tableDecl
      ;
 
 declAffRule
-     : CONST? (INT|CHAR) VAR '=' rvalue ';'                                     #declAffVar
-     | CONST? (CHAR) VAR '[' NUM ']' '=' '{' CHARACTER(','CHARACTER)* '}' ';'   #declAffTable
+     : CONST? (INT|CHAR) VAR '=' rvalue                                     #declAffVar
+     | CONST? (CHAR) VAR '[' NUM ']' '=' '{' CHARACTER(','CHARACTER)* '}'   #declAffTable
      ;
 
 affectationRule
-     : VAR '=' rvalue ';'               #simpleAff
-     | VAR '[' NUM ']' '=' rvalue ';'   #tableAff
-     | VAR '[' VAR ']' '=' rvalue ';'   #tableAff2
-     ;
-
-affectationRule2
-     : VAR '=' rvalue
+     : VAR op_aff=('='|'+='|'-='|'*='|'/=') rvalue               #simpleAff
+     | VAR '[' NUM ']' op_aff=('='|'+='|'-='|'*='|'/=') rvalue   #tableAff
+     | VAR '[' VAR ']' op_aff=('='|'+='|'-='|'*='|'/=') rvalue   #tableAff2
+     | '(' affectationRule ')'                                   #parAff
      ;
 
 rvalue
      : functionCallRule       //you can't do func() = func2()
-     | affectationRule2
+     | affectationRule
      | expr
      ;
 
 returnStmtRule
-     : RETURN rvalue ';'
+     : RETURN rvalue
      ;
 
 //=============================================
@@ -154,7 +151,7 @@ expr
      : '(' expr ')'                     #exprParExpr
      | VAR '[' VAR ']'                  #exprTableVar
      | VAR '[' NUM ']'                  #exprTable
-     | op_unary=('-' | '!') expr        #exprUnary
+     | op_unary=('-' | '!' | '+') expr  #exprUnary
      | expr OP_MULT expr                #exprMultDivMod
      | expr op_add=('+' | '-') expr     #exprSumSous
      | expr COMPARAISON expr            #exprComparaison
@@ -190,15 +187,6 @@ OP_MULT
      : '*'
      | '/'
      | '%'
-     ;
-
-OP_SUM
-     : '+'
-     | '-'
-     ;
-
-MODULO
-     : '%'
      ;
 
 OR

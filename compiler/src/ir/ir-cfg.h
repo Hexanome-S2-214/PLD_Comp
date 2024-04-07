@@ -6,6 +6,7 @@ namespace IR
 }
 
 #include <vector>
+#include <stack>
 #include "ir-base.h"
 #include "ir-symbol-table.h"
 #include "../error-reporter/error-reporter.h"
@@ -29,7 +30,7 @@ namespace IR
     class CFG : public IRBase, public IRScopedBlock
     {
     public:
-        CFG(string name);
+        CFG(IRBase * parent, string name);
         ~CFG();
 
         void gen_asm_x86(ostream& o) override;
@@ -42,9 +43,7 @@ namespace IR
 
         void add_instr(IRBase * instr);
         void add_bb(BasicBlock * bb);
-
-        BasicBlock * get_break_parent(string label);
-        BasicBlock * get_continue_parent(string label);
+        void remove_bb(BasicBlock * bb);
 
         void set_current_bb(BasicBlock * bb);
         void set_nb_param(int n);
@@ -52,15 +51,20 @@ namespace IR
 
         BasicBlock * get_current_bb();
         vector<BasicBlock *> get_blocks();
-        string get_next_bb_label();
+        string get_next_bb_label(string name_label = "");
         string get_epilogue_label();
         string get_fname();
         int get_nb_param();
         bool get_no_return();
 
         int calc_st_size();
-        
-        vector<string> stack; // TODO: Make private and add push/pop methods (also maybe rename to something that means something)
+
+        void push_break(string label);
+        string pop_break();
+        string get_break();
+        void push_continue(string label);
+        string pop_continue();
+        string get_continue();
     private:
         vector<BasicBlock *> blocks;
 
@@ -68,6 +72,9 @@ namespace IR
         static int bb_count;
         BasicBlock * epilogue_bb;
         string epilogue_label;
+
+        stack<string> break_stack;
+        stack<string> continue_stack;
 
         string fname;
         int nb_param;

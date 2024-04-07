@@ -85,4 +85,17 @@ namespace IR
         void gen_asm_x86(ostream& o) override;
         void gen_asm_arm(ostream& o) override;
     };
+
+    class IRRegArmTemp1 : public IRReg
+    {
+    public:
+        void gen_asm_x86(ostream& o) override;
+        void gen_asm_arm(ostream& o) override;
+    };
+    class IRRegArmTemp2 : public IRReg
+    {
+    public:
+        void gen_asm_x86(ostream& o) override;
+        void gen_asm_arm(ostream& o) override;
+    };
 };

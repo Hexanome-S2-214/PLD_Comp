@@ -1,3 +1,4 @@
+#include <set>
 #include "ir-visitor.h"
 #include "ir/ir-type.h"
 #include "ir/ir-cfg.h"
@@ -20,10 +21,12 @@
 #include "ir/instr/comp.h"
 #include "ir/instr/set_flag_comp.h"
 #include "ir/instr/expression_bit_a_bit.h"
-#include "ir/instr/intr-cheat.h"
 #include "ir/instr/jump.h"
 #include "ir/instr/call.h"
 #include "ir/instr/push.h"
+#include "ir/instr/expression_mod.h"
+#include "ir/instr/test.h"
+#include "ir/ir-errors.h"
 #include "error-reporter/compiler-error-token.h"
 #include "./error-reporter/error-reporter.h"
 
@@ -38,7 +41,6 @@ VisitorFlags vf;
 ////////////////////////////////////////////
 
 antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *ctx) {
-
     //detection of return inside a return-void function
     if (cfg->get_no_return()) {
         ErrorReporter::ErrorReporter::getInstance()->reportError(
@@ -73,17 +75,89 @@ antlrcpp::Any IRVisitor::visitSimpleAff(ifccParser::SimpleAffContext *ctx)
     
     if (symbol->const_var) {
         ErrorReporter::ErrorReporter::getInstance()->reportError(
-            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "'const’ value cannot be used as left-value", ctx)
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "'const' value cannot be used as left-value", ctx)
         );
     }
 
     this->visit(ctx->rvalue());
 
+    if (ctx->op_aff->getText() == "=") {
+        //base affectation : simply affect value
+        cfg->add_instr(
+            (new IR::IRInstrAssign)
+                ->set_symbol(symbol)
+                ->set_ctx(ctx)
+        );
+    } else if (ctx->op_aff->getText() == "+=") {
+        cfg->add_instr(
+            (new IR::IRInstrExprPlus)
+                ->set_src(new IR::IRRegA)
+                ->set_dest(symbol)
+                ->set_ctx(ctx)
+        );
+
+    } else if (ctx->op_aff->getText() == "*=") {
+        cfg->add_instr(
+                (new IR::IRInstrExprMult)
+                    ->set_src(symbol)
+                    ->set_dest(new IR::IRRegA)
+                    ->set_ctx(ctx)
+        );
+
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(new IR::IRRegA)
+                ->set_dest(symbol)
+                ->set_ctx(ctx)
+        );
+
+    } else if (ctx->op_aff->getText() == "-=") {
+        cfg->add_instr(
+                (new IR::IRInstrExprMinus)
+                    ->set_src(new IR::IRRegA)
+                    ->set_dest(symbol)
+                    ->set_ctx(ctx)
+        );
+
+    } else if (ctx->op_aff->getText() == "/=") {
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(new IR::IRRegA)
+                ->set_dest(new IR::IRRegB)
+                ->set_ctx(ctx)
+        );
+
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(symbol)
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
+
+        cfg->add_instr(
+            (new IR::IRInstrExprDiv)
+                ->set_ctx(ctx)
+        );
+
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(new IR::IRRegA)
+                ->set_dest(symbol)
+                ->set_ctx(ctx)
+        );
+    }
+
+    //move value of result into %eax
     cfg->add_instr(
-        (new IR::IRInstrAssign)
-            ->set_symbol(symbol)
+        (new IR::IRInstrMov)
+            ->set_src(symbol)
+            ->set_dest(new IR::IRRegA)
             ->set_ctx(ctx)
     );
+
+    //update flags : not the value, we need to propagate it
+    vf.type_size = IR::Int.size;
+    vf.f_const = false;
 
     return 0;
 }
@@ -91,6 +165,7 @@ antlrcpp::Any IRVisitor::visitSimpleAff(ifccParser::SimpleAffContext *ctx)
 antlrcpp::Any IRVisitor::visitSimpleDecl(ifccParser::SimpleDeclContext *ctx)
 {
     IR::Type type;
+    bool const_var = ctx->CONST() ? true : false;
 
     if (ctx->getTokens(ifccParser::INT).size() >= 1)
     {
@@ -107,7 +182,7 @@ antlrcpp::Any IRVisitor::visitSimpleDecl(ifccParser::SimpleDeclContext *ctx)
         );
     }
 
-    cfg->get_current_bb()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx);
+    cfg->get_current_bb()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx, const_var);
 
     //update flags
     vf.type_size = type.size;
@@ -205,6 +280,8 @@ antlrcpp::Any IRVisitor::visitDeclAffTable(ifccParser::DeclAffTableContext *ctx)
 antlrcpp::Any IRVisitor::visitTableDecl(ifccParser::TableDeclContext *ctx)
 {
     IR::Type type;
+    bool const_var = ctx->CONST() ? true : false;
+    cerr << const_var << endl;
 
     if (ctx->CHAR())
     {
@@ -221,33 +298,7 @@ antlrcpp::Any IRVisitor::visitTableDecl(ifccParser::TableDeclContext *ctx)
         );
     }
 
-    cfg->get_current_bb()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx, false, stoi(ctx->NUM()->getText()));
-
-    return 0;
-}
-
-antlrcpp::Any IRVisitor::visitAffectationRule2(ifccParser::AffectationRule2Context *ctx)
-{
-
-    IR::Symbol * symbol = cfg->get_current_bb()->get_symbol(ctx->VAR()->getText(), ctx);
-
-    if (symbol->const_var) {
-        ErrorReporter::ErrorReporter::getInstance()->reportError(
-            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "const’ value cannot be used as left-value", ctx)
-        );
-    }
-
-    this->visit(ctx->rvalue());
-
-    cfg->add_instr(
-        (new IR::IRInstrAssign)
-            ->set_symbol(symbol)
-            ->set_ctx(ctx)
-    );
-
-    //update flags
-    vf.type_size = IR::Int.size;
-    vf.f_const = false;
+    cfg->get_current_bb()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx, const_var, stoi(ctx->NUM()->getText()));
 
     return 0;
 }
@@ -260,7 +311,10 @@ antlrcpp::Any IRVisitor::visitExprTable(ifccParser::ExprTableContext *ctx)
     cfg->add_instr(
     (new IR::IRInstrMov)
         ->set_src(new IR::SymbolT(offset, symbol))
-        ->set_dest(new IR::IRRegA)
+        ->set_dest(
+            (new IR::IRRegA)
+                ->set_size(symbol->get_size())
+        )
         ->set_ctx(ctx)
     );
 
@@ -284,8 +338,15 @@ antlrcpp::Any IRVisitor::visitExprTableVar(ifccParser::ExprTableVarContext *ctx)
 
 antlrcpp::Any IRVisitor::visitTableAff(ifccParser::TableAffContext *ctx)
 {
-    this->visit(ctx->rvalue());
     IR::Symbol * symbol = cfg->get_current_bb()->get_symbol(ctx->VAR()->getText(), ctx);
+    if (symbol->const_var) {
+        ErrorReporter::ErrorReporter::getInstance()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "'const' value cannot be used as left-value", ctx)
+        );
+    }
+
+    this->visit(ctx->rvalue());
+
     int index = stoi(ctx->NUM()->getText());
     IR::SymbolT* symbolT = new IR::SymbolT(index, symbol);
     cfg->add_instr(
@@ -376,10 +437,8 @@ antlrcpp::Any IRVisitor::visitExprVar(ifccParser::ExprVarContext *ctx)
     IR::Symbol *var = cfg->get_current_bb()->get_symbol(ctx->VAR()->getText(), ctx);
     cfg->add_instr(
         (new IR::IRInstrExprVar)
-            ->set_symbol(
-                var)
-            ->set_ctx(ctx)
-    );
+            ->set_symbol(var)
+            ->set_ctx(ctx));
 
     //update flags
     vf.type_size = var->type.size;
@@ -498,14 +557,21 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
     const_left = vf.f_const;
     val_left = vf.value;
 
-    IR::Symbol *varTemp = this->cfg->get_current_bb()->declare_tmp(cfg, IR::Int, ctx);
+    IR::Symbol *num = this->cfg->get_current_bb()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
         (new IR::IRInstrAssign)
-            ->set_symbol(varTemp)
+            ->set_symbol(num)
             ->set_ctx(ctx)
     );
     
     this->visit(ctx->expr(1));
+
+    IR::Symbol *dem = this->cfg->get_current_bb()->declare_tmp(cfg, IR::Int, ctx);
+    cfg->add_instr(
+        (new IR::IRInstrAssign)
+            ->set_symbol(dem)
+            ->set_ctx(ctx)
+    );
     const_right = vf.f_const;
     val_right = vf.value;
 
@@ -522,7 +588,6 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
         if (ctx->OP_MULT()->getText() == "*")
         {
             final_value = val_left * val_right;
-
         }
         else if (ctx->OP_MULT()->getText() == "/")
         {
@@ -545,47 +610,48 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
         
     } else {
 
-        if (ctx->OP_MULT()->getText() == "*")
-        {
-            cfg->add_instr(
-                (new IR::IRInstrExprMult)
-                    ->set_src(varTemp)
-                    ->set_dest(new IR::IRRegA)
-                    ->set_ctx(ctx)
-            );
-        }
-        else if (ctx->OP_MULT()->getText() == "/" || ctx->OP_MULT()->getText() == "%")
-        {
-            cfg->add_instr(
-                (new IR::IRInstrMov)
-                    ->set_src(new IR::IRRegA)
-                    ->set_dest(new IR::IRRegB)
-                    ->set_ctx(ctx)
-            );
+    if (ctx->OP_MULT()->getText() == "*")
+    {
+        cfg->add_instr(
+            (new IR::IRInstrExprMult)
+                ->set_src(num)
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
+    }
+    else if (ctx->OP_MULT()->getText() == "/" || ctx->OP_MULT()->getText() == "%")
+    {
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(new IR::IRRegA)
+                ->set_dest(new IR::IRRegB)
+                ->set_ctx(ctx)
+        );
 
-            cfg->add_instr(
-                (new IR::IRInstrMov)
-                    ->set_src(varTemp)
-                    ->set_dest(new IR::IRRegA)
-                    ->set_ctx(ctx)
-            );
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(num)
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
 
             cfg->add_instr(
                 (new IR::IRInstrExprDiv)
                     ->set_ctx(ctx)
             );
 
-            if (ctx->OP_MULT()->getText() == "%")
-            {
-                //Modulo : il faut mettre EDX dans EAX -> c'est ce registre qui contient le reste après idivl
-                cfg->add_instr(
-                    (new IR::IRInstrMov)
-                        ->set_src(new IR::IRRegD)
-                        ->set_dest(new IR::IRRegA)
-                        ->set_ctx(ctx)
-                );
-            }
+        if (ctx->OP_MULT()->getText() == "%")
+        {
+            //Modulo : il faut mettre EDX dans EAX -> c'est ce registre qui contient le reste après idivl
+            IR::IRInstrExprMod * instr = new IR::IRInstrExprMod;
+            instr->num = num;
+            instr->dem = dem;
+            instr->div_res = new IR::IRRegA;
+            instr->set_dest(new IR::IRRegA);
+            
+            cfg->add_instr(instr);
         }
+    }
     }
 
     //update flags
@@ -619,8 +685,10 @@ antlrcpp::Any IRVisitor::visitExprUnary(ifccParser::ExprUnaryContext *ctx)
 
         if (ctx->op_unary->getText() == "-") {
             final_value = -val;
-        } else {
+        } else if (ctx->op_unary->getText() == "!"){
             final_value = !val;
+        } else if (ctx->op_unary->getText() == "+"){
+            final_value = val;
         }
 
         cfg->add_instr(
@@ -642,7 +710,7 @@ antlrcpp::Any IRVisitor::visitExprUnary(ifccParser::ExprUnaryContext *ctx)
                     ->set_ctx(ctx)
             );
         }
-        else {
+        else if (ctx->op_unary->getText() == "!") {
             //comparaison EAX (droite) et ECX (gauche)
             cfg->add_instr(
                 (new IR::IRInstrComp)
@@ -1070,35 +1138,58 @@ antlrcpp::Any IRVisitor::visitExprOrBAB(ifccParser::ExprOrBABContext *ctx)
 ////////////////////////////////////////////
 
 antlrcpp::Any IRVisitor::visitExprAnd(ifccParser::ExprAndContext *ctx) {
-
-    //equivalent to : if first expr is false then return false, else return value of second expr
     bool const_left; bool const_right;
     int val_left; int val_right;
     int final_value;
 
-    string first_expr_false_label = cfg->get_next_bb_label();
-    string end_label = cfg->get_next_bb_label();
+    IR::BasicBlock * current_bb = cfg->get_current_bb();
 
+    string left_expr_label = cfg->get_next_bb_label("AND_LEFT_EXPR");
+    string left_eval_label = cfg->get_next_bb_label("AND_LEFT_EVAL");
+    string right_expr_label = cfg->get_next_bb_label("AND_RIGHT_EXPR");
+    string true_label = cfg->get_next_bb_label("AND_TRUE");
+    string exit_label = cfg->get_next_bb_label("AND_EXIT");
+
+    IR::BasicBlock * left_expr_bb = new IR::BasicBlock(cfg, left_expr_label, nullptr, nullptr);
+    cfg->add_bb(left_expr_bb);
     this->visit(ctx->expr(0));
+
     const_left = vf.f_const;
     val_left = vf.value;
 
-    //if false -> jump to the block which moves $0 into %eax
+    IR::BasicBlock * left_eval_bb = new IR::BasicBlock(cfg, left_eval_label, nullptr, nullptr);
+    cfg->add_bb(left_eval_bb);
+
+    cfg->add_instr(
+        (new IR::IRInstrTest)
+            ->set_src(new IR::IRRegA)
+    );
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_jump(IR::JumpType::IfNotEqual)
-            ->set_label(first_expr_false_label)
+            ->set_jump(IR::JumpType::IfTrue)
+            ->set_label(right_expr_label)
+            ->set_ctx(ctx)
+    );
+    cfg->add_instr(
+        (new IR::IRInstrJump)
+            ->set_jump(IR::JumpType::IfFalse)
+            ->set_label(exit_label)
             ->set_ctx(ctx)
     );
 
-    //if true -> visit second expression
+    IR::BasicBlock * right_expr_bb = new IR::BasicBlock(cfg, right_expr_label, nullptr, nullptr);
+    cfg->add_bb(right_expr_bb);
     this->visit(ctx->expr(1));
+
     const_right = vf.f_const;
     val_right = vf.value;
 
     if (const_left && const_right) {
-        
-        cfg->get_current_bb()->remove_last_instructions(3);
+        cfg->remove_bb(right_expr_bb);
+        cfg->remove_bb(left_eval_bb);
+        cfg->remove_bb(left_expr_bb);
+
+        cfg->set_current_bb(current_bb);
 
         final_value = val_left && val_right;
 
@@ -1112,34 +1203,43 @@ antlrcpp::Any IRVisitor::visitExprAnd(ifccParser::ExprAndContext *ctx) {
                 ->set_dest(new IR::IRRegA)
                 ->set_ctx(ctx)
         );
-
     } else {
-
-        //setup of block to reach if first expr is false
-        IR::BasicBlock * first_expr_false_bb = new IR::BasicBlock(cfg, first_expr_false_label, nullptr, nullptr);
-        first_expr_false_bb->set_exit(end_label);
-        first_expr_false_bb->add_instr(
-            (new IR::IRInstrMov)
-                ->set_src(
-                    (new IR::IRConst)
-                        ->set_literal("0")
-                )
-                ->set_dest(
-                    (new IR::IRRegA)
-                        ->set_size(IR::DWord))
+        cfg->add_instr(
+            (new IR::IRInstrTest)
+                ->set_src(new IR::IRRegA)
+        );
+        cfg->add_instr(
+            (new IR::IRInstrJump)
+                ->set_jump(IR::JumpType::IfTrue)
+                ->set_label(true_label)
+                ->set_ctx(ctx)
+        );
+        cfg->add_instr(
+            (new IR::IRInstrJump)
+                ->set_jump(IR::JumpType::IfFalse)
+                ->set_label(exit_label)
                 ->set_ctx(ctx)
         );
 
-        //in the end, jump to block which continues the program
-        cfg->get_current_bb()->set_exit(end_label);
+        IR::BasicBlock * true_bb = new IR::BasicBlock(cfg, true_label, nullptr, nullptr);
+        cfg->add_bb(true_bb);
 
-        IR::BasicBlock * end_bb = new IR::BasicBlock(cfg, end_label, nullptr, nullptr);
-
-        cfg->add_bb(first_expr_false_bb);
-        cfg->add_bb(end_bb);
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(
+                    (new IR::IRConst)
+                        ->set_literal("1")
+                        ->set_size(IR::Int.size)
+                )
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
     }
-    
-    //update flags
+
+    IR::BasicBlock * exit_bb = new IR::BasicBlock(cfg, exit_label, nullptr, nullptr);
+    cfg->add_bb(exit_bb);
+
+    // update flags
     vf.type_size = IR::Int.size;
     vf.f_const = (const_left && const_right);
     if (vf.f_const) {
@@ -1150,35 +1250,58 @@ antlrcpp::Any IRVisitor::visitExprAnd(ifccParser::ExprAndContext *ctx) {
 }
 
 antlrcpp::Any IRVisitor::visitExprOr(ifccParser::ExprOrContext *ctx) {
-
-    //equivalent to : if first expr is true then return true, else return value of second expr
     bool const_left; bool const_right;
     int val_left; int val_right;
     int final_value;
 
-    string first_expr_true_label = cfg->get_next_bb_label();
-    string end_label = cfg->get_next_bb_label();
+    IR::BasicBlock * current_bb = cfg->get_current_bb();
 
+    string left_expr_label = cfg->get_next_bb_label("OR_LEFT_EXPR");
+    string left_eval_label = cfg->get_next_bb_label("OR_LEFT_EVAL");
+    string right_expr_label = cfg->get_next_bb_label("OR_RIGHT_EXPR");
+    string true_label = cfg->get_next_bb_label("OR_TRUE");
+    string exit_label = cfg->get_next_bb_label("OR_EXIT");
+
+    IR::BasicBlock * left_expr_bb = new IR::BasicBlock(cfg, left_expr_label, nullptr, nullptr);
+    cfg->add_bb(left_expr_bb);
     this->visit(ctx->expr(0));
+
     const_left = vf.f_const;
     val_left = vf.value;
 
-    //if true -> jump to the block which moves $1 into %eax
+    IR::BasicBlock * left_eval_bb = new IR::BasicBlock(cfg, left_eval_label, nullptr, nullptr);
+    cfg->add_bb(left_eval_bb);
+
+    cfg->add_instr(
+        (new IR::IRInstrTest)
+            ->set_src(new IR::IRRegA)
+    );
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_jump(IR::JumpType::IfEqual)
-            ->set_label(first_expr_true_label)
+            ->set_jump(IR::JumpType::IfTrue)
+            ->set_label(true_label)
+            ->set_ctx(ctx)
+    );
+    cfg->add_instr(
+        (new IR::IRInstrJump)
+            ->set_jump(IR::JumpType::IfFalse)
+            ->set_label(right_expr_label)
             ->set_ctx(ctx)
     );
 
-    //if true -> visit second expression
+    IR::BasicBlock * right_expr_bb = new IR::BasicBlock(cfg, right_expr_label, nullptr, nullptr);
+    cfg->add_bb(right_expr_bb);
     this->visit(ctx->expr(1));
+
     const_right = vf.f_const;
     val_right = vf.value;
 
     if (const_left && const_right) {
-        
-        cfg->get_current_bb()->remove_last_instructions(3);
+        cfg->remove_bb(left_expr_bb);
+        cfg->remove_bb(left_eval_bb);
+        cfg->remove_bb(right_expr_bb);
+
+        cfg->set_current_bb(current_bb);
 
         final_value = val_left || val_right;
 
@@ -1192,34 +1315,43 @@ antlrcpp::Any IRVisitor::visitExprOr(ifccParser::ExprOrContext *ctx) {
                 ->set_dest(new IR::IRRegA)
                 ->set_ctx(ctx)
         );
-
     } else {
+        cfg->add_instr(
+            (new IR::IRInstrTest)
+                ->set_src(new IR::IRRegA)
+        );
+        cfg->add_instr(
+            (new IR::IRInstrJump)
+                ->set_jump(IR::JumpType::IfTrue)
+                ->set_label(true_label)
+                ->set_ctx(ctx)
+        );
+        cfg->add_instr(
+            (new IR::IRInstrJump)
+                ->set_jump(IR::JumpType::IfFalse)
+                ->set_label(exit_label)
+                ->set_ctx(ctx)
+        );
 
-        //setup of block to reach if first expr is false
-        IR::BasicBlock * first_expr_true_bb = new IR::BasicBlock(cfg, first_expr_true_label, nullptr, nullptr);
-        first_expr_true_bb->set_exit(end_label);
-        first_expr_true_bb->add_instr(
+        IR::BasicBlock * true_bb = new IR::BasicBlock(cfg, true_label, nullptr, nullptr);
+        cfg->add_bb(true_bb);
+
+        cfg->add_instr(
             (new IR::IRInstrMov)
                 ->set_src(
                     (new IR::IRConst)
                         ->set_literal("1")
+                        ->set_size(IR::Int.size)
                 )
-                ->set_dest(
-                    (new IR::IRRegA)
-                        ->set_size(IR::DWord))
+                ->set_dest(new IR::IRRegA)
                 ->set_ctx(ctx)
         );
-
-        //in the end, jump to block which continues the program
-        cfg->get_current_bb()->set_exit(end_label);
-
-        IR::BasicBlock * end_bb = new IR::BasicBlock(cfg, end_label, nullptr, nullptr);
-
-        cfg->add_bb(first_expr_true_bb);
-        cfg->add_bb(end_bb);
     }
-    
-    //update flags
+
+    IR::BasicBlock * exit_bb = new IR::BasicBlock(cfg, exit_label, nullptr, nullptr);
+    cfg->add_bb(exit_bb);
+
+    // update flags
     vf.type_size = IR::Int.size;
     vf.f_const = (const_left && const_right);
     if (vf.f_const) {
@@ -1234,220 +1366,231 @@ antlrcpp::Any IRVisitor::visitExprOr(ifccParser::ExprOrContext *ctx) {
 ////////////////////////////////////////////
 
 antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *ctx) {
-    IR::BasicBlock * expr_bb = cfg->get_current_bb();
-    
-    //determine if it's if-then-else or only if-then
-    bool if_then_else = (ctx->struct_bloc().size() > 1) ? true : false;
-    
-    // Evaluate IF expression
-    this->visit(ctx->expr());
-
-    // Create labels for jumps -> now because the child needs to jump to the parent when finished
-    string exit_label = cfg->get_next_bb_label();
+    string expr_label = cfg->get_next_bb_label();
+    string eval_label = cfg->get_next_bb_label();
     string if_true_label = cfg->get_next_bb_label();
-    string if_false_label;
+    string if_false_label = cfg->get_next_bb_label();
+    string exit_label = cfg->get_next_bb_label();
 
-    // Push end jump label to stack for children
-    cfg->stack.push_back(exit_label); // Push own exit
+    bool has_else_stmt = ctx->struct_bloc().size() > 1;
 
-    cfg->set_current_bb(expr_bb);
-    // Compare IF result
+    if (!has_else_stmt)
+    {
+        if_false_label = exit_label;
+    }
+    
+    IR::BasicBlock * expr_bb = new IR::BasicBlock(cfg, expr_label, nullptr, nullptr);
+    cfg->add_bb(expr_bb);
+    this->visit(ctx->expr());
+    cfg->get_current_bb()->set_exit(eval_label);
+
+    IR::BasicBlock * eval_bb = new IR::BasicBlock(cfg, eval_label, nullptr, nullptr);
+    cfg->add_bb(eval_bb);
+
     cfg->add_instr(
-        (new IR::IRInstrComp)
-            ->set_src(
-                (new IR::IRConst)->set_literal("1")
-            )
-            ->set_dest(new IR::IRRegA)
+        (new IR::IRInstrTest)
+            ->set_src(new IR::IRRegA)
             ->set_ctx(ctx)
     );
-
-    //if-then else -> jump to false bloc
-    string jump_after_eval_cond;
-    switch (if_then_else) {
-        case true:
-            if_false_label = cfg->get_next_bb_label();
-            jump_after_eval_cond = if_false_label;
-            break;
-        case false:
-            jump_after_eval_cond = exit_label;
-    }
-
-    //Jump after condition evaluation
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_jump(IR::JumpType::IfEqual)
+            ->set_jump(IR::JumpType::IfTrue)
             ->set_label(if_true_label)
             ->set_ctx(ctx)
     );
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_jump(IR::JumpType::IfNotEqual)
-            ->set_label(jump_after_eval_cond)
+            ->set_jump(IR::JumpType::IfFalse)
+            ->set_label(if_false_label)
             ->set_ctx(ctx)
     );
 
-    // Visit if true : always
-    IR::BasicBlock * if_true = new IR::BasicBlock(cfg, if_true_label, nullptr, nullptr);
-    cfg->add_bb(if_true);
-    this->visit(ctx->struct_bloc(0)); // Add if true
-    if_true->set_exit(exit_label);
-
-    // Add if false
-    if (if_then_else) {
-        cfg->set_current_bb(expr_bb);
-        IR::BasicBlock * if_false = new IR::BasicBlock(cfg, if_false_label, nullptr, nullptr);
-        cfg->add_bb(if_false);
-        this->visit(ctx->struct_bloc(1));
-        if_false->set_exit(exit_label);
-    }
-
-    // Pop exit from stack
-    cfg->stack.pop_back();
     cfg->set_current_bb(expr_bb);
+    IR::BasicBlock * if_true_bb = new IR::BasicBlock(cfg, if_true_label, nullptr, nullptr);
+    cfg->add_bb(if_true_bb);
+    this->visit(ctx->struct_bloc(0));
+    cfg->get_current_bb()->set_exit(exit_label);
 
-    // Add exit
+    if (has_else_stmt)
+    {
+        cfg->set_current_bb(expr_bb);
+        IR::BasicBlock * if_false_bb = new IR::BasicBlock(cfg, if_false_label, nullptr, nullptr);
+        cfg->add_bb(if_false_bb);
+        this->visit(ctx->struct_bloc(1));
+        cfg->get_current_bb()->set_exit(exit_label);
+    }
+    
+    cfg->set_current_bb(expr_bb);
     IR::BasicBlock * exit_bb = new IR::BasicBlock(cfg, exit_label, nullptr, nullptr);
     cfg->add_bb(exit_bb);
 
-    // Set exit from parent
-    if (cfg->stack.size() > 0)
-    {
-        string parent_exit = cfg->stack.back();
-        if (parent_exit != "")
-        {
-            exit_bb->set_exit(parent_exit);
-        }
-    }
-
-    return IR::Int.size;
+    return 0;
 }
 
 antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx) {
-    IR::BasicBlock * expr_bb = cfg->get_current_bb();
+    string expr_label = cfg->get_next_bb_label();
+    string eval_label = cfg->get_next_bb_label();
+    string if_true_label = cfg->get_next_bb_label();
+    string exit_label = cfg->get_next_bb_label();
 
-    //Labels for new blocks
-    string condition_label = cfg->get_next_bb_label();
-    string body_label = cfg->get_next_bb_label();
-    string end_while_label = cfg->get_next_bb_label();
-
-    // Push condition (!!!!) jump label to stack for children
-    cfg->stack.push_back(condition_label); // Push own exit
-
-    //Jump to condition block
-    cfg->add_instr(
-        (new IR::IRInstrJump)
-            ->set_jump(IR::JumpType::Jump)
-            ->set_label(condition_label)
-            ->set_ctx(ctx)
-    );
-
-    //Parsing of condition block
-    IR::BasicBlock * condition_bb = new IR::BasicBlock(cfg, condition_label, nullptr, nullptr);
-    condition_bb->set_bb_id(BB_WHILE); //for break/continue
-    cfg->add_bb(condition_bb);
+    IR::BasicBlock * expr_bb = new IR::BasicBlock(cfg, expr_label, nullptr, nullptr);
+    cfg->add_bb(expr_bb);
     this->visit(ctx->expr());
-    condition_bb->set_exit(end_while_label); //jumps to end if condition false
-    
-    //test result
+    cfg->get_current_bb()->set_exit(eval_label);
+
+    IR::BasicBlock * eval_bb = new IR::BasicBlock(cfg, eval_label, nullptr, nullptr);
+    cfg->add_bb(eval_bb);
+
     cfg->add_instr(
-        (new IR::IRInstrComp)
-            ->set_src(
-                (new IR::IRConst)->set_literal("1")
-            )
-            ->set_dest(new IR::IRRegA)
+        (new IR::IRInstrTest)
+            ->set_src(new IR::IRRegA)
             ->set_ctx(ctx)
     );
-    //if condition is evaluated to "true" -> jump to body of the while
     cfg->add_instr(
         (new IR::IRInstrJump)
-            ->set_jump(IR::JumpType::IfEqual)
-            ->set_label(body_label)
+            ->set_jump(IR::JumpType::IfTrue)
+            ->set_label(if_true_label)
             ->set_ctx(ctx)
     );
-
-    //Parsing of body block
-    IR::BasicBlock * body_bb = new IR::BasicBlock(cfg, body_label, nullptr, nullptr);
-    cfg->add_bb(body_bb);
-    this->visit(ctx->struct_bloc());
-    body_bb->set_exit(condition_label);
+    cfg->add_instr(
+        (new IR::IRInstrJump)
+            ->set_jump(IR::JumpType::IfFalse)
+            ->set_label(exit_label)
+            ->set_ctx(ctx)
+    );
 
     cfg->set_current_bb(expr_bb);
-    //Adding the end-while block
-    IR::BasicBlock * end_while_bb = new IR::BasicBlock(cfg, end_while_label, nullptr, nullptr);
-    body_bb->set_bb_id(BB_END_WHILE);
-    cfg->add_bb(end_while_bb);
+    IR::BasicBlock * if_true_bb = new IR::BasicBlock(cfg, if_true_label, nullptr, nullptr);
+    cfg->add_bb(if_true_bb);
+    cfg->push_break(exit_label);         // Add exit label to break stack
+    cfg->push_continue(expr_label);      // Add eval label to continue stack
+    this->visit(ctx->struct_bloc());
+    cfg->pop_continue();                 // Remove eval label from continue stack
+    cfg->pop_break();                    // Remove exit label from break stack
+    cfg->get_current_bb()->set_exit(expr_label);
+    
+    cfg->set_current_bb(expr_bb);
+    IR::BasicBlock * exit_bb = new IR::BasicBlock(cfg, exit_label, nullptr, nullptr);
+    cfg->add_bb(exit_bb);
 
-    // Pop exit from stack
-    cfg->stack.pop_back();
-
-    // Set exit from parent
-    if (cfg->stack.size() > 0)
-    {
-        string parent_exit = cfg->stack.back();
-        if (parent_exit != "")
-        {
-            end_while_bb->set_exit(parent_exit);
-        }
-    }
-
-    return IR::Int.size;
+    return 0;
 }
 
 antlrcpp::Any IRVisitor::visitStruct_switch_case(ifccParser::Struct_switch_caseContext *ctx) {
-    IR::BasicBlock * expr_bb = cfg->get_current_bb();
+    string expr_label = cfg->get_next_bb_label();
+    string eval_label = cfg->get_next_bb_label();
+
+    vector<string> case_eval_labels;    // Compare case value with expr
+    vector<string> case_block_labels;   // Execute case block
+    vector<string> case_exit_labels;    // Exit case block
+
     int nb_case = ctx->case_opt().size();
-    bool default_opt = ctx->default_opt() ? true : false;
 
-    vector<IR::BasicBlock *> cases;
-
-    //Works because while_bb are identified via the condition block (a switch will be in the body block)
-    cfg->get_current_bb()->set_bb_id(BB_SWITCH);
-
-    //Labels
-    string end_switch_label = cfg->get_next_bb_label();
-
-    cfg->get_current_bb()->set_exit(end_switch_label);    
-
-    //evaluate expression
-    this->visit(ctx->expr());
-
-    //evaluate all conditions and prepare corresponding blocks
     for (int i=0; i < nb_case ; ++i) {
-        //create bb
-        string case_bb_label = cfg->get_next_bb_label();
-        IR::BasicBlock * case_bb = new IR::BasicBlock(cfg, case_bb_label, nullptr, nullptr);
-        cases.push_back(case_bb);
+        case_eval_labels.push_back(cfg->get_next_bb_label("SWITCH_EVAL_" + to_string(i)));
+        case_block_labels.push_back(cfg->get_next_bb_label("SWITCH_BLOCK_" + to_string(i)));
+        case_exit_labels.push_back(cfg->get_next_bb_label("SWITCH_EXIT_" + to_string(i)));
+    }
 
-        //evaluate case condition
+    string default_label = cfg->get_next_bb_label();
+    string exit_label = cfg->get_next_bb_label();
+
+    bool has_default = ctx->default_opt() ? true : false;
+
+    // Define where to redirect a case eval if no block available
+    string case_default_label = has_default ? default_label : exit_label;
+
+    IR::BasicBlock * expr_bb = new IR::BasicBlock(cfg, expr_label, nullptr, nullptr);
+    cfg->add_bb(expr_bb);
+    this->visit(ctx->expr());
+    cfg->get_current_bb()->set_exit(eval_label);
+
+    IR::BasicBlock * eval_bb = new IR::BasicBlock(cfg, eval_label, nullptr, nullptr);
+    cfg->add_bb(eval_bb);
+
+    IR::Symbol *eval_res = this->cfg->declare_tmp(cfg, IR::Int, ctx);
+    cfg->add_instr(
+        (new IR::IRInstrAssign)
+            ->set_symbol(eval_res)
+            ->set_ctx(ctx)
+    );
+
+    map<string, antlr4::ParserRuleContext *> case_values;
+    for (int i=0; i < nb_case ; ++i) {
+        string case_val = ctx->case_opt(i)->case_val()->getText();
+        
+        if (case_values.find(case_val) != case_values.end()) {
+            ErrorReporter::ErrorReporter::getInstance()->reportError(
+                new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Duplicate case value", ctx->case_opt(i)->case_val())
+            );
+            ErrorReporter::ErrorReporter::getInstance()->reportError(
+                new ErrorReporter::CompilerErrorToken(ErrorReporter::INFO, "Previous case here", case_values.at(case_val))
+            );
+        } else {
+            case_values[case_val] = ctx->case_opt(i)->case_val();
+        }
+
+        IR::BasicBlock * case_eval_bb = new IR::BasicBlock(cfg, case_eval_labels.at(i), nullptr, nullptr);
+        cfg->add_bb(case_eval_bb);
+
         cfg->add_instr(
             (new IR::IRInstrComp)
                 ->set_src(
-                    (new IR::IRConst)->set_literal(ctx->case_opt(i)->case_val()->getText())
+                    (new IR::IRConst)->set_literal(case_val)
                 )
-                ->set_dest(new IR::IRRegA)
+                ->set_dest(eval_res)
                 ->set_ctx(ctx)
         );
+
+        string next_eval_label = i == nb_case - 1 ? (has_default ? default_label : exit_label) : case_eval_labels.at(i+1);
+
+        // If true, go to case block
         cfg->add_instr(
-        (new IR::IRInstrJump)
-            ->set_jump(IR::JumpType::IfEqual)
-            ->set_label(case_bb_label)
-            ->set_ctx(ctx)
+            (new IR::IRInstrJump)
+                ->set_jump(IR::JumpType::IfEqual)
+                ->set_label(case_block_labels.at(i))
+                ->set_ctx(ctx)
+        );
+        // If false, go to next case eval
+        cfg->add_instr(
+            (new IR::IRInstrJump)
+                ->set_jump(IR::JumpType::IfNotEqual)
+                ->set_label(next_eval_label)
+                ->set_ctx(ctx)
+        );
+
+        IR::BasicBlock * case_block_bb = new IR::BasicBlock(cfg, case_block_labels.at(i), nullptr, nullptr);
+        cfg->add_bb(case_block_bb);
+        cfg->push_break(exit_label);         // Add exit label to break stack
+        this->visit(ctx->case_opt(i)->case_block());
+        cfg->pop_break();                    // Remove exit label from break stack
+        cfg->get_current_bb()->set_exit(case_exit_labels.at(i));
+
+        IR::BasicBlock * case_exit_bb = new IR::BasicBlock(cfg, case_exit_labels.at(i), nullptr, nullptr);
+        cfg->add_bb(case_exit_bb);
+
+        // If block has no break, execute next block without eval
+        string next_block_label = i == nb_case - 1 ? (has_default ? default_label : exit_label) : case_block_labels.at(i+1);
+        cfg->add_instr(
+            (new IR::IRInstrJump)
+                ->set_jump(IR::JumpType::Jump)
+                ->set_label(next_block_label)
+                ->set_ctx(ctx)
         );
     }
 
-    //first : visit default (reached if no previous condition is matched)
-    if (default_opt) {
+    if (has_default) {
+        IR::BasicBlock * default_bb = new IR::BasicBlock(cfg, default_label, nullptr, nullptr);
+        cfg->add_bb(default_bb);
+        cfg->push_break(exit_label);         // Add exit label to break stack
         this->visit(ctx->default_opt()->case_block());
-    }
-
-    for(int i=0 ; i < nb_case ; ++i) {
-        cfg->add_bb(cases.at(i));
-        this->visit(ctx->case_opt(i)->case_block());
+        cfg->pop_break();                    // Remove exit label from break stack
+        cfg->get_current_bb()->set_exit(exit_label);
     }
 
     cfg->set_current_bb(expr_bb);
-    IR::BasicBlock * end_switch_bb = new IR::BasicBlock(cfg, end_switch_label, nullptr, nullptr);
-    cfg->add_bb(end_switch_bb);
+    IR::BasicBlock * exit_bb = new IR::BasicBlock(cfg, exit_label, nullptr, nullptr);
+    cfg->add_bb(exit_bb);
 
     return 0;
 }
@@ -1457,11 +1600,11 @@ antlrcpp::Any IRVisitor::visitStruct_switch_case(ifccParser::Struct_switch_caseC
 ////////////////////////////////////////////
 
 antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *ctx) {
-    cerr << "\nfunction " << ctx->fname->getText() << endl;
+    cfg_set->declare_function(ctx->fname->getText(), ctx);
+
     //One CFG and one Symbol Table per fonction (careful : CFG contains the ST in our model)
     IR::CFG * cfg = static_cast<IR::CFG *>(
-        (new IR::CFG(ctx->fname->getText()))
-        ->set_parent(cfg_set)
+        (new IR::CFG(cfg_set, ctx->fname->getText()))
     );
 
     //Update both cfg_set AND current cfg kept as attribute
@@ -1476,12 +1619,17 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
     int stop = nb_params > 6 ? 6 : nb_params;
     int i=0;
     while(i < stop) {
-        IR::Symbol *symbol = this->cfg->get_current_bb()->declare_symbol(cfg, ctx->fparam_decla()->fparam_decla2(i)->VAR()->getText(), IR::Int, ctx);
+        IR::Symbol *symbol = this->cfg->get_current_bb()->declare_symbol(
+            cfg,
+            ctx->fparam_decla()->fparam_decla2(i)->VAR()->getText(),
+            IR::Int,
+            ctx->fparam_decla()->fparam_decla2(i)
+        );
         cfg->add_instr(
             (new IR::IRInstrAssign)
                 ->set_src(reg_function_params[i])
                 ->set_symbol(symbol)
-                ->set_ctx(ctx)
+                ->set_ctx(ctx->fparam_decla()->fparam_decla2(i))
         );
         i++;
     }
@@ -1490,7 +1638,12 @@ antlrcpp::Any IRVisitor::visitDecla_function(ifccParser::Decla_functionContext *
     //Careful : we declare variables with personnalized offset
     int offset = 16;
     for (int i=6 ; i < nb_params ; i++) {
-        IR::Symbol *symbol = this->cfg->get_current_bb()->declare_symbol(cfg, ctx->fparam_decla()->fparam_decla2(i)->VAR()->getText(), IR::Int, ctx);
+        IR::Symbol *symbol = this->cfg->get_current_bb()->declare_symbol(
+            cfg,
+            ctx->fparam_decla()->fparam_decla2(i)->VAR()->getText(),
+            IR::Int,
+            ctx->fparam_decla()->fparam_decla2(i)
+        );
         cfg->add_instr(
             (new IR::IRInstrMov)
                 ->set_src((new IR::IRRegStack)->set_offset(offset))
@@ -1519,24 +1672,19 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
     int cpt_bytes;
 
     //first : check if correct number of parameters
-    try {
-        int correct_nb_param; 
-        if(ctx->fname->getText() == "putchar"){
-            correct_nb_param = 1;
-        } else if (ctx->fname->getText() == "getchar"){
-            correct_nb_param = 0;
-        }else {
-            correct_nb_param = cfg_set->get_cfg_by_fname(ctx->fname->getText())->get_nb_param();
-        }
-        if (correct_nb_param != nb_params) {
+    if (ctx->fname->getText() != "getchar" && ctx->fname->getText() != "putchar") {
+        try {
+            int correct_nb_param = cfg_set->get_cfg_by_fname(ctx->fname->getText())->get_nb_param();
+            if (correct_nb_param != nb_params) {
+                ErrorReporter::ErrorReporter::getInstance()->reportError(
+                    new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "function called with wrong number of parameters", ctx)
+                );
+            }
+        } catch (exception &e) {
             ErrorReporter::ErrorReporter::getInstance()->reportError(
-                new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "function called with wrong number of parameters", ctx)
+                new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "this function is called but not declared", ctx)
             );
         }
-    } catch (exception &e) {
-        ErrorReporter::ErrorReporter::getInstance()->reportError(
-            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "this function is called but not declared", ctx)
-        );
     }
 
     //If there is more than 6 parameters, we place the remaining parameters on top of the stack
@@ -1578,7 +1726,10 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
             cfg->add_instr(
                 (new IR::IRInstrMov)
                     ->set_src(src)
-                    ->set_dest(new IR::IRRegA)
+                    ->set_dest(
+                        (new IR::IRRegA)
+                            ->set_size(src->get_size())
+                    )
                     ->set_ctx(ctx)
             );
         }
@@ -1626,49 +1777,37 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
 ////////////////////////////////////////////
 
 antlrcpp::Any IRVisitor::visitBreakStmt(ifccParser::BreakStmtContext *ctx) {
-    //check if break can be used
-    IR::BasicBlock * bb_loop;
     try {
-        bb_loop = cfg->get_break_parent(cfg->get_current_bb()->get_label());
-    } catch (exception &e) {
+        cfg->add_instr(
+            (new IR::IRInstrJump)
+                ->set_jump(IR::JumpType::Jump)
+                ->set_label(cfg->get_break())
+                ->set_comment("break")
+                ->set_ctx(ctx)
+        );
+    } catch (IR::IRLoopError &e) {
         ErrorReporter::ErrorReporter::getInstance()->reportError(
-            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "'break' can only be used in loop or 'switch'", ctx)
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, e.what(), ctx)
         );
     }
-
-    //we need to jump to end_while block
-    string end_loop_label = bb_loop->get_exit_label();
-
-    cfg->add_instr(
-        (new IR::IRInstrJump)
-            ->set_jump(IR::JumpType::Jump)
-            ->set_label(end_loop_label)
-            ->set_ctx(ctx)
-    );
 
     return 0;
 }
 
 antlrcpp::Any IRVisitor::visitContinueStmt(ifccParser::ContinueStmtContext *ctx) {
-    //check if continue can be used
-    IR::BasicBlock * bb_loop;
     try {
-        bb_loop = cfg->get_continue_parent(cfg->get_current_bb()->get_label());
-    } catch (exception &e) {
+        cfg->add_instr(
+            (new IR::IRInstrJump)
+                ->set_jump(IR::JumpType::Jump)
+                ->set_label(cfg->get_continue())
+                ->set_comment("continue")
+                ->set_ctx(ctx)
+        );
+    } catch (IR::IRLoopError &e) {
         ErrorReporter::ErrorReporter::getInstance()->reportError(
-            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "'continue' can only be used in loop", ctx)
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, e.what(), ctx)
         );
     }
-
-    //we need to jump to condition
-    string condition_loop_label = bb_loop->get_label();
-
-    cfg->add_instr(
-        (new IR::IRInstrJump)
-            ->set_jump(IR::JumpType::Jump)
-            ->set_label(condition_loop_label)
-            ->set_ctx(ctx)
-    );
 
     return 0;
 }

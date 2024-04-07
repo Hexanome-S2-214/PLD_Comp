@@ -2,11 +2,14 @@
 #include "ir-basic-block.h"
 #include "ir-symbol-table.h"
 #include "instr/epilogue.h"
+#include "ir-errors.h"
 
 int IR::CFG::bb_count = 2;
 
-IR::CFG::CFG(string name)
+IR::CFG::CFG(IRBase * parent, string name)
 {
+    set_parent(parent);
+
     fname = name;
     nb_param = 0;
 
@@ -49,19 +52,21 @@ void IR::CFG::gen_asm_arm(ostream& o)
         block->gen_asm_arm(o);
     }
 
-    // gen_asm_arm_epilogue(o);
+    gen_asm_arm_epilogue(o);
 }
 
 void IR::CFG::gen_asm_arm_prologue(ostream& o){
     o << ".globl main\n";
     o << "main:\n";
-    o << "    push {fp, lr}\n";
-    o << "    add fp, sp, #4\n";
+    o << "\tsub	sp, sp, 16\n";
+    //o << "    push {fp, lr}\n";
+    //o << "    add fp, sp, #4\n";
 }
 
-// void IR::CFG::gen_asm_arm_epilogue(ostream& o){
-//     o << "    pop {fp, pc}\n";
-// }
+void IR::CFG::gen_asm_arm_epilogue(ostream& o){
+    // o << "    pop {fp, pc}\n";
+    this->epilogue_bb->gen_asm_arm(o);
+}
 
 void IR::CFG::gen_asm_x86_prologue(ostream& o)
 {
@@ -110,62 +115,49 @@ IR::BasicBlock * IR::CFG::get_current_bb()
     return current_bb;
 }
 
-/**
- * Retourne le parent-"break" (switch ou boucle) du bloc passé en paramètre
- * Retourne une erreur si pas de bloc parent
- * @param label : label du block dont on veut l'indentation par rapport à une boucle
- * @return bloc "boucle"
-*/
-IR::BasicBlock * IR::CFG::get_break_parent(string label) {
-    std::stack<IR::BasicBlock *> ret_label;
-
-    for (auto bb : blocks) {
-        switch(bb->get_bb_id()) {
-            case BB_SWITCH:
-            case BB_WHILE:
-                ret_label.push(bb);
-                break;
-            
-            case BB_END_SWITCH:
-            case BB_END_WHILE:
-                ret_label.pop();
-                break;
-        }
-    }
-
-    if (ret_label.empty()){
-        throw runtime_error("break outside of a loop");
-    }
-
-    return ret_label.top();
+void IR::CFG::push_break(string label) {
+    break_stack.push(label);
 }
 
-/**
- * Retourne le parent-"continue" (boucle) du bloc passé en paramètre
- * Retourne une erreur si pas de bloc parent
- * @param label : label du block dont on veut l'indentation par rapport à une boucle
- * @return bloc "boucle"
-*/
-IR::BasicBlock * IR::CFG::get_continue_parent(string label) {
-    std::stack<IR::BasicBlock *> ret_label;
-
-    for (auto bb : blocks) {
-        switch(bb->get_bb_id()) {
-            case BB_WHILE:
-                ret_label.push(bb);
-                break;
-            
-            case BB_END_WHILE:
-                ret_label.pop();
-                break;
-        }
+string IR::CFG::pop_break() {
+    if (break_stack.empty()) {
+        throw IRLoopError("break statement outside of a loop or switch");
     }
 
-    if (ret_label.empty()){
-        throw runtime_error("continue outside of a loop");
+    string label = break_stack.top();
+    break_stack.pop();
+
+    return label;
+}
+
+string IR::CFG::get_break() {
+    if (break_stack.empty()) {
+        throw IRLoopError("break statement outside of a loop or switch");
     }
 
-    return ret_label.top();
+    return break_stack.top();
+}
+
+void IR::CFG::push_continue(string label) {
+    continue_stack.push(label);
+}
+
+string IR::CFG::pop_continue() {
+    if (continue_stack.empty()) {
+        throw IRLoopError("continue statement outside of a loop");
+    }
+
+    string label = continue_stack.top();
+    continue_stack.pop();
+    return label;
+}
+
+string IR::CFG::get_continue() {
+    if (continue_stack.empty()) {
+        throw IRLoopError("continue statement outside of a loop");
+    }
+
+    return continue_stack.top();
 }
 
 vector<IR::BasicBlock *> IR::CFG::get_blocks()
@@ -173,9 +165,15 @@ vector<IR::BasicBlock *> IR::CFG::get_blocks()
     return blocks;
 }
 
-string IR::CFG::get_next_bb_label()
+string IR::CFG::get_next_bb_label(string name_label)
 {
     string label = ".L" + to_string(IR::CFG::bb_count);
+
+    if (name_label.length() > 0)
+    {
+        label += "_" + name_label;
+    }
+
     IR::CFG::bb_count++;
     return label;
 }
@@ -204,6 +202,11 @@ void IR::CFG::add_bb(IR::BasicBlock * bb)
 
     blocks.push_back(bb);
     set_current_bb(bb);
+}
+
+void IR::CFG::remove_bb(IR::BasicBlock * bb)
+{
+    blocks.erase(remove(blocks.begin(), blocks.end(), bb), blocks.end());
 }
 
 // IR::BasicBlock * IR::CFG::create_bb(IR::BasicBlock * exit_true, IR::BasicBlock * exit_false)

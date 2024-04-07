@@ -6,9 +6,10 @@ int main() {
         case 1:
             c=1;
         
-        case 2:
+        case 2:{
             c=2;
             break;
+        }
         
         case 3:
             if (a == 2) {

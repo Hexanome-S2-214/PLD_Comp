@@ -200,4 +200,20 @@ namespace IR
     protected:
         JumpType jump;
     };
+
+    template<class Ref>
+    class IRAttrComment
+    {
+    public:
+        Ref * set_comment(string comment) {
+            this->comment = comment;
+            return static_cast<Ref*>(this);
+        }
+
+        string get_comment() {
+            return comment;
+        }
+    protected:
+        string comment;
+    };
 }

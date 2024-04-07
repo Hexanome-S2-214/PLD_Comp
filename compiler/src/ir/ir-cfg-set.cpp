@@ -9,7 +9,45 @@ void IR::CfgSet::gen_asm_x86(ostream& o)
 
 void IR::CfgSet::gen_asm_arm(ostream& o)
 {
-    
+    for (auto cfg : cfgs) {
+        cfg->gen_asm(o);
+    }
+}
+
+IR::Func * IR::CfgSet::declare_function(string name, antlr4::ParserRuleContext * ctx)
+{
+    if (functions.find(name) != functions.end()) {
+        ErrorReporter::ErrorReporter::getInstance()->reportError(new ErrorReporter::CompilerErrorToken(
+            ErrorReporter::ERROR,
+            "function '" + name + "' already declared.",
+            ctx
+        ));
+        ErrorReporter::ErrorReporter::getInstance()->reportError(new ErrorReporter::CompilerErrorToken(
+            ErrorReporter::INFO,
+            "other declaration of function '" + name + "' here:",
+            functions[name].ctx
+        ));
+
+        return &functions[name];
+    }
+
+    bool used = name == "main";
+    functions[name] = Func{name, used, ctx};
+
+    return &functions[name];
+}
+
+vector<IR::Func *> IR::CfgSet::get_unused_functions()
+{
+    vector<IR::Func *> unused_functions;
+
+    for (auto & [name, func] : functions) {
+        if (!func.used) {
+            unused_functions.push_back(&func);
+        }
+    }
+
+    return unused_functions;
 }
 
 void IR::CfgSet::set_current_cfg(IR::CFG * cfg)
