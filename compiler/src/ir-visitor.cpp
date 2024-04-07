@@ -361,7 +361,7 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
 
         if (ctx->OP_MULT()->getText() == "%")
         {
-            cfg->add_instr(
+            /* cfg->add_instr(
                 (new IR::IRInstrMov)
                     ->set_src(num)
                     ->set_dest(new IR::IRRegArmTemp1)
@@ -372,12 +372,12 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
                     ->set_src(dem)
                     ->set_dest(new IR::IRRegArmTemp2)
                     ->set_ctx(ctx)
-            );
+            ); */
 
             //Modulo : il faut mettre EDX dans EAX -> c'est ce registre qui contient le reste après idivl
             IR::IRInstrExprMod * instr = new IR::IRInstrExprMod;
-            instr->num = new IR::IRRegArmTemp1;
-            instr->dem = new IR::IRRegArmTemp2;
+            instr->num = num;
+            instr->dem = dem;
             instr->div_res = new IR::IRRegA;
             instr->set_dest(new IR::IRRegA);
             

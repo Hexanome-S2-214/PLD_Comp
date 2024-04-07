@@ -189,7 +189,7 @@ namespace IR
 
     void IRRegStackPointer::gen_asm_arm(ostream& o)
     {
-        
+        o << "sp";
     }
 
     void IRRegDest::gen_asm_x86(ostream& o)
@@ -346,6 +346,23 @@ namespace IR
 
     void IRRegArmTemp1::gen_asm_x86(ostream& o)
     {
+        switch (get_size())
+        {
+        case Byte:
+            o << "%r10b";
+            break;
+        case Word:
+            o << "%r10w";
+            break;
+        case DWord:
+            o << "%r10d";
+            break;
+        case QWord:
+            o << "%r10";
+            break;
+        default:
+            break;
+        }
     }
 
     void IRRegArmTemp1::gen_asm_arm(ostream& o)
@@ -367,6 +384,23 @@ namespace IR
 
     void IRRegArmTemp2::gen_asm_x86(ostream& o)
     {
+        switch (get_size())
+        {
+        case Byte:
+            o << "%r11b";
+            break;
+        case Word:
+            o << "%r11w";
+            break;
+        case DWord:
+            o << "%r11d";
+            break;
+        case QWord:
+            o << "%r11";
+            break;
+        default:
+            break;
+        }
     }
 
     void IRRegArmTemp2::gen_asm_arm(ostream& o)
