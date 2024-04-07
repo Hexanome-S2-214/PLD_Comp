@@ -40,7 +40,6 @@ VisitorFlags vf;
 ////////////////////////////////////////////
 
 antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *ctx) {
-    cerr << "visit return" << endl;
     //detection of return inside a return-void function
     if (cfg->get_no_return()) {
         ErrorReporter::ErrorReporter::getInstance()->reportError(
@@ -62,7 +61,6 @@ antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *
     //Disable writing in the block AFTER adding jmp instruction
     this->cfg->get_current_bb()->set_write_mode(false);
 
-    cerr << "end return" << endl;
     return 0;
 }
 
@@ -72,7 +70,6 @@ antlrcpp::Any IRVisitor::visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *
 
 antlrcpp::Any IRVisitor::visitSimpleAff(ifccParser::SimpleAffContext *ctx)
 {
-    cerr << "visit affectation" << endl;
     IR::Symbol * symbol = cfg->get_current_bb()->get_symbol(ctx->VAR()->getText(), ctx);
     
     if (symbol->const_var) {
@@ -85,15 +82,12 @@ antlrcpp::Any IRVisitor::visitSimpleAff(ifccParser::SimpleAffContext *ctx)
 
     if (ctx->op_aff->getText() == "=") {
         //base affectation : simply affect value
-        cerr << "aff =" << endl;
-
         cfg->add_instr(
             (new IR::IRInstrAssign)
                 ->set_symbol(symbol)
                 ->set_ctx(ctx)
         );
     } else if (ctx->op_aff->getText() == "+=") {
-        cerr << "aff +" << endl;
         cfg->add_instr(
             (new IR::IRInstrExprPlus)
                 ->set_src(new IR::IRRegA)
@@ -102,8 +96,6 @@ antlrcpp::Any IRVisitor::visitSimpleAff(ifccParser::SimpleAffContext *ctx)
         );
 
     } else if (ctx->op_aff->getText() == "*=") {
-        cerr << "aff *" << endl;
-
         cfg->add_instr(
                 (new IR::IRInstrExprMult)
                     ->set_src(symbol)
@@ -119,7 +111,6 @@ antlrcpp::Any IRVisitor::visitSimpleAff(ifccParser::SimpleAffContext *ctx)
         );
 
     } else if (ctx->op_aff->getText() == "-=") {
-        cerr << "aff -" << endl;
         cfg->add_instr(
                 (new IR::IRInstrExprMinus)
                     ->set_src(new IR::IRRegA)
@@ -128,7 +119,6 @@ antlrcpp::Any IRVisitor::visitSimpleAff(ifccParser::SimpleAffContext *ctx)
         );
 
     } else if (ctx->op_aff->getText() == "/=") {
-        cerr << "aff /" << endl;
         cfg->add_instr(
             (new IR::IRInstrMov)
                 ->set_src(new IR::IRRegA)
@@ -167,8 +157,6 @@ antlrcpp::Any IRVisitor::visitSimpleAff(ifccParser::SimpleAffContext *ctx)
     //update flags : not the value, we need to propagate it
     vf.type_size = IR::Int.size;
     vf.f_const = false;
-
-    cerr << "end affectation" << endl;
 
     return 0;
 }
@@ -1249,6 +1237,7 @@ antlrcpp::Any IRVisitor::visitStruct_if_else(ifccParser::Struct_if_elseContext *
         cfg->get_current_bb()->set_exit(exit_label);
     }
     
+    cfg->set_current_bb(expr_bb);
     IR::BasicBlock * exit_bb = new IR::BasicBlock(cfg, exit_label, nullptr, nullptr);
     cfg->add_bb(exit_bb);
 
@@ -1295,6 +1284,7 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
     cfg->pop_break();                    // Remove exit label from break stack
     cfg->get_current_bb()->set_exit(expr_label);
     
+    cfg->set_current_bb(expr_bb);
     IR::BasicBlock * exit_bb = new IR::BasicBlock(cfg, exit_label, nullptr, nullptr);
     cfg->add_bb(exit_bb);
 
@@ -1399,6 +1389,7 @@ antlrcpp::Any IRVisitor::visitStruct_switch_case(ifccParser::Struct_switch_caseC
         cfg->get_current_bb()->set_exit(exit_label);
     }
 
+    cfg->set_current_bb(expr_bb);
     IR::BasicBlock * exit_bb = new IR::BasicBlock(cfg, exit_label, nullptr, nullptr);
     cfg->add_bb(exit_bb);
 
