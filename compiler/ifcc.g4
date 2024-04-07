@@ -117,8 +117,8 @@ instructionRule
      ;
 
 declStdRule
-     : (INT|CHAR) VAR                   #simpleDecl
-     | (INT | CHAR) VAR '[' NUM ']'     #tableDecl
+     : CONST? (INT|CHAR) VAR                   #simpleDecl
+     | CONST? (INT | CHAR) VAR '[' NUM ']'     #tableDecl
      ;
 
 declAffRule
