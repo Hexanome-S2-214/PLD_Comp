@@ -1046,6 +1046,7 @@ antlrcpp::Any IRVisitor::visitExprAnd(ifccParser::ExprAndContext *ctx) {
     string left_expr_label = cfg->get_next_bb_label();
     string left_eval_label = cfg->get_next_bb_label();
     string right_expr_label = cfg->get_next_bb_label();
+    string true_label = cfg->get_next_bb_label();
     string exit_label = cfg->get_next_bb_label();
 
     IR::BasicBlock * left_expr_bb = new IR::BasicBlock(cfg, left_expr_label, nullptr, nullptr);
@@ -1077,6 +1078,37 @@ antlrcpp::Any IRVisitor::visitExprAnd(ifccParser::ExprAndContext *ctx) {
     cfg->add_bb(right_expr_bb);
     this->visit(ctx->expr(1));
     cfg->get_current_bb()->set_exit(exit_label);
+
+    cfg->add_instr(
+        (new IR::IRInstrTest)
+            ->set_src(new IR::IRRegA)
+    );
+    cfg->add_instr(
+        (new IR::IRInstrJump)
+            ->set_jump(IR::JumpType::IfTrue)
+            ->set_label(true_label)
+            ->set_ctx(ctx)
+    );
+    cfg->add_instr(
+        (new IR::IRInstrJump)
+            ->set_jump(IR::JumpType::IfFalse)
+            ->set_label(exit_label)
+            ->set_ctx(ctx)
+    );
+
+    IR::BasicBlock * true_bb = new IR::BasicBlock(cfg, true_label, nullptr, nullptr);
+    cfg->add_bb(true_bb);
+
+    cfg->add_instr(
+        (new IR::IRInstrMov)
+            ->set_src(
+                (new IR::IRConst)
+                    ->set_literal("1")
+                    ->set_size(IR::Int.size)
+            )
+            ->set_dest(new IR::IRRegA)
+            ->set_ctx(ctx)
+    );
 
     IR::BasicBlock * exit_bb = new IR::BasicBlock(cfg, exit_label, nullptr, nullptr);
     cfg->add_bb(exit_bb);
@@ -1088,6 +1120,7 @@ antlrcpp::Any IRVisitor::visitExprOr(ifccParser::ExprOrContext *ctx) {
     string left_expr_label = cfg->get_next_bb_label();
     string left_eval_label = cfg->get_next_bb_label();
     string right_expr_label = cfg->get_next_bb_label();
+    string true_label = cfg->get_next_bb_label();
     string exit_label = cfg->get_next_bb_label();
 
     IR::BasicBlock * left_expr_bb = new IR::BasicBlock(cfg, left_expr_label, nullptr, nullptr);
@@ -1105,7 +1138,7 @@ antlrcpp::Any IRVisitor::visitExprOr(ifccParser::ExprOrContext *ctx) {
     cfg->add_instr(
         (new IR::IRInstrJump)
             ->set_jump(IR::JumpType::IfTrue)
-            ->set_label(exit_label)
+            ->set_label(true_label)
             ->set_ctx(ctx)
     );
     cfg->add_instr(
@@ -1119,6 +1152,37 @@ antlrcpp::Any IRVisitor::visitExprOr(ifccParser::ExprOrContext *ctx) {
     cfg->add_bb(right_expr_bb);
     this->visit(ctx->expr(1));
     cfg->get_current_bb()->set_exit(exit_label);
+
+    cfg->add_instr(
+        (new IR::IRInstrTest)
+            ->set_src(new IR::IRRegA)
+    );
+    cfg->add_instr(
+        (new IR::IRInstrJump)
+            ->set_jump(IR::JumpType::IfTrue)
+            ->set_label(true_label)
+            ->set_ctx(ctx)
+    );
+    cfg->add_instr(
+        (new IR::IRInstrJump)
+            ->set_jump(IR::JumpType::IfFalse)
+            ->set_label(exit_label)
+            ->set_ctx(ctx)
+    );
+
+    IR::BasicBlock * true_bb = new IR::BasicBlock(cfg, true_label, nullptr, nullptr);
+    cfg->add_bb(true_bb);
+
+    cfg->add_instr(
+        (new IR::IRInstrMov)
+            ->set_src(
+                (new IR::IRConst)
+                    ->set_literal("1")
+                    ->set_size(IR::Int.size)
+            )
+            ->set_dest(new IR::IRRegA)
+            ->set_ctx(ctx)
+    );
 
     IR::BasicBlock * exit_bb = new IR::BasicBlock(cfg, exit_label, nullptr, nullptr);
     cfg->add_bb(exit_bb);
