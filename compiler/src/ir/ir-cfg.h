@@ -6,6 +6,7 @@ namespace IR
 }
 
 #include <vector>
+#include <stack>
 #include "ir-base.h"
 #include "ir-symbol-table.h"
 #include "../error-reporter/error-reporter.h"
@@ -43,8 +44,6 @@ namespace IR
         void add_instr(IRBase * instr);
         void add_bb(BasicBlock * bb);
 
-        BasicBlock * get_continue_parent(string label);
-
         void set_current_bb(BasicBlock * bb);
         void set_nb_param(int n);
         void set_no_return(bool b);
@@ -62,8 +61,9 @@ namespace IR
         void push_break(string label);
         string pop_break();
         string get_break();
-        
-        vector<string> stack; // TODO: Make private and add push/pop methods (also maybe rename to something that means something)
+        void push_continue(string label);
+        string pop_continue();
+        string get_continue();
     private:
         vector<BasicBlock *> blocks;
 
@@ -72,7 +72,8 @@ namespace IR
         BasicBlock * epilogue_bb;
         string epilogue_label;
 
-        vector<string> break_stack;
+        stack<string> break_stack;
+        stack<string> continue_stack;
 
         string fname;
         int nb_param;

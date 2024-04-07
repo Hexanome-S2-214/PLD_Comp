@@ -1280,7 +1280,9 @@ antlrcpp::Any IRVisitor::visitStruct_while(ifccParser::Struct_whileContext *ctx)
     IR::BasicBlock * if_true_bb = new IR::BasicBlock(cfg, if_true_label, nullptr, nullptr);
     cfg->add_bb(if_true_bb);
     cfg->push_break(exit_label);         // Add exit label to break stack
+    cfg->push_continue(expr_label);      // Add eval label to continue stack
     this->visit(ctx->struct_bloc());
+    cfg->pop_continue();                 // Remove eval label from continue stack
     cfg->pop_break();                    // Remove exit label from break stack
     cfg->get_current_bb()->set_exit(expr_label);
     
@@ -1581,6 +1583,7 @@ antlrcpp::Any IRVisitor::visitBreakStmt(ifccParser::BreakStmtContext *ctx) {
             (new IR::IRInstrJump)
                 ->set_jump(IR::JumpType::Jump)
                 ->set_label(cfg->get_break())
+                ->set_comment("break")
                 ->set_ctx(ctx)
         );
     } catch (IR::IRLoopError &e) {
@@ -1589,33 +1592,23 @@ antlrcpp::Any IRVisitor::visitBreakStmt(ifccParser::BreakStmtContext *ctx) {
         );
     }
 
-    
-
     return 0;
 }
 
 antlrcpp::Any IRVisitor::visitContinueStmt(ifccParser::ContinueStmtContext *ctx) {
-    //check if continue can be used
-    IR::BasicBlock * bb_loop;
     try {
-        bb_loop = cfg->get_continue_parent(cfg->get_current_bb()->get_label());
-    } catch (exception &e) {
-        cerr << e.what() << endl;
-        ErrorReporter::ErrorReporter::getInstance()->reportError(
-            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "'continue' can only be used in loop", ctx)
+        cfg->add_instr(
+            (new IR::IRInstrJump)
+                ->set_jump(IR::JumpType::Jump)
+                ->set_label(cfg->get_continue())
+                ->set_comment("continue")
+                ->set_ctx(ctx)
         );
-        return 0;
+    } catch (IR::IRLoopError &e) {
+        ErrorReporter::ErrorReporter::getInstance()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, e.what(), ctx)
+        );
     }
-
-    //we need to jump to condition
-    string condition_loop_label = bb_loop->get_label();
-
-    cfg->add_instr(
-        (new IR::IRInstrJump)
-            ->set_jump(IR::JumpType::Jump)
-            ->set_label(condition_loop_label)
-            ->set_ctx(ctx)
-    );
 
     return 0;
 }
