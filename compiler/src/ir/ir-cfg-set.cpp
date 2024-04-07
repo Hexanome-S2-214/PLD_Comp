@@ -39,6 +39,10 @@ IR::Func * IR::CfgSet::declare_function(string name, antlr4::ParserRuleContext *
 
 void IR::CfgSet::set_function_as_used(string name)
 {
+    if (name == "main" || name == "putchar" || name == "getchar") {
+        return;
+    }
+
     if (functions.find(name) == functions.end()) {
         throw runtime_error("function not declared");
     }
