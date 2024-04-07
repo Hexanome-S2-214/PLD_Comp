@@ -43,9 +43,8 @@ namespace IR
         }
         else
         {
-            get_error_reporter()->reportError(
-                new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Invalid push size", get_ctx())
-            );
+            ErrorReporter::ErrorReporter::getInstance()->reportError(
+                new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Invalid push size", get_ctx()));
         }
     }
 }

@@ -469,7 +469,7 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
     const_left = vf.f_const;
     val_left = vf.value;
 
-    IR::Symbol *num = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    IR::Symbol *num = this->cfg->get_current_bb()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
         (new IR::IRInstrAssign)
             ->set_symbol(num)
@@ -478,7 +478,7 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
     
     this->visit(ctx->expr(1));
 
-    IR::Symbol *dem = this->cfg->get_symbol_table()->declare_tmp(cfg, IR::Int, ctx);
+    IR::Symbol *dem = this->cfg->get_current_bb()->declare_tmp(cfg, IR::Int, ctx);
     cfg->add_instr(
         (new IR::IRInstrAssign)
             ->set_symbol(dem)
@@ -563,6 +563,7 @@ antlrcpp::Any IRVisitor::visitExprMultDivMod(ifccParser::ExprMultDivModContext *
             
             cfg->add_instr(instr);
         }
+    }
     }
 
     //update flags

@@ -58,18 +58,15 @@ int main(int argn, const char **argv)
         exit(1);
     }
 
-  IR::CfgSet * cfg_set = static_cast<IR::CfgSet *>(
-    (new IR::CfgSet())
-      ->set_error_reporter(new ErrorReporter::ErrorReporter())
-      ->set_arch(IR::IRArch::X86)
-  );
-  IRVisitor visitor(cfg_set);
+    IR::CfgSet * cfg_set = static_cast<IR::CfgSet *>(
+      (new IR::CfgSet())
+    );
+    IRVisitor visitor(cfg_set);
 
     visitor.visit(tree);
 
-  IR::asm_arch = IR::X86;
-  cfg_set->gen_asm(cout);
-    map<int, vector<ErrorReporter::CompilerError *>> errors_to_report
+    IR::asm_arch = IR::X86;
+    map<int, vector<ErrorReporter::CompilerError *>> errors_to_report;
 
     for (auto symbol : IR::SymbolTable::get_all_unused_symbols())
     {

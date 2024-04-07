@@ -42,9 +42,8 @@ namespace IR
                 op = "bne";
                 break;
             default:
-                get_error_reporter()->reportError(
-                    new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Invalid jump type", get_ctx())
-                );
+                ErrorReporter::ErrorReporter::getInstance()->reportError(
+                    new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Invalid jump type", get_ctx()));
         }
 
         o << "\t" << op << " " << label << endl;

@@ -38,22 +38,21 @@ namespace IR
     {
         if (src->get_size() != dest->get_size())
         {
-            get_error_reporter()->reportError(
-                new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Addition between different sizes", get_ctx())
-            );
+            ErrorReporter::ErrorReporter::getInstance()->reportError(
+                new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Addition between different sizes", get_ctx()));
         }
 
         paste_properties(
-                (new IRInstrMov)
-                    ->set_dest((new IRRegArmTemp1)->set_size(src->get_size()))
-                    ->set_src(src)
-            )->gen_asm(o); 
+            (new IRInstrMov)
+                ->set_dest((new IRRegArmTemp1)->set_size(src->get_size()))
+                ->set_src(src)
+        )->gen_asm(o); 
 
         paste_properties(
-                (new IRInstrMov)
-                    ->set_dest((new IRRegArmTemp2)->set_size(dest->get_size()))
-                    ->set_src(dest)
-            )->gen_asm(o);   
+            (new IRInstrMov)
+                ->set_dest((new IRRegArmTemp2)->set_size(dest->get_size()))
+                ->set_src(dest)
+        )->gen_asm(o);   
 
         o << "\tadd " << (new IRRegA)->get_asm_str() << ", " << (new IRRegArmTemp2)->get_asm_str() << ", " << (new IRRegArmTemp1)->get_asm_str() << "\n";
     }
