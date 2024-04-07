@@ -11,7 +11,7 @@ string ErrorReporter::CompilerErrorToken::toString() {
     size_t tokenCharPositionInLine = this->getCharPositionInLine();
 
     if (tokenLine != -1 && tokenCharPositionInLine != -1) {
-        buffer << " (Ln " << tokenLine << ", Col " << tokenCharPositionInLine << ")";
+        buffer << " (Ln " << tokenLine << ", Col " << tokenCharPositionInLine + 1 << ")";
     }
 
     buffer << ": " << this->getMessage() << endl;
@@ -24,18 +24,27 @@ string ErrorReporter::CompilerErrorToken::toString() {
         string lines = getLines(startToken->getInputStream(), startToken->getStartIndex(), stopToken->getStopIndex());
         vector<string> linesVector = split(lines, '\n');
 
-        for (int i = 0; i < linesVector.size(); i++)
+        for (int i = 0; i < min((int)linesVector.size(), 3); i++)
         {
             buffer << padString(to_string(tokenLine + i), 4, ' ') << " | " << linesVector[i] << endl;
 
             if (i == 0)
             {
+                int lenght = min(
+                    stopToken->getStopIndex() - startToken->getStartIndex(),
+                    linesVector[i].size() - tokenCharPositionInLine - 1
+                );
+
                 buffer
                         << padString("", 4, ' ') << " | "
                         << padString("", tokenCharPositionInLine, ' ')
-                        << "^" << padString("", stopToken->getStopIndex() - startToken->getStartIndex(), '~')
+                        << "^" << padString("", lenght, '~')
                         << endl;
             }
+        }
+        
+        if (linesVector.size() > 1) {
+            buffer << padString("", 4, ' ') << " | " << endl;
         }
     }
 

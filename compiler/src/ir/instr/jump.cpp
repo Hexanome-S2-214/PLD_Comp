@@ -1,5 +1,4 @@
 #include "jump.h"
-#include "../../error-reporter/compiler-error-token.h"
 
 namespace IR
 {
@@ -19,7 +18,7 @@ namespace IR
                 op = "jne";
                 break;
             default:
-                get_error_reporter()->reportError(
+                ErrorReporter::ErrorReporter::getInstance()->reportError(
                     new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Invalid jump type", get_ctx())
                 );
         }

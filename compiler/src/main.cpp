@@ -9,6 +9,7 @@
 #include "../generated/ifccBaseVisitor.h"
 
 #include "ir/ir-cfg.h"
+#include "ir/ir-symbol-table.h"
 #include "ir-visitor.h"
 #include "error-reporter/error-reporter.h"
 #include "error-reporter/error-listener.h"
@@ -18,59 +19,91 @@ using namespace std;
 
 int main(int argn, const char **argv)
 {
-  stringstream in;
-  if (argn==2)
-  {
-     ifstream lecture(argv[1]);
-     in << lecture.rdbuf();
-  }
-  else
-  {
-      cerr << "usage: ifcc path/to/file.c" << endl ;
-      exit(1);
-  }
-  
-  ANTLRInputStream input(in.str());
+    stringstream in;
+    if (argn == 2)
+    {
+        ifstream lecture(argv[1]);
+        in << lecture.rdbuf();
+    }
+    else
+    {
+        cerr << "usage: ifcc path/to/file.c" << endl;
+        exit(1);
+    }
 
-  ErrorReporter::ErrorReporter * error_reporter = new ErrorReporter::ErrorReporter();
-  ErrorReporter::ErrorListener * error_listener = new ErrorReporter::ErrorListener(error_reporter);
+    ANTLRInputStream input(in.str());
 
-  ifccLexer lexer(&input);
+    ErrorReporter::ErrorReporter *error_reporter = ErrorReporter::ErrorReporter::getInstance();
+    ErrorReporter::ErrorListener *error_listener = new ErrorReporter::ErrorListener(error_reporter);
 
-  lexer.removeErrorListeners();
-  lexer.addErrorListener(error_listener);
+    ifccLexer lexer(&input);
 
-  CommonTokenStream tokens(&lexer);
+    lexer.removeErrorListeners();
+    lexer.addErrorListener(error_listener);
 
-  tokens.fill();
+    CommonTokenStream tokens(&lexer);
 
-  ifccParser parser(&tokens);
+    tokens.fill();
 
-  parser.removeErrorListeners();
-  parser.addErrorListener(error_listener);
+    ifccParser parser(&tokens);
 
-  tree::ParseTree* tree = parser.axiom();
+    parser.removeErrorListeners();
+    parser.addErrorListener(error_listener);
 
-  if(parser.getNumberOfSyntaxErrors() != 0)
-  {
-      cerr << "error: syntax error during parsing" << endl;
-      exit(1);
-  }
+    tree::ParseTree *tree = parser.axiom();
 
+    if (parser.getNumberOfSyntaxErrors() != 0)
+    {
+        cerr << "error: syntax error during parsing" << endl;
+        exit(1);
+    }
 
-  IR::CfgSet * cfg_set = static_cast<IR::CfgSet *>(
-    (new IR::CfgSet())
-      ->set_error_reporter(new ErrorReporter::ErrorReporter())
-      ->set_arch(IR::IRArch::X86)
-  );
-  IRVisitor visitor(cfg_set);
+    IR::CfgSet *cfg_set = static_cast<IR::CfgSet *>(
+        (new IR::CfgSet())
+            ->set_arch(IR::IRArch::X86));
+    IRVisitor visitor(cfg_set);
 
-  visitor.visit(tree);
+    visitor.visit(tree);
 
-  cfg_set->gen_asm(cout);
+    map<int, vector<ErrorReporter::CompilerError *>> errors_to_report;
 
-  delete cfg_set;
-  delete error_reporter;
+    for (auto symbol : IR::SymbolTable::get_all_unused_symbols())
+    {
+        ErrorReporter::CompilerErrorToken *error = new ErrorReporter::CompilerErrorToken(
+            ErrorReporter::WARNING,
+            "'" + symbol->id + "' is declared but never used. Variable declared here:",
+            symbol->get_ctx());
 
-  return 0;
+        errors_to_report[error->getLine()].push_back(error);
+    }
+
+    for (auto function : cfg_set->get_unused_functions())
+    {
+        ErrorReporter::CompilerErrorToken *error = new ErrorReporter::CompilerErrorToken(
+            ErrorReporter::WARNING,
+            "function '" + function->name + "' is declared but never used. Function declared here:",
+            function->ctx);
+
+        errors_to_report[error->getLine()].push_back(error);
+    }
+
+    for (auto &pair : errors_to_report)
+    {
+        for (auto error : pair.second)
+        {
+            error_reporter->reportError(error);
+        }
+    }
+
+    if (error_reporter->getShouldThrow())
+    {
+        exit(1);
+    }
+
+    cfg_set->gen_asm(cout);
+
+    delete cfg_set;
+    delete error_reporter;
+
+    return 0;
 }

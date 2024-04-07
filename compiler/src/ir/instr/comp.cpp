@@ -1,5 +1,4 @@
 #include "comp.h"
-#include "../../error-reporter/compiler-error-token.h"
 
 namespace IR
 {
@@ -23,8 +22,8 @@ namespace IR
     {
         if (src->get_size() != dest->get_size())
         {
-            this->get_error_reporter()->reportError(
-                new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Comparison between different sizes", this->get_ctx())
+            ErrorReporter::ErrorReporter::getInstance()->reportError(
+                new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Comparison between different sizes", get_ctx())
             );
         }
 

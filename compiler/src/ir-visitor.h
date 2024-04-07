@@ -5,6 +5,12 @@
 
 #include "ir/ir-cfg-set.h"
 
+struct VisitorFlags {
+    IR::Size type_size;
+    bool f_const;
+    int value;
+};
+
 class IRVisitor : public ifccBaseVisitor
 {
 public:
@@ -13,11 +19,13 @@ public:
     //To make it easier to manipulate CFGs during visit
     void set_cfg(IR::CFG * cfg) { this->cfg = cfg; }
 
-    virtual antlrcpp::Any visitDeclStdRule(ifccParser::DeclStdRuleContext *ctx) override;
+    virtual antlrcpp::Any visitSimpleDecl(ifccParser::SimpleDeclContext *ctx) override;
     virtual antlrcpp::Any visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx) override;
-    virtual antlrcpp::Any visitAffectationRule(ifccParser::AffectationRuleContext *ctx) override;
-    virtual antlrcpp::Any visitAffectationRule2(ifccParser::AffectationRule2Context *ctx) override;
+    virtual antlrcpp::Any visitTableDecl(ifccParser::TableDeclContext *ctx) override;
+    virtual antlrcpp::Any visitSimpleAff(ifccParser::SimpleAffContext *ctx) override;
+    virtual antlrcpp::Any visitTableAff(ifccParser::TableAffContext * ctx) override;
 
+    virtual antlrcpp::Any visitExprTable(ifccParser::ExprTableContext *ctx) override;
     virtual antlrcpp::Any visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *ctx) override;
 
     virtual antlrcpp::Any visitExprCharacter(ifccParser::ExprCharacterContext *ctx) override;

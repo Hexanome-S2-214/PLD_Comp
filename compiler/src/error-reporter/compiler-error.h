@@ -8,6 +8,7 @@ using namespace std;
 namespace ErrorReporter {
     enum CompilerErrorLevel
     {
+        INFO = -1,
         WARNING = 0,
         ERROR = 1,
     };

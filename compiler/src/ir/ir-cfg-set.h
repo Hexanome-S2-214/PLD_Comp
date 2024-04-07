@@ -6,6 +6,7 @@ namespace IR
 }
 
 #include <vector>
+#include <map>
 #include "ir-base.h"
 #include "ir-symbol-table.h"
 #include "ir-cfg.h"
@@ -15,6 +16,13 @@ using namespace std;
 
 namespace IR
 {
+    struct Func
+    {
+        string name;
+        bool used;
+        antlr4::ParserRuleContext * ctx;
+    };
+
     class CfgSet : public IRBase
     {
     public:
@@ -26,12 +34,16 @@ namespace IR
 
         void add_cfg(CFG * cfg);
 
+        Func * declare_function(string name, antlr4::ParserRuleContext * ctx);
+        vector<Func *> get_unused_functions();
+
         CFG * get_current_cfg();
         CFG * get_cfg_by_fname(string fname);
         void set_current_cfg(CFG * cfg);
         vector<string> stack; // TODO: Make private and add push/pop methods (also maybe rename to something that means something)
     private:
         vector<CFG *> cfgs;
+        map<string, Func> functions;
         CFG * current_cfg;
     };
 };

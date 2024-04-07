@@ -22,6 +22,8 @@ namespace ErrorReporter
         ~CompilerErrorToken() override = default;
 
         string toString() override;
+        size_t getLine();
+        size_t getCharPositionInLine();
     private:
         antlr4::ParserRuleContext *ctx = nullptr;
         antlr4::Token *start = nullptr;
@@ -31,7 +33,5 @@ namespace ErrorReporter
 
         antlr4::Token * getStart();
         antlr4::Token * getStop();
-        size_t getLine();
-        size_t getCharPositionInLine();
     };
 }
