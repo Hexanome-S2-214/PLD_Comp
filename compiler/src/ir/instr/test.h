@@ -2,11 +2,10 @@
 
 #include "../ir-instr.h"
 #include "../ir-attr.h"
-#include "../../error-reporter/compiler-error-token.h"
 
 namespace IR
 {
-    class IRInstrJump : public IRInstr, public IRAttrJump<IRInstrJump>, public IRAttrLabel<IRInstrJump>, public IRAttrComment<IRInstrJump>
+    class IRInstrTest : public IRInstr, public IRAttrSrc<IRInstrTest>
     {
     public:
         void gen_asm_x86(ostream& o) override;

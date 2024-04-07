@@ -8,4 +8,9 @@ namespace IR
     public:
         IRSymbolError(const std::string &msg) : std::runtime_error(msg) {}
     };
+
+    class IRLoopError : public std::runtime_error {
+    public:
+        IRLoopError(const std::string &msg) : std::runtime_error(msg) {}
+    };
 } // namespace IR

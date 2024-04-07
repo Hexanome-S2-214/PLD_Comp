@@ -17,13 +17,26 @@ namespace IR
             case JumpType::IfNotEqual:
                 op = "jne";
                 break;
+            case JumpType::IfFalse:
+                op = "jz";
+                break;
+            case JumpType::IfTrue:
+                op = "jnz";
+                break;
             default:
                 ErrorReporter::ErrorReporter::getInstance()->reportError(
                     new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Invalid jump type", get_ctx())
                 );
         }
 
-        o << "\t" << op << " " << label << endl;
+        o << "\t" << op << " " << label;
+
+        if (get_comment() != "")
+        {
+            o << "\t\t# " << get_comment();
+        }
+
+        o << endl;
     }
     
     void IRInstrJump::gen_asm_arm(ostream& o)

@@ -35,5 +35,7 @@ namespace IR
         Jump,
         IfEqual,
         IfNotEqual,
+        IfFalse,
+        IfTrue
     };
 };

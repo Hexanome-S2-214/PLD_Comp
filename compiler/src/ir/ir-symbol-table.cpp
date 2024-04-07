@@ -39,6 +39,7 @@ namespace IR
         symbol->id = id;
         symbol->type = type;
         symbol->const_var = const_var;
+        symbol->used = id[0] == "!"[0];
         symbol->offset = symbol_offset;
         symbol_offset -= type.size / 8 * tableSize;
         symbols[id] = symbol;
