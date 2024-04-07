@@ -1,3 +1,4 @@
+#include <set>
 #include "ir-visitor.h"
 #include "ir/ir-type.h"
 #include "ir/ir-cfg.h"
@@ -1031,16 +1032,24 @@ antlrcpp::Any IRVisitor::visitExprOrBAB(ifccParser::ExprOrBABContext *ctx)
 ////////////////////////////////////////////
 
 antlrcpp::Any IRVisitor::visitExprAnd(ifccParser::ExprAndContext *ctx) {
-    string left_expr_label = cfg->get_next_bb_label();
-    string left_eval_label = cfg->get_next_bb_label();
-    string right_expr_label = cfg->get_next_bb_label();
-    string true_label = cfg->get_next_bb_label();
-    string exit_label = cfg->get_next_bb_label();
+    bool const_left; bool const_right;
+    int val_left; int val_right;
+    int final_value;
+
+    IR::BasicBlock * current_bb = cfg->get_current_bb();
+
+    string left_expr_label = cfg->get_next_bb_label("AND_LEFT_EXPR");
+    string left_eval_label = cfg->get_next_bb_label("AND_LEFT_EVAL");
+    string right_expr_label = cfg->get_next_bb_label("AND_RIGHT_EXPR");
+    string true_label = cfg->get_next_bb_label("AND_TRUE");
+    string exit_label = cfg->get_next_bb_label("AND_EXIT");
 
     IR::BasicBlock * left_expr_bb = new IR::BasicBlock(cfg, left_expr_label, nullptr, nullptr);
     cfg->add_bb(left_expr_bb);
     this->visit(ctx->expr(0));
-    cfg->get_current_bb()->set_exit(left_eval_label);
+
+    const_left = vf.f_const;
+    val_left = vf.value;
 
     IR::BasicBlock * left_eval_bb = new IR::BasicBlock(cfg, left_eval_label, nullptr, nullptr);
     cfg->add_bb(left_eval_bb);
@@ -1065,56 +1074,94 @@ antlrcpp::Any IRVisitor::visitExprAnd(ifccParser::ExprAndContext *ctx) {
     IR::BasicBlock * right_expr_bb = new IR::BasicBlock(cfg, right_expr_label, nullptr, nullptr);
     cfg->add_bb(right_expr_bb);
     this->visit(ctx->expr(1));
-    cfg->get_current_bb()->set_exit(exit_label);
 
-    cfg->add_instr(
-        (new IR::IRInstrTest)
-            ->set_src(new IR::IRRegA)
-    );
-    cfg->add_instr(
-        (new IR::IRInstrJump)
-            ->set_jump(IR::JumpType::IfTrue)
-            ->set_label(true_label)
-            ->set_ctx(ctx)
-    );
-    cfg->add_instr(
-        (new IR::IRInstrJump)
-            ->set_jump(IR::JumpType::IfFalse)
-            ->set_label(exit_label)
-            ->set_ctx(ctx)
-    );
+    const_right = vf.f_const;
+    val_right = vf.value;
 
-    IR::BasicBlock * true_bb = new IR::BasicBlock(cfg, true_label, nullptr, nullptr);
-    cfg->add_bb(true_bb);
+    if (const_left && const_right) {
+        cfg->remove_bb(right_expr_bb);
+        cfg->remove_bb(left_eval_bb);
+        cfg->remove_bb(left_expr_bb);
 
-    cfg->add_instr(
-        (new IR::IRInstrMov)
-            ->set_src(
-                (new IR::IRConst)
-                    ->set_literal("1")
-                    ->set_size(IR::Int.size)
-            )
-            ->set_dest(new IR::IRRegA)
-            ->set_ctx(ctx)
-    );
+        cfg->set_current_bb(current_bb);
+
+        final_value = val_left && val_right;
+
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(
+                    (new IR::IRConst)
+                        ->set_literal(to_string(final_value))
+                        ->set_size(IR::Int.size)
+                )
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
+    } else {
+        cfg->add_instr(
+            (new IR::IRInstrTest)
+                ->set_src(new IR::IRRegA)
+        );
+        cfg->add_instr(
+            (new IR::IRInstrJump)
+                ->set_jump(IR::JumpType::IfTrue)
+                ->set_label(true_label)
+                ->set_ctx(ctx)
+        );
+        cfg->add_instr(
+            (new IR::IRInstrJump)
+                ->set_jump(IR::JumpType::IfFalse)
+                ->set_label(exit_label)
+                ->set_ctx(ctx)
+        );
+
+        IR::BasicBlock * true_bb = new IR::BasicBlock(cfg, true_label, nullptr, nullptr);
+        cfg->add_bb(true_bb);
+
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(
+                    (new IR::IRConst)
+                        ->set_literal("1")
+                        ->set_size(IR::Int.size)
+                )
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
+    }
 
     IR::BasicBlock * exit_bb = new IR::BasicBlock(cfg, exit_label, nullptr, nullptr);
     cfg->add_bb(exit_bb);
+
+    // update flags
+    vf.type_size = IR::Int.size;
+    vf.f_const = (const_left && const_right);
+    if (vf.f_const) {
+        vf.value = final_value;
+    }
 
     return 0;
 }
 
 antlrcpp::Any IRVisitor::visitExprOr(ifccParser::ExprOrContext *ctx) {
-    string left_expr_label = cfg->get_next_bb_label();
-    string left_eval_label = cfg->get_next_bb_label();
-    string right_expr_label = cfg->get_next_bb_label();
-    string true_label = cfg->get_next_bb_label();
-    string exit_label = cfg->get_next_bb_label();
+    bool const_left; bool const_right;
+    int val_left; int val_right;
+    int final_value;
+
+    IR::BasicBlock * current_bb = cfg->get_current_bb();
+
+    string left_expr_label = cfg->get_next_bb_label("OR_LEFT_EXPR");
+    string left_eval_label = cfg->get_next_bb_label("OR_LEFT_EVAL");
+    string right_expr_label = cfg->get_next_bb_label("OR_RIGHT_EXPR");
+    string true_label = cfg->get_next_bb_label("OR_TRUE");
+    string exit_label = cfg->get_next_bb_label("OR_EXIT");
 
     IR::BasicBlock * left_expr_bb = new IR::BasicBlock(cfg, left_expr_label, nullptr, nullptr);
     cfg->add_bb(left_expr_bb);
     this->visit(ctx->expr(0));
-    cfg->get_current_bb()->set_exit(left_eval_label);
+
+    const_left = vf.f_const;
+    val_left = vf.value;
 
     IR::BasicBlock * left_eval_bb = new IR::BasicBlock(cfg, left_eval_label, nullptr, nullptr);
     cfg->add_bb(left_eval_bb);
@@ -1139,41 +1186,71 @@ antlrcpp::Any IRVisitor::visitExprOr(ifccParser::ExprOrContext *ctx) {
     IR::BasicBlock * right_expr_bb = new IR::BasicBlock(cfg, right_expr_label, nullptr, nullptr);
     cfg->add_bb(right_expr_bb);
     this->visit(ctx->expr(1));
-    cfg->get_current_bb()->set_exit(exit_label);
 
-    cfg->add_instr(
-        (new IR::IRInstrTest)
-            ->set_src(new IR::IRRegA)
-    );
-    cfg->add_instr(
-        (new IR::IRInstrJump)
-            ->set_jump(IR::JumpType::IfTrue)
-            ->set_label(true_label)
-            ->set_ctx(ctx)
-    );
-    cfg->add_instr(
-        (new IR::IRInstrJump)
-            ->set_jump(IR::JumpType::IfFalse)
-            ->set_label(exit_label)
-            ->set_ctx(ctx)
-    );
+    const_right = vf.f_const;
+    val_right = vf.value;
 
-    IR::BasicBlock * true_bb = new IR::BasicBlock(cfg, true_label, nullptr, nullptr);
-    cfg->add_bb(true_bb);
+    if (const_left && const_right) {
+        cfg->remove_bb(left_expr_bb);
+        cfg->remove_bb(left_eval_bb);
+        cfg->remove_bb(right_expr_bb);
 
-    cfg->add_instr(
-        (new IR::IRInstrMov)
-            ->set_src(
-                (new IR::IRConst)
-                    ->set_literal("1")
-                    ->set_size(IR::Int.size)
-            )
-            ->set_dest(new IR::IRRegA)
-            ->set_ctx(ctx)
-    );
+        cfg->set_current_bb(current_bb);
+
+        final_value = val_left || val_right;
+
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(
+                    (new IR::IRConst)
+                        ->set_literal(to_string(final_value))
+                        ->set_size(IR::Int.size)
+                )
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
+    } else {
+        cfg->add_instr(
+            (new IR::IRInstrTest)
+                ->set_src(new IR::IRRegA)
+        );
+        cfg->add_instr(
+            (new IR::IRInstrJump)
+                ->set_jump(IR::JumpType::IfTrue)
+                ->set_label(true_label)
+                ->set_ctx(ctx)
+        );
+        cfg->add_instr(
+            (new IR::IRInstrJump)
+                ->set_jump(IR::JumpType::IfFalse)
+                ->set_label(exit_label)
+                ->set_ctx(ctx)
+        );
+
+        IR::BasicBlock * true_bb = new IR::BasicBlock(cfg, true_label, nullptr, nullptr);
+        cfg->add_bb(true_bb);
+
+        cfg->add_instr(
+            (new IR::IRInstrMov)
+                ->set_src(
+                    (new IR::IRConst)
+                        ->set_literal("1")
+                        ->set_size(IR::Int.size)
+                )
+                ->set_dest(new IR::IRRegA)
+                ->set_ctx(ctx)
+        );
+    }
 
     IR::BasicBlock * exit_bb = new IR::BasicBlock(cfg, exit_label, nullptr, nullptr);
     cfg->add_bb(exit_bb);
+
+    // update flags
+    vf.type_size = IR::Int.size;
+    vf.f_const = (const_left && const_right);
+    if (vf.f_const) {
+        vf.value = final_value;
+    }
 
     return 0;
 }
@@ -1332,14 +1409,28 @@ antlrcpp::Any IRVisitor::visitStruct_switch_case(ifccParser::Struct_switch_caseC
             ->set_ctx(ctx)
     );
 
+    map<string, antlr4::ParserRuleContext *> case_values;
     for (int i=0; i < nb_case ; ++i) {
+        string case_val = ctx->case_opt(i)->case_val()->getText();
+        
+        if (case_values.find(case_val) != case_values.end()) {
+            ErrorReporter::ErrorReporter::getInstance()->reportError(
+                new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Duplicate case value", ctx->case_opt(i)->case_val())
+            );
+            ErrorReporter::ErrorReporter::getInstance()->reportError(
+                new ErrorReporter::CompilerErrorToken(ErrorReporter::INFO, "Previous case here", case_values.at(case_val))
+            );
+        } else {
+            case_values[case_val] = ctx->case_opt(i)->case_val();
+        }
+
         IR::BasicBlock * case_eval_bb = new IR::BasicBlock(cfg, case_eval_labels.at(i), nullptr, nullptr);
         cfg->add_bb(case_eval_bb);
 
         cfg->add_instr(
             (new IR::IRInstrComp)
                 ->set_src(
-                    (new IR::IRConst)->set_literal(ctx->case_opt(i)->case_val()->getText())
+                    (new IR::IRConst)->set_literal(case_val)
                 )
                 ->set_dest(eval_res)
                 ->set_ctx(ctx)

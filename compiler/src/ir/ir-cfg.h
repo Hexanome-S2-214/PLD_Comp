@@ -43,6 +43,7 @@ namespace IR
 
         void add_instr(IRBase * instr);
         void add_bb(BasicBlock * bb);
+        void remove_bb(BasicBlock * bb);
 
         void set_current_bb(BasicBlock * bb);
         void set_nb_param(int n);

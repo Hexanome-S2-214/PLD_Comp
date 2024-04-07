@@ -200,6 +200,11 @@ void IR::CFG::add_bb(IR::BasicBlock * bb)
     set_current_bb(bb);
 }
 
+void IR::CFG::remove_bb(IR::BasicBlock * bb)
+{
+    blocks.erase(remove(blocks.begin(), blocks.end(), bb), blocks.end());
+}
+
 // IR::BasicBlock * IR::CFG::create_bb(IR::BasicBlock * exit_true, IR::BasicBlock * exit_false)
 // {
 //     string label = ".L" + to_string(IR::CFG::bb_count);
