@@ -8,10 +8,10 @@ using namespace std;
 
 namespace IR
 {
-    IRBase::IRBase() : parent(nullptr), arch(DEFAULT_ARCH), ctx(nullptr) {}
+    IRBase::IRBase() : parent(nullptr), ctx(nullptr) {}
 
     void IRBase::gen_asm(ostream& o){
-        switch(arch){
+        switch(asm_arch){
             case IR::IRArch::X86:
                 gen_asm_x86(o);
                 break;
@@ -32,13 +32,6 @@ namespace IR
         return ss.str();
     }
 
-    IRBase * IRBase::set_arch(IRArch arch)
-    {
-        this->arch = arch;
-
-        return this;
-    }
-
     IRBase * IRBase::set_ctx(antlr4::ParserRuleContext * ctx)
     {
         this->ctx = ctx;
@@ -50,8 +43,6 @@ namespace IR
     {
         this->parent = parent;
 
-        this->arch = parent->arch;
-
         if (this->ctx == nullptr)
             this->ctx = parent->ctx;
 
@@ -60,7 +51,6 @@ namespace IR
 
     IRBase * IRBase::paste_properties(IRBase * other)
     {
-        other->set_arch(arch);
         other->set_ctx(ctx);
         other->set_parent(parent);
 

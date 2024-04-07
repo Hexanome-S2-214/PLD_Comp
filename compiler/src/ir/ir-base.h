@@ -22,7 +22,6 @@ namespace IR
         virtual void gen_asm_arm(ostream &o) = 0;
         string get_asm_str();
 
-        IRBase * set_arch(IRArch arch);
         IRBase * set_ctx(antlr4::ParserRuleContext * ctx);
         IRBase * set_parent(IRBase * parent);
 
@@ -33,7 +32,6 @@ namespace IR
         antlr4::ParserRuleContext * get_ctx();
     private:
         IRBase * parent;
-        IRArch arch;
         antlr4::ParserRuleContext * ctx;
     };
 };

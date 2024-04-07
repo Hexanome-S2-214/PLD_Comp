@@ -1,4 +1,6 @@
 #include "expression_minus.h"
+#include "../params/ir-reg.h"
+#include "mov.h"
 
 namespace IR
 {
@@ -9,5 +11,18 @@ namespace IR
 
     void IRInstrExprMinus::gen_asm_arm(ostream& o)
     {
+        paste_properties(
+                (new IRInstrMov)
+                    ->set_dest((new IRRegArmTemp1)->set_size(src->get_size()))
+                    ->set_src(src)
+            )->gen_asm(o); 
+
+        paste_properties(
+                (new IRInstrMov)
+                    ->set_dest((new IRRegArmTemp2)->set_size(dest->get_size()))
+                    ->set_src(dest)
+            )->gen_asm(o);  
+
+        o << "\tsub " << (new IRRegA)->get_asm_str() << ", " << (new IRRegArmTemp2)->get_asm_str() << ", " << (new IRRegArmTemp1)->get_asm_str() << "\n";
     }
 }

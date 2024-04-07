@@ -1,22 +1,18 @@
 #pragma once
 
-namespace IR
-{
-    class BasicBlock;
-}
-
 #include "../ir-instr.h"
 #include "../ir-attr.h"
 
 namespace IR
 {
-    class IRInstrCheat : public IRInstr
+    class IRInstrExprMod : public IRInstr, public IRAttrDest<IRInstrExprMod>
     {
     public:
-        IRInstrCheat * set_instr(string instr);
         void gen_asm_x86(ostream& o) override;
         void gen_asm_arm(ostream& o) override;
-    private:
-        string instr;
+
+        IRParam * div_res;
+        IRParam * num;
+        IRParam * dem;
     };
 }
