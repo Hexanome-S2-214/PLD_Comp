@@ -37,6 +37,19 @@ IR::Func * IR::CfgSet::declare_function(string name, antlr4::ParserRuleContext *
     return &functions[name];
 }
 
+void IR::CfgSet::set_function_as_used(string name)
+{
+    if (name == "main" || name == "putchar" || name == "getchar") {
+        return;
+    }
+
+    if (functions.find(name) == functions.end()) {
+        throw runtime_error("function not declared");
+    }
+
+    functions[name].used = true;
+}
+
 vector<IR::Func *> IR::CfgSet::get_unused_functions()
 {
     vector<IR::Func *> unused_functions;

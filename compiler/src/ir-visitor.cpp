@@ -191,7 +191,7 @@ antlrcpp::Any IRVisitor::visitSimpleDecl(ifccParser::SimpleDeclContext *ctx)
     return 0;
 }
 
-antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
+antlrcpp::Any IRVisitor::visitDeclAffVar(ifccParser::DeclAffVarContext *ctx)
 {
     IR::Type type;
     bool const_var = ctx->CONST() ? true : false;
@@ -231,11 +231,52 @@ antlrcpp::Any IRVisitor::visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx)
     return 0;
 }
 
+antlrcpp::Any IRVisitor::visitDeclAffTable(ifccParser::DeclAffTableContext *ctx)
+{
+    bool const_var = ctx->CONST() ? true : false;
+
+    IR::Type type = IR::Char;
+    int size = stoi(ctx->NUM()->getText());
+
+    std::vector<antlr4::tree::TerminalNode *> chars = ctx->CHARACTER();
+    if(chars.size() != size){
+        ErrorReporter::ErrorReporter::getInstance()->reportError(
+            new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "DeclAffTable sizes are not matching", ctx)
+        );
+    }
+
+    IR::Symbol * symbol = cfg->get_current_bb()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx, const_var, size);
+
+    for(int i = 0; i < chars.size(); ++i){
+        IR::SymbolT * symbolT = new IR::SymbolT(i, symbol);
+        std::string text = chars[i]->getText();
+        if (!text.empty())
+        {
+            int ascii_value = static_cast<int>(text[1]);
+            cfg->add_instr(
+                (new IR::IRInstrExprCst)
+                    ->set_value(
+                        (new IR::IRConst)
+                            ->set_literal(to_string(ascii_value))
+                            ->set_size(IR::Char.size)
+                        )
+                    ->set_ctx(ctx)
+            );
+        }
+        cfg->add_instr(
+            (new IR::IRInstrAssignTable(stoi(ctx->NUM()->getText())))
+                ->set_symbol(symbolT)
+                ->set_ctx(ctx)
+        );
+    }
+
+    return IR::Int.size;
+}
+
 antlrcpp::Any IRVisitor::visitTableDecl(ifccParser::TableDeclContext *ctx)
 {
     IR::Type type;
     bool const_var = ctx->CONST() ? true : false;
-    cerr << const_var << endl;
 
     if (ctx->CHAR())
     {
@@ -275,6 +316,20 @@ antlrcpp::Any IRVisitor::visitExprTable(ifccParser::ExprTableContext *ctx)
     return 0;
 }
 
+antlrcpp::Any IRVisitor::visitExprTableVar(ifccParser::ExprTableVarContext *ctx)
+{
+    int offset = vf.value;
+    IR::Symbol * symbol = cfg->get_current_bb()->get_symbol(ctx->VAR(0)->getText(), ctx);
+
+    cfg->add_instr(
+    (new IR::IRInstrMov)
+        ->set_src(new IR::SymbolT(offset, symbol))
+        ->set_dest(new IR::IRRegA)
+        ->set_ctx(ctx)
+    );
+    return 0;
+}
+
 antlrcpp::Any IRVisitor::visitTableAff(ifccParser::TableAffContext *ctx)
 {
     IR::Symbol * symbol = cfg->get_current_bb()->get_symbol(ctx->VAR()->getText(), ctx);
@@ -287,13 +342,33 @@ antlrcpp::Any IRVisitor::visitTableAff(ifccParser::TableAffContext *ctx)
     this->visit(ctx->rvalue());
 
     int index = stoi(ctx->NUM()->getText());
-    //TODO: Do we really need to allocate memory here ?
     IR::SymbolT* symbolT = new IR::SymbolT(index, symbol);
     cfg->add_instr(
         (new IR::IRInstrAssignTable(stoi(ctx->NUM()->getText())))
             ->set_symbol(symbolT)
             ->set_ctx(ctx)
     );
+
+    return 0;
+}
+
+antlrcpp::Any IRVisitor::visitTableAff2(ifccParser::TableAff2Context *ctx)
+{
+    int index = vf.value;
+    bool tmp_bool = vf.f_const;
+    IR::Size size = vf.type_size;
+    this->visit(ctx->rvalue());
+    IR::Symbol * symbol = cfg->get_current_bb()->get_symbol(ctx->VAR(0)->getText(), ctx);
+    IR::SymbolT* symbolT = new IR::SymbolT(index, symbol);
+    cfg->add_instr(
+        (new IR::IRInstrAssignTable(index))
+            ->set_symbol(symbolT)
+            ->set_ctx(ctx)
+    );
+
+    vf.value = index;
+    vf.f_const = tmp_bool;
+    vf.type_size = size;
 
     return 0;
 }
@@ -306,7 +381,12 @@ antlrcpp::Any IRVisitor::visitExprCharacter(ifccParser::ExprCharacterContext *ct
     std::string text = ctx->CHARACTER()->getText();
     if (!text.empty())
     {
-        int ascii_value = static_cast<int>(text[1]);
+        int ascii_value;
+        if(text[1] == '\\'){
+            ascii_value = 10;
+        } else {
+            ascii_value = static_cast<int>(text[1]);
+        }
         cfg->add_instr(
             (new IR::IRInstrExprCst)
                 ->set_value(
@@ -1599,6 +1679,8 @@ antlrcpp::Any IRVisitor::visitFunctionCallRule(ifccParser::FunctionCallRuleConte
             );
         }
     }
+
+    cfg_set->set_function_as_used(ctx->fname->getText());
 
     //If there is more than 6 parameters, we place the remaining parameters on top of the stack
     if (nb_params > 6) {

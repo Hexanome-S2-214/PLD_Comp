@@ -31,7 +31,9 @@ namespace IR
         } else if (op == "|") {
             o << "\torr " << (new IRRegA)->get_asm_str() << ", " << (new IRRegArmTemp2)->get_asm_str() << ", " << (new IRRegArmTemp1)->get_asm_str() << "\n";
         } else {
-            cerr << "Error: unsupported operator" << endl;
+            ErrorReporter::ErrorReporter::getInstance()->reportError(
+                new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Error: unsupported operator + '" + op + "'", get_ctx())
+            );
         }
     }
 }

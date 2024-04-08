@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 int fonction_pour_montrer_le_reste() {
-    int result = 0;
+    int result = 1;
     char c = 'a';
     switch(c) {
         case 'b':
@@ -12,7 +12,7 @@ int fonction_pour_montrer_le_reste() {
             result -= 1;
             break;
     }
-    return result += result /= result -= result *= 2;
+    return result -= result += result /= result *= 2;
 }
 
 int facto(int n) {

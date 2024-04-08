@@ -37,8 +37,9 @@ namespace IR
     {
         if (src->get_size() != dest->get_size())
         {
-            cerr << "Error: comparison between different sizes" << endl;
-            return;
+            ErrorReporter::ErrorReporter::getInstance()->reportError(
+                new ErrorReporter::CompilerErrorToken(ErrorReporter::ERROR, "Comparison between different sizes", get_ctx())
+            );
         }
 
         paste_properties(

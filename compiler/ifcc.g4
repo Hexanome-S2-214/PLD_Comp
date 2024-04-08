@@ -122,12 +122,14 @@ declStdRule
      ;
 
 declAffRule
-     : CONST? (INT|CHAR) VAR '=' rvalue
+     : CONST? (INT|CHAR) VAR '=' rvalue                                     #declAffVar
+     | CONST? (CHAR) VAR '[' NUM ']' '=' '{' CHARACTER(','CHARACTER)* '}'   #declAffTable
      ;
 
 affectationRule
      : VAR op_aff=('='|'+='|'-='|'*='|'/=') rvalue               #simpleAff
      | VAR '[' NUM ']' op_aff=('='|'+='|'-='|'*='|'/=') rvalue   #tableAff
+     | VAR '[' VAR ']' op_aff=('='|'+='|'-='|'*='|'/=') rvalue   #tableAff2
      | '(' affectationRule ')'                                   #parAff
      ;
 
@@ -147,6 +149,7 @@ returnStmtRule
 
 expr
      : '(' expr ')'                     #exprParExpr
+     | VAR '[' VAR ']'                  #exprTableVar
      | VAR '[' NUM ']'                  #exprTable
      | op_unary=('-' | '!' | '+') expr  #exprUnary
      | expr OP_MULT expr                #exprMultDivMod
@@ -238,6 +241,13 @@ VAR
 CHARACTER
      : '"' [a-zA-Z0-9_ ] '"'
      | '\'' [a-zA-Z0-9_ ] '\''
+     | '\'\\n\''
+     | '\':\''
+     | '\'+\''
+     | '\'-\''
+     | '\'|\''
+     | '\'!\''
+     | '\',\''
      ;
 
 COMMENT

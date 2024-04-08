@@ -20,12 +20,15 @@ public:
     void set_cfg(IR::CFG * cfg) { this->cfg = cfg; }
 
     virtual antlrcpp::Any visitSimpleDecl(ifccParser::SimpleDeclContext *ctx) override;
-    virtual antlrcpp::Any visitDeclAffRule(ifccParser::DeclAffRuleContext *ctx) override;
+    virtual antlrcpp::Any visitDeclAffVar(ifccParser::DeclAffVarContext *ctx) override;
+    virtual antlrcpp::Any visitDeclAffTable(ifccParser::DeclAffTableContext *ctx) override;
     virtual antlrcpp::Any visitTableDecl(ifccParser::TableDeclContext *ctx) override;
     virtual antlrcpp::Any visitSimpleAff(ifccParser::SimpleAffContext *ctx) override;
     virtual antlrcpp::Any visitTableAff(ifccParser::TableAffContext * ctx) override;
+    virtual antlrcpp::Any visitTableAff2(ifccParser::TableAff2Context * ctx) override;
 
     virtual antlrcpp::Any visitExprTable(ifccParser::ExprTableContext *ctx) override;
+    virtual antlrcpp::Any visitExprTableVar(ifccParser::ExprTableVarContext *ctx) override;
     virtual antlrcpp::Any visitReturnStmtRule(ifccParser::ReturnStmtRuleContext *ctx) override;
 
     virtual antlrcpp::Any visitExprCharacter(ifccParser::ExprCharacterContext *ctx) override;
