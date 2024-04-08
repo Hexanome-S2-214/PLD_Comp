@@ -233,7 +233,6 @@ antlrcpp::Any IRVisitor::visitDeclAffVar(ifccParser::DeclAffVarContext *ctx)
 
 antlrcpp::Any IRVisitor::visitDeclAffTable(ifccParser::DeclAffTableContext *ctx)
 {
-    std::cerr << ">>visitDeclAffTable" << std::endl;
     bool const_var = ctx->CONST() ? true : false;
 
     IR::Type type = IR::Char;
@@ -246,9 +245,7 @@ antlrcpp::Any IRVisitor::visitDeclAffTable(ifccParser::DeclAffTableContext *ctx)
         );
     }
 
-    std::cerr << "oki" << std::endl;
     IR::Symbol * symbol = cfg->get_current_bb()->declare_symbol(cfg, ctx->VAR()->getText(), type, ctx, const_var, size);
-    std::cerr << "ok" << std::endl;
 
     for(int i = 0; i < chars.size(); ++i){
         IR::SymbolT * symbolT = new IR::SymbolT(i, symbol);
@@ -273,7 +270,6 @@ antlrcpp::Any IRVisitor::visitDeclAffTable(ifccParser::DeclAffTableContext *ctx)
         );
     }
 
-    std::cerr << "<<visitDeclAffTable" << std::endl;
     return IR::Int.size;
 }
 
@@ -281,7 +277,6 @@ antlrcpp::Any IRVisitor::visitTableDecl(ifccParser::TableDeclContext *ctx)
 {
     IR::Type type;
     bool const_var = ctx->CONST() ? true : false;
-    cerr << const_var << endl;
 
     if (ctx->CHAR())
     {
@@ -324,7 +319,6 @@ antlrcpp::Any IRVisitor::visitExprTable(ifccParser::ExprTableContext *ctx)
 antlrcpp::Any IRVisitor::visitExprTableVar(ifccParser::ExprTableVarContext *ctx)
 {
     int offset = vf.value;
-    std::cerr << "offset : " << offset  << std::endl;
     IR::Symbol * symbol = cfg->get_current_bb()->get_symbol(ctx->VAR(0)->getText(), ctx);
 
     cfg->add_instr(
@@ -363,7 +357,6 @@ antlrcpp::Any IRVisitor::visitTableAff2(ifccParser::TableAff2Context *ctx)
     int index = vf.value;
     bool tmp_bool = vf.f_const;
     IR::Size size = vf.type_size;
-    std::cerr << "index : " << index << std::endl;
     this->visit(ctx->rvalue());
     IR::Symbol * symbol = cfg->get_current_bb()->get_symbol(ctx->VAR(0)->getText(), ctx);
     IR::SymbolT* symbolT = new IR::SymbolT(index, symbol);
