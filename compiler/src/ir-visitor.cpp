@@ -1,4 +1,6 @@
 #include <set>
+#include <cmath>
+
 #include "ir-visitor.h"
 #include "ir/ir-type.h"
 #include "ir/ir-cfg.h"
@@ -337,10 +339,14 @@ antlrcpp::Any IRVisitor::visitExprNum(ifccParser::ExprNumContext *ctx){
             ->set_ctx(ctx)
     );
 
+    //if value is over 32-bits limit, crop it
+    int value = stoll(ctx->NUM()->getText()) & 0xFFFFFFFF;
+    cerr << value << endl;
+
     //update flags
     vf.type_size = IR::Int.size;
     vf.f_const = true;
-    vf.value = stoi(ctx->NUM()->getText());
+    vf.value = value;
 
     return 0;
 }
@@ -926,7 +932,6 @@ antlrcpp::Any IRVisitor::visitExprAndBAB(ifccParser::ExprAndBABContext *ctx)
 
 antlrcpp::Any IRVisitor::visitExprXorBAB(ifccParser::ExprXorBABContext *ctx)
 {
-    
     bool const_left; bool const_right;
     int val_left; int val_right;
     int final_value;
