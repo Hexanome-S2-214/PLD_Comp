@@ -254,6 +254,10 @@ COMMENT
      : '/*' .*? '*/' -> skip
      ;
 
+LINE_COMMENT
+     : '//' .*? '\n' -> skip
+     ;
+
 DIRECTIVE
      : '#' .*? '\n' -> skip
      ;
