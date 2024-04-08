@@ -421,7 +421,6 @@ antlrcpp::Any IRVisitor::visitExprNum(ifccParser::ExprNumContext *ctx){
 
     //if value is over 32-bits limit, crop it
     int value = stoll(ctx->NUM()->getText()) & 0xFFFFFFFF;
-    cerr << value << endl;
 
     //update flags
     vf.type_size = IR::Int.size;
