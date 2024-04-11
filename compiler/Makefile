@@ -69,3 +69,8 @@ clean:
 	rm -rf build generated
 	rm -f ifcc
 	rm -rf ../tests/ifcc-test-output
+
+#########################################
+# launches all the tests
+test:
+	python3 ../tests/ifcc-test.py ../tests/testfiles/
